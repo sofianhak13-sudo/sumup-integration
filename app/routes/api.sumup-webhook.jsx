@@ -50,6 +50,19 @@ if (!payment) {
   console.error("PAIEMENT INTROUVABLE EN BASE :", checkout.id);
   return new Response(null, { status: 204 });
 }
+await prisma.sumUpPayment.update({
+  where: {
+    checkoutId: checkout.id,
+  },
+  data: {
+    status: checkout.status,
+  },
+});
+
+if (checkout.status !== "PAID") {
+  console.log("PAIEMENT NON FINAL :", checkout.status);
+  return new Response(null, { status: 204 });
+}
 if (payment.orderId) {
   console.log("COMMANDE SHOPIFY DEJA CREEE :", payment.orderId);
   return new Response(null, { status: 204 });
