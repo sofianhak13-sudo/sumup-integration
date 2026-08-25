@@ -48,6 +48,10 @@ api_version = "2026-07"
 
 [auth]
 redirect_urls = [ "https://sumup-integration-dwm1.onrender.com/auth/callback" ]
+[app_proxy]
+url = "/apps/sumup-pay"
+prefix = "apps"
+subpath = "sumup-pay"
 
 [build]
 include_config_on_deploy = true
