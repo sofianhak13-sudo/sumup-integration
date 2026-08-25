@@ -47,7 +47,7 @@ api_version = "2026-07"
   topics = [ "app/scopes_update" ]
 
 [auth]
-redirect_urls = [ ]
+redirect_urls = [ "https://sumup-integration-dwm1.onrender.com/auth/callback" ]
 
 [build]
 include_config_on_deploy = true
