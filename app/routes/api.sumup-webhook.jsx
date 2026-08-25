@@ -117,7 +117,9 @@ const orderResponse = await admin.graphql(
     },
   ],
 },
-
+    },
+  },
+);
 const orderData = await orderResponse.json();
 const orderErrors = orderData.data?.orderCreate?.userErrors || [];
 const order = orderData.data?.orderCreate?.order;
