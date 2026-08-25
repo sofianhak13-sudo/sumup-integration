@@ -31,3 +31,17 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+model SumUpPayment {
+  checkoutId        String   @id
+  checkoutReference String   @unique
+  shop              String
+  productId         String
+  variantId         String
+  amount            Float
+  currency          String
+  status            String   @default("PENDING")
+  orderId           String?
+  customerEmail     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
