@@ -1,4 +1,5 @@
 import prisma from "../db.server";
+import { unauthenticated } from "../shopify.server";
 export const action = async ({ request }) => {
   try {
     const event = await request.json();
@@ -49,7 +50,70 @@ if (!payment) {
   console.error("PAIEMENT INTROUVABLE EN BASE :", checkout.id);
   return new Response(null, { status: 204 });
 }
+if (payment.orderId) {
+  console.log("COMMANDE SHOPIFY DEJA CREEE :", payment.orderId);
+  return new Response(null, { status: 204 });
+}
+if (
+  checkout.checkout_reference !== payment.checkoutReference ||
+  Math.abs(Number(checkout.amount) - Number(payment.amount)) > 0.001 ||
+  checkout.currency !== payment.currency
+) {
+  console.error("DONNEES PAIEMENT SUMUP INCOHERENTES");
+  return new Response(null, { status: 204 });
+}
 
+const { admin } = await unauthenticated.admin(payment.shop);
+
+const orderResponse = await admin.graphql(
+  `#graphql
+  mutation orderCreate($order: OrderCreateOrderInput!) {
+    orderCreate(order: $order) {
+      order {
+        id
+        name
+        displayFinancialStatus
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }`,
+  {
+    variables: {
+      order: {
+        lineItems: [
+          {
+            variantId: payment.variantId,
+            quantity: 1,
+          },
+        ],
+        financialStatus: "PAID",
+      },
+    },
+  },
+);
+
+const orderData = await orderResponse.json();
+const orderErrors = orderData.data?.orderCreate?.userErrors || [];
+const order = orderData.data?.orderCreate?.order;
+
+if (orderErrors.length > 0 || !order?.id) {
+  console.error("ERREUR CREATION COMMANDE SHOPIFY :", orderErrors);
+  return new Response(null, { status: 500 });
+}
+
+await prisma.sumUpPayment.update({
+  where: {
+    checkoutId: checkout.id,
+  },
+  data: {
+    orderId: order.id,
+  },
+});
+
+console.log("COMMANDE SHOPIFY CREEE :", order.id, order.name);
 await prisma.sumUpPayment.update({
   where: {
     checkoutId: checkout.id,
