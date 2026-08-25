@@ -80,8 +80,11 @@ const { admin } = await unauthenticated.admin(payment.shop);
 
 const orderResponse = await admin.graphql(
   `#graphql
-  mutation orderCreate($order: OrderCreateOrderInput!) {
-    orderCreate(order: $order) {
+  mutation orderCreate(
+  $order: OrderCreateOrderInput!
+  $options: OrderCreateOptionsInput
+) {
+  orderCreate(order: $order, options: $options) {
       order {
         id
         name
@@ -118,6 +121,9 @@ const orderResponse = await admin.graphql(
     },
   ],
 },
+options: {
+      sendReceipt: true,
+    },
     },
   },
 );
