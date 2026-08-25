@@ -92,6 +92,7 @@ const price = variant?.price;
         merchant_code: merchantCode,
         description: product.title,
         return_url: "https://sumup-integration-dwm1.onrender.com/api/sumup-webhook",
+        redirect_url: "https://lebonplan-ebook.com",
         hosted_checkout: {
           enabled: true,
         },
