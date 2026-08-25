@@ -1,5 +1,5 @@
 import { authenticate } from "../shopify.server";
-
+import prisma from "../db.server";
 export const loader = async ({ request }) => {
   await authenticate.public.appProxy(request);
 
@@ -11,7 +11,7 @@ export const loader = async ({ request }) => {
 };
 
 export const action = async ({ request }) => {
-  const { admin } = await authenticate.public.appProxy(request);
+  const { admin, session } = await authenticate.public.appProxy(request);
 
   if (!admin) {
     return new Response("Boutique non autorisée.", { status: 401 });
@@ -52,7 +52,8 @@ export const action = async ({ request }) => {
 
   const productData = await productResponse.json();
   const product = productData.data?.product;
-  const price = product?.variants?.nodes?.[0]?.price;
+  const variant = product?.variants?.nodes?.[0];
+const price = variant?.price;
 
   if (!product || !price) {
     return new Response(
@@ -109,7 +110,18 @@ console.log("CHECKOUT SUMUP STATUS :", sumupData.status);
       { status: 500 },
     );
   }
-
+await prisma.sumUpPayment.create({
+  data: {
+    checkoutId: sumupData.id,
+    checkoutReference: checkoutReference,
+    shop: session.shop,
+    productId: product.id,
+    variantId: variant.id,
+    amount: Number(price),
+    currency: "EUR",
+    status: sumupData.status || "PENDING",
+  },
+});
   return new Response(null, {
     status: 302,
     headers: {
