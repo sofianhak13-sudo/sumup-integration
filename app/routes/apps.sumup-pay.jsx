@@ -94,7 +94,8 @@ export const action = async ({ request }) => {
   );
 
   const sumupData = await sumupResponse.json();
-
+console.log("CHECKOUT SUMUP ID :", sumupData.id);
+console.log("CHECKOUT SUMUP STATUS :", sumupData.status);
   if (!sumupResponse.ok) {
     return new Response(
       `Erreur SumUp ${sumupResponse.status}: ${JSON.stringify(sumupData)}`,
