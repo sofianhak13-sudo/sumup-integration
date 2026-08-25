@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "e813504c8a7bbfc86312b07774d957d9"
-application_url = "https://example.com"
+application_url = "https://sumup-integration-dwm1.onrender.com"
 embedded = true
 name = "Sumup integration"
 
