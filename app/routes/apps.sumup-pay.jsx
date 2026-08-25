@@ -85,6 +85,7 @@ export const action = async ({ request }) => {
         currency: "EUR",
         merchant_code: merchantCode,
         description: product.title,
+        return_url: "https://sumup-integration-dwm1.onrender.com/api/sumup-webhook",
         hosted_checkout: {
           enabled: true,
         },
