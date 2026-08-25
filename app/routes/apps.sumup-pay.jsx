@@ -75,7 +75,7 @@ const price = variant?.price;
   }
 
   const checkoutReference = `shopify-${productId}-${Date.now()}`;
-
+console.log("CHECKOUT REFERENCE :", checkoutReference);
   const sumupResponse = await fetch(
     "https://api.sumup.com/v0.1/checkouts",
     {
