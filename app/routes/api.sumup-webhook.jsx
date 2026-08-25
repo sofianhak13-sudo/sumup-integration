@@ -38,7 +38,10 @@ export const action = async ({ request }) => {
     }
 
     const checkout = await checkoutResponse.json();
-
+if (checkout.status !== "PAID") {
+  console.log("PAIEMENT NON FINAL :", checkout.status);
+  return new Response(null, { status: 204 });
+}
     console.log("PAIEMENT SUMUP VERIFIE :", {
       id: checkout.id,
       reference: checkout.checkout_reference,
