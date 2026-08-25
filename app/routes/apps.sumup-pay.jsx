@@ -9,3 +9,109 @@ export const loader = async ({ request }) => {
     },
   });
 };
+
+export const action = async ({ request }) => {
+  const { admin } = await authenticate.public.appProxy(request);
+
+  if (!admin) {
+    return new Response("Boutique non autorisée.", { status: 401 });
+  }
+
+  const formData = await request.formData();
+  const productId = formData.get("productId");
+
+  if (!productId) {
+    return new Response("Produit Shopify manquant.", { status: 400 });
+  }
+
+  const gid = productId.startsWith("gid://")
+    ? productId
+    : `gid://shopify/Product/${productId}`;
+
+  const productResponse = await admin.graphql(
+    `#graphql
+      query GetProductForSumUp($id: ID!) {
+        product(id: $id) {
+          id
+          title
+          variants(first: 1) {
+            nodes {
+              id
+              price
+            }
+          }
+        }
+      }
+    `,
+    {
+      variables: {
+        id: gid,
+      },
+    },
+  );
+
+  const productData = await productResponse.json();
+  const product = productData.data?.product;
+  const price = product?.variants?.nodes?.[0]?.price;
+
+  if (!product || !price) {
+    return new Response(
+      "Impossible de récupérer le prix du produit Shopify.",
+      { status: 400 },
+    );
+  }
+
+  const apiKey = process.env.SUMUP_API_KEY;
+  const merchantCode = process.env.SUMUP_MERCHANT_CODE;
+
+  if (!apiKey || !merchantCode) {
+    return new Response("Configuration SumUp manquante.", { status: 500 });
+  }
+
+  const checkoutReference = `shopify-${productId}-${Date.now()}`;
+
+  const sumupResponse = await fetch(
+    "https://api.sumup.com/v0.1/checkouts",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        checkout_reference: checkoutReference,
+        amount: Number(price),
+        currency: "EUR",
+        merchant_code: merchantCode,
+        description: product.title,
+        hosted_checkout: {
+          enabled: true,
+        },
+      }),
+    },
+  );
+
+  const sumupData = await sumupResponse.json();
+
+  if (!sumupResponse.ok) {
+    return new Response(
+      `Erreur SumUp ${sumupResponse.status}: ${JSON.stringify(sumupData)}`,
+      { status: 500 },
+    );
+  }
+
+  if (!sumupData.hosted_checkout_url) {
+    return new Response(
+      "SumUp n'a pas renvoyé d'URL de paiement.",
+      { status: 500 },
+    );
+  }
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: sumupData.hosted_checkout_url,
+    },
+  });
+};
