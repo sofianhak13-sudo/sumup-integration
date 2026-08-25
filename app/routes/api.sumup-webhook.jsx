@@ -112,6 +112,7 @@ const orderResponse = await admin.graphql(
         id
         name
         displayFinancialStatus
+        statusPageUrl
       }
       userErrors {
         field
@@ -173,6 +174,7 @@ await prisma.sumUpPayment.update({
   },
   data: {
     orderId: order.id,
+    statusPageUrl: order.statusPageUrl,
     processing: false,
   },
 });
