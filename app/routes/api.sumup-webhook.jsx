@@ -75,7 +75,21 @@ if (
   console.error("DONNEES PAIEMENT SUMUP INCOHERENTES");
   return new Response(null, { status: 204 });
 }
+const lock = await prisma.sumUpPayment.updateMany({
+  where: {
+    checkoutId: checkout.id,
+    processing: false,
+    orderId: null,
+  },
+  data: {
+    processing: true,
+  },
+});
 
+if (lock.count === 0) {
+  console.log("PAIEMENT DEJA EN COURS OU COMMANDE DEJA CREEE");
+  return new Response(null, { status: 204 });
+}
 const { admin } = await unauthenticated.admin(payment.shop);
 
 const orderResponse = await admin.graphql(
@@ -133,6 +147,14 @@ const order = orderData.data?.orderCreate?.order;
 
 if (orderErrors.length > 0 || !order?.id) {
   console.error("ERREUR CREATION COMMANDE SHOPIFY :", orderErrors);
+await prisma.sumUpPayment.update({
+  where: {
+    checkoutId: checkout.id,
+  },
+  data: {
+    processing: false,
+  },
+});
   return new Response(null, { status: 500 });
 }
 
@@ -142,22 +164,11 @@ await prisma.sumUpPayment.update({
   },
   data: {
     orderId: order.id,
+    processing: false,
   },
 });
 
 console.log("COMMANDE SHOPIFY CREEE :", order.id, order.name);
-await prisma.sumUpPayment.update({
-  where: {
-    checkoutId: checkout.id,
-  },
-  data: {
-    status: checkout.status,
-  },
-});
-if (checkout.status !== "PAID") {
-  console.log("PAIEMENT NON FINAL :", checkout.status);
-  return new Response(null, { status: 204 });
-}
     console.log("PAIEMENT SUMUP VERIFIE :", {
       id: checkout.id,
       reference: checkout.checkout_reference,
