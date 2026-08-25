@@ -1,3 +1,4 @@
+import prisma from "../db.server";
 export const action = async ({ request }) => {
   try {
     const event = await request.json();
@@ -38,6 +39,25 @@ export const action = async ({ request }) => {
     }
 
     const checkout = await checkoutResponse.json();
+    const payment = await prisma.sumUpPayment.findUnique({
+  where: {
+    checkoutId: checkout.id,
+  },
+});
+
+if (!payment) {
+  console.error("PAIEMENT INTROUVABLE EN BASE :", checkout.id);
+  return new Response(null, { status: 204 });
+}
+
+await prisma.sumUpPayment.update({
+  where: {
+    checkoutId: checkout.id,
+  },
+  data: {
+    status: checkout.status,
+  },
+});
 if (checkout.status !== "PAID") {
   console.log("PAIEMENT NON FINAL :", checkout.status);
   return new Response(null, { status: 204 });
