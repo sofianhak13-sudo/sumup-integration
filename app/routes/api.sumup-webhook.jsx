@@ -50,6 +50,15 @@ if (!payment) {
   console.error("PAIEMENT INTROUVABLE EN BASE :", checkout.id);
   return new Response(null, { status: 204 });
 }
+const customerEmail =
+  typeof payment.customerEmail === "string"
+    ? payment.customerEmail.trim()
+    : "";
+
+if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+  console.error("EMAIL CLIENT INVALIDE EN BASE :", checkout.id);
+  return new Response(null, { status: 204 });
+}
 await prisma.sumUpPayment.update({
   where: {
     checkoutId: checkout.id,
