@@ -19,7 +19,7 @@ export const action = async ({ request }) => {
 
   const formData = await request.formData();
   const productId = formData.get("productId");
-
+const email = formData.get("email");
   if (!productId) {
     return new Response("Produit Shopify manquant.", { status: 400 });
   }
@@ -120,6 +120,7 @@ await prisma.sumUpPayment.create({
     amount: Number(price),
     currency: "EUR",
     status: sumupData.status || "PENDING",
+    customerEmail: String(email),
   },
 });
   return new Response(null, {

@@ -96,6 +96,7 @@ const orderResponse = await admin.graphql(
   {
     variables: {
       order: {
+        email: payment.customerEmail,
   currency: payment.currency,
   lineItems: [
     {
