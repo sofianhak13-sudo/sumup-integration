@@ -51,8 +51,6 @@ export const action = async ({ request }) => {
   );
 
   const productData = await productResponse.json();
-  console.log("PRODUCT ID RECU :", productId);
-console.log("REPONSE SHOPIFY :", JSON.stringify(productData, null, 2));
   const product = productData.data?.product;
   const price = product?.variants?.nodes?.[0]?.price;
 
