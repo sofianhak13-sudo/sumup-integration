@@ -96,17 +96,27 @@ const orderResponse = await admin.graphql(
   {
     variables: {
       order: {
-        lineItems: [
-          {
-            variantId: payment.variantId,
-            quantity: 1,
-          },
-        ],
-        financialStatus: "PAID",
+  currency: payment.currency,
+  lineItems: [
+    {
+      variantId: payment.variantId,
+      quantity: 1,
+    },
+  ],
+  transactions: [
+    {
+      kind: "SALE",
+      status: "SUCCESS",
+      gateway: "SumUp",
+      amountSet: {
+        shopMoney: {
+          amount: Number(payment.amount),
+          currencyCode: payment.currency,
+        },
       },
     },
-  },
-);
+  ],
+},
 
 const orderData = await orderResponse.json();
 const orderErrors = orderData.data?.orderCreate?.userErrors || [];
