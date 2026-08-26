@@ -129,24 +129,69 @@ if (!apiKey || !merchantCode) {
     status: 500,
   });
 }
-console.log("PANIER SHOPIFY VERIFIE :", {
-  items: verifiedItems,
-  total: totalCents / 100,
-  currency,
-});
+if (totalCents <= 0) {
+  return new Response("Montant du panier invalide.", {
+    status: 400,
+  });
+}
 
-return new Response(
-  JSON.stringify({
-    ok: true,
-    items: verifiedItems,
-    total: totalCents / 100,
-    currency,
-  }),
+const sumupResponse = await fetch(
+  "https://api.sumup.com/v0.1/checkouts",
   {
-    status: 200,
+    method: "POST",
     headers: {
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
+    body: JSON.stringify({
+      checkout_reference: checkoutReference,
+      amount: totalCents / 100,
+      currency,
+      merchant_code: merchantCode,
+      description: `Panier Shopify - ${verifiedItems.length} article(s)`,
+      return_url:
+        "https://sumup-integration-dwm1.onrender.com/api/sumup-cart-webhook",
+      hosted_checkout: {
+        enabled: true,
+      },
+    }),
   },
 );
+
+const sumupData = await sumupResponse.json();
+
+if (!sumupResponse.ok || !sumupData.id) {
+  console.error("ERREUR CREATION CHECKOUT PANIER SUMUP :", sumupData);
+
+  return new Response("Impossible de créer le paiement SumUp.", {
+    status: 500,
+  });
+}
+await prisma.sumUpCartPayment.create({
+  data: {
+    checkoutId: sumupData.id,
+    checkoutReference,
+    shop: session.shop,
+    customerEmail: email,
+    items: verifiedItems,
+    amount: totalCents / 100,
+    currency,
+    status: sumupData.status || "PENDING",
+  },
+});
+
+if (!sumupData.hosted_checkout_url) {
+  return new Response(
+    "SumUp n'a pas renvoyé d'URL de paiement.",
+    { status: 500 },
+  );
+}
+
+return new Response(null, {
+  status: 302,
+  headers: {
+    Location: sumupData.hosted_checkout_url,
+  },
+});
 };
