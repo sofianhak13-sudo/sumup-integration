@@ -12,6 +12,17 @@ export const action = async ({ request }) => {
 
   const formData = await request.formData();
   const cartRaw = formData.get("cart");
+  const emailRaw = formData.get("email");
+const email =
+  typeof emailRaw === "string"
+    ? emailRaw.trim()
+    : "";
+
+if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  return new Response("Adresse e-mail invalide.", {
+    status: 400,
+  });
+}
 
   if (!cartRaw || typeof cartRaw !== "string") {
     return new Response("Panier manquant.", {
