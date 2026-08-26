@@ -120,7 +120,15 @@ for (const item of cart.items) {
 }
 
 const currency = variantsData.data?.shop?.currencyCode || "EUR";
+const checkoutReference = `cart-${Date.now()}`;
+const apiKey = process.env.SUMUP_API_KEY;
+const merchantCode = process.env.SUMUP_MERCHANT_CODE;
 
+if (!apiKey || !merchantCode) {
+  return new Response("Configuration SumUp manquante.", {
+    status: 500,
+  });
+}
 console.log("PANIER SHOPIFY VERIFIE :", {
   items: verifiedItems,
   total: totalCents / 100,
