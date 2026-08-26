@@ -46,15 +46,99 @@ if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     });
   }
 
-  console.log(
-    "PANIER SUMUP RECU :",
-    cart.items.map((item) => ({
-      variantId: item.variant_id,
-      quantity: item.quantity,
-    })),
-  );
+  const variantGids = cart.items.map(
+  (item) => `gid://shopify/ProductVariant/${item.variant_id}`,
+);
 
-  return new Response("Panier SumUp reçu correctement.", {
-    status: 200,
+const variantsResponse = await admin.graphql(
+  `#graphql
+  query CartVariants($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on ProductVariant {
+        id
+        title
+        price
+        product {
+          id
+          title
+        }
+      }
+    }
+    shop {
+      currencyCode
+    }
+  }`,
+  {
+    variables: {
+      ids: variantGids,
+    },
+  },
+);
+
+const variantsData = await variantsResponse.json();
+const variants = variantsData.data?.nodes || [];
+
+const variantMap = new Map(
+  variants
+    .filter(Boolean)
+    .map((variant) => [variant.id, variant]),
+);
+
+const verifiedItems = [];
+let totalCents = 0;
+
+for (const item of cart.items) {
+  const quantity = Number(item.quantity);
+  const variantId = `gid://shopify/ProductVariant/${item.variant_id}`;
+  const variant = variantMap.get(variantId);
+
+  if (!variant || !Number.isInteger(quantity) || quantity <= 0) {
+    return new Response("Article du panier invalide.", {
+      status: 400,
+    });
+  }
+
+  const unitPrice = Number(variant.price);
+
+  if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+    return new Response("Prix Shopify invalide.", {
+      status: 500,
+    });
+  }
+
+  const unitCents = Math.round(unitPrice * 100);
+
+  totalCents += unitCents * quantity;
+
+  verifiedItems.push({
+    variantId: variant.id,
+    productId: variant.product.id,
+    title: variant.product.title,
+    quantity,
+    unitAmount: unitCents / 100,
   });
+}
+
+const currency = variantsData.data?.shop?.currencyCode || "EUR";
+
+console.log("PANIER SHOPIFY VERIFIE :", {
+  items: verifiedItems,
+  total: totalCents / 100,
+  currency,
+});
+
+return new Response(
+  JSON.stringify({
+    ok: true,
+    items: verifiedItems,
+    total: totalCents / 100,
+    currency,
+  }),
+  {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  },
+);
 };
