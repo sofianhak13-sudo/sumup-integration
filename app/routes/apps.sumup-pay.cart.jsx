@@ -152,6 +152,7 @@ const sumupResponse = await fetch(
       description: `Panier Shopify - ${verifiedItems.length} article(s)`,
       return_url:
         "https://sumup-integration-dwm1.onrender.com/api/sumup-cart-webhook",
+       redirect_url: `https://lebonplan-ebook.com/apps/sumup-pay/cart/return?reference=${encodeURIComponent(checkoutReference)}`, 
       hosted_checkout: {
         enabled: true,
       },
