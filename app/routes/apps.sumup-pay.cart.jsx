@@ -227,7 +227,7 @@ export const action = async ({ request }) => {
   }
 
   return new Response(null, {
-    status: 302,
+    status: 303,
     headers: {
       ...noStoreHeaders,
       Location: sumupData.hosted_checkout_url,
