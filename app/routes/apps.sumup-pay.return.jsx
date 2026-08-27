@@ -27,13 +27,11 @@ export const loader = async ({ request }) => {
   });
 
   if (!payment || payment.shop !== session.shop) {
-    return new Response("Paiement introuvable.", {
+    return new Response("Paiement produit introuvable.", {
       status: 404,
     });
   }
 
-  // La commande Shopify n'est pas encore prête :
-  // on attend le webhook puis on recharge automatiquement.
   if (!payment.statusPageUrl) {
     return liquid(
       `
@@ -45,12 +43,12 @@ export const loader = async ({ request }) => {
 
       <script>
         const attempts = Number(
-          sessionStorage.getItem("sumupReturnAttempts") || "0"
+          sessionStorage.getItem("sumupProductReturnAttempts") || "0"
         );
 
         if (attempts < 30) {
           sessionStorage.setItem(
-            "sumupReturnAttempts",
+            "sumupProductReturnAttempts",
             String(attempts + 1)
           );
 
@@ -58,7 +56,7 @@ export const loader = async ({ request }) => {
             window.location.reload();
           }, 1500);
         } else {
-          sessionStorage.removeItem("sumupReturnAttempts");
+          sessionStorage.removeItem("sumupProductReturnAttempts");
 
           document.body.innerHTML =
             '<div style="font-family:Arial,sans-serif;text-align:center;padding:60px 20px;">' +
@@ -83,18 +81,8 @@ export const loader = async ({ request }) => {
     </div>
 
     <script>
-      (async () => {
-        sessionStorage.removeItem("sumupReturnAttempts");
-
-        try {
-          await fetch("/cart/clear.js", {
-            method: "POST",
-            credentials: "same-origin"
-          });
-        } catch (error) {
-          console.error("Impossible de vider le panier :", error);
-        }
-
+      (() => {
+        sessionStorage.removeItem("sumupProductReturnAttempts");
         window.location.replace(${statusPageUrl});
       })();
     </script>
