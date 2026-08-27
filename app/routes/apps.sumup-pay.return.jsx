@@ -1,6 +1,11 @@
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
+const noStoreHeaders = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+  Expires: "0",
+};
+
 export const loader = async ({ request }) => {
   const { session, liquid } =
     await authenticate.public.appProxy(request);
@@ -8,6 +13,7 @@ export const loader = async ({ request }) => {
   if (!session) {
     return new Response("Session Shopify introuvable.", {
       status: 401,
+      headers: noStoreHeaders,
     });
   }
 
@@ -17,6 +23,7 @@ export const loader = async ({ request }) => {
   if (!reference) {
     return new Response("Référence de paiement manquante.", {
       status: 400,
+      headers: noStoreHeaders,
     });
   }
 
@@ -29,6 +36,7 @@ export const loader = async ({ request }) => {
   if (!payment || payment.shop !== session.shop) {
     return new Response("Paiement produit introuvable.", {
       status: 404,
+      headers: noStoreHeaders,
     });
   }
 
@@ -67,7 +75,10 @@ export const loader = async ({ request }) => {
         }
       </script>
       `,
-      { layout: false },
+      {
+        layout: false,
+        headers: noStoreHeaders,
+      },
     );
   }
 
@@ -87,6 +98,9 @@ export const loader = async ({ request }) => {
       })();
     </script>
     `,
-    { layout: false },
+    {
+      layout: false,
+      headers: noStoreHeaders,
+    },
   );
 };
