@@ -12,7 +12,54 @@ l'utilisateur (thème Horizon déjà personnalisé LE BON PLAN, V1.2 FIXED).
 | `sections/header-group.json` | Texte du bandeau d'annonce : "Welcome to our store" → "🔒 Paiement sécurisé · Accès immédiat après achat · Aucun abonnement" | Contenu Horizon générique non francisé, non conforme à la Phase 7 (éviter un Horizon générique) |
 | `sections/footer-group.json` | "Join our email list" → "Restez informé des nouveaux bons plans" ; "Get exclusive deals and early access to new products." → "Recevez nos meilleures offres et accès en avant-première." ; "Sign up" → "S'inscrire" | Idem — contenu générique en anglais sur une boutique française |
 | `templates/product.json` | "You may also like " → "Vous aimerez aussi" (section recommandations) | Idem |
-| `templates/index.json` | "View all" → "Voir tout" (bouton de la liste produits) ; ajout de `settings.image_1` sur la section hero (référence `shopify://shop_images/Boite_premium_Le_Bon_Plan_futuriste.png`, fichier déjà présent dans les Fichiers Shopify de la boutique) ; ajout des sections `benefits_lbp` et `steps_lbp` (voir ci-dessous) | Francisation + pré-remplissage de l'image hero avec un asset déjà uploadé + sections manquantes de la Phase 12 |
+| `templates/index.json` | "View all" → "Voir tout" (bouton de la liste produits) ; ajout de `settings.image_1` sur la section hero (référence `shopify://shop_images/Boite_premium_Le_Bon_Plan_futuriste.png`, fichier déjà présent dans les Fichiers Shopify de la boutique) ; ajout des sections `benefits_lbp` et `steps_lbp` (voir ci-dessous) ; **3 liens `shopify://collections/all` → `shopify://collections/frontpage`** (bouton hero, section "Nos offres", bouton CTA) | Francisation + pré-remplissage de l'image hero avec un asset déjà uploadé + sections manquantes de la Phase 12 + **bug 404 confirmé en direct sur la boutique** (voir ci-dessous) |
+| `templates/cart.json` | `"collection": "all"` → `"collection": "frontpage"` sur la section "produits recommandés" du panier | Même bug 404 |
+
+## Bug 404 sur la page d'accueil — trouvé et corrigé après connexion à la boutique réelle
+
+Signalé par l'utilisateur : "en cliquant sur un lien/bouton de la page
+d'accueil (aperçu non publié), j'obtiens une erreur 404".
+
+**Diagnostic** (effectué en interrogeant directement l'API Admin de la
+boutique `lebonplan-ebook.com` connectée à cette session) :
+
+- Le bouton hero ("🚀 Obtenir mon accès"), le bouton du bloc CTA
+  ("💰 J'ARRÊTE DE PAYER PLEIN TARIF") et la section "Nos offres" de la page
+  d'accueil pointaient tous vers `shopify://collections/all`.
+- Vérification via GraphQL (`collectionByHandle(handle: "all")`) : **cette
+  boutique n'a pas de collection avec le handle `all`** — la requête renvoie
+  `null`. De nombreuses boutiques Shopify ont une collection automatique
+  "Tous les produits" à `/collections/all`, mais ce n'est pas le cas de
+  celle-ci.
+- Résultat concret : cliquer sur n'importe lequel de ces 3 éléments envoie
+  vers `/collections/all`, qui n'existe pas sur cette boutique → **404 réel**,
+  reproductible, confirmé.
+- La boutique possède en revanche une collection bien réelle et peuplée :
+  **`frontpage`** ("Home page", handle `frontpage`, 2 produits actifs — les
+  deux e-books LE BON PLAN confirmés via `search_products`).
+
+**Correction appliquée** : les 3 occurrences dans `templates/index.json` et
+la section "produits recommandés" du panier dans `templates/cart.json` ont
+été repointées vers `shopify://collections/frontpage` / `"collection":
+"frontpage"`.
+
+**Ce qui n'était PAS le problème** (vérifié et écarté) :
+- Le menu principal (`main-menu`) : ses 3 liens (Accueil, produit e-book,
+  Contact) résolvent tous vers des ressources réelles et existantes
+  (vérifié via `menus(first: 20)` — l'ID produit et l'ID page correspondent
+  bien à des ressources actives).
+- Le menu footer (politiques) : toutes les URLs de politiques référencent
+  des `ShopPolicy` existants sur la boutique.
+- Les deux produits eux-mêmes : confirmés `ACTIVE` avec un handle correct
+  (`📖-le-bon-plan-e-book-acces-exclusif-aux-canaux-prives-a-vie-👑` et
+  `📖-le-bon-plan-e-book-acces-prives-a-vie-👑-copie`).
+
+**Point d'attention restant (non corrigé, nécessite une décision utilisateur)** :
+les liens réseaux sociaux du footer (`facebook.com/`, `instagram.com/`,
+`youtube.com/`, `tiktok.com/`, `x.com/`) sont les valeurs par défaut
+génériques du thème Horizon — ce ne sont pas des 404, mais ils ne mènent nulle
+part d'utile tant qu'ils ne sont pas remplacés par les vrais comptes LE BON
+PLAN (ou masqués) dans Personnaliser → Pied de page.
 
 ## Fichiers créés (nouvelles sections dans `templates/index.json`)
 

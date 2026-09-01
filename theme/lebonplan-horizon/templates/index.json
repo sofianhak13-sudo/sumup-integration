@@ -34,7 +34,7 @@
           "name": "t:names.button",
           "settings": {
             "label": "🚀 Obtenir mon accès",
-            "link": "shopify://collections/all",
+            "link": "shopify://collections/frontpage",
             "open_in_new_tab": false,
             "style_class": "button-premium",
             "custom_button_background": "rgba(0,0,0,0)",
@@ -262,7 +262,7 @@
       },
       "name": "Featured collection",
       "settings": {
-        "collection": "all",
+        "collection": "frontpage",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 8,
@@ -325,7 +325,7 @@
           "name": "Bouton Premium Glow",
           "settings": {
             "label": "💰 J'ARRÊTE DE PAYER PLEIN TARIF",
-            "link": "shopify://collections/all",
+            "link": "shopify://collections/frontpage",
             "style_class": "button-premium",
             "premium_bg_color": "#000000",
             "premium_bg_gradient_color": "#1a1a1a",
