@@ -1,0 +1,23 @@
+{% doc %}
+  Renders the cart title or empty-cart state.
+
+  @param {boolean} [force_empty] - Force the empty-cart label.
+{% enddoc %}
+
+{% liquid
+  assign block_settings = block.settings
+%}
+
+<div
+  class="cart-title spacing-style text-{{ block_settings.alignment }}{% if block_settings.text_color != blank %} color-custom-{{ block.id }}{% endif %}"
+  style="{% render 'spacing-style', settings: block_settings %}"
+>
+  <h1 class="{{ block_settings.type_preset | default: 'h2' }}">
+    {%- if cart.empty? or force_empty -%}
+      {{ 'content.your_cart_is_empty' | t }}
+    {%- else -%}
+      {{ block_settings.title }}
+      {%- if block_settings.show_count -%}{% render 'cart-bubble' %}{%- endif -%}
+    {%- endif -%}
+  </h1>
+</div>

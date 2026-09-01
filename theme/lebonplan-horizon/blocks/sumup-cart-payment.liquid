@@ -1,0 +1,287 @@
+{%- doc -%}
+  SumUp — Paiement panier (App Proxy)
+
+  Reconstruction propre du bloc "sumup-cart-wrapper" trouvé dans l'ancien
+  sections/main-cart.liquid Streamline. Se dépose comme n'importe quel
+  block Horizon dans la zone "more blocks" de la page panier (cart-page)
+  ou du panier latéral.
+
+  Flux : e-mail + contenu de /cart.js (JSON) → POST vers l'App Proxy.
+  Le thème n'effectue aucun calcul de prix et n'expose aucun secret :
+  le backend SumUp existant reste seul responsable de la commande.
+
+  @example
+  {% content_for 'block', type: 'sumup-cart-payment', id: 'sumup-cart-payment' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign endpoint = block.settings.app_proxy_endpoint | default: '/apps/sumup-pay/cart'
+  assign button_text = block.settings.button_text | default: '🚀 Obtenir mon accès'
+  assign loading_text = block.settings.loading_text | default: 'Chargement...'
+  assign email_placeholder = block.settings.email_placeholder | default: 'Votre adresse e-mail'
+  assign warning_text = block.settings.warning_text | default: '⚠️ Utilisez une adresse e-mail valide pour recevoir votre accès'
+-%}
+
+<div
+  class="sumup-cart-block sumup-cart-block--{{ block.id }}"
+  data-sumup-cart-endpoint="{{ endpoint }}"
+  {{ block.shopify_attributes }}
+>
+  <input
+    type="email"
+    class="sumup-cart-email"
+    data-sumup-cart-email
+    placeholder="{{ email_placeholder }}"
+    autocomplete="email"
+    value="{{ customer.email | escape }}"
+    required
+  >
+
+  {% if warning_text != blank %}
+    <p class="sumup-cart-warning">{{ warning_text }}</p>
+  {% endif %}
+
+  <button
+    type="button"
+    class="sumup-cart-button"
+    data-sumup-cart-button
+    data-label="{{ button_text }}"
+    data-loading-label="{{ loading_text }}"
+  >
+    {{ button_text }}
+  </button>
+</div>
+
+{% style %}
+  .sumup-cart-block--{{ block.id }} {
+    width: 100%;
+    margin-top: var(--margin-lg, 22px);
+  }
+
+  .sumup-cart-block--{{ block.id }} .sumup-cart-email {
+    width: 100%;
+    box-sizing: border-box;
+    background: {{ block.settings.field_background | default: '#0b0d12' }};
+    color: {{ block.settings.field_text_color | default: '#ffffff' }};
+    border: 1.5px solid {{ block.settings.accent_color | default: '#00a8ff' }};
+    border-radius: {{ block.settings.field_radius | default: 18 }}px;
+    padding: 16px 18px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .sumup-cart-block--{{ block.id }} .sumup-cart-email:focus {
+    border-color: {{ block.settings.accent_color | default: '#00a8ff' }};
+    box-shadow: 0 0 12px rgba({{ block.settings.accent_color | default: '#00a8ff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.35);
+  }
+
+  .sumup-cart-block--{{ block.id }} .sumup-cart-warning {
+    margin: 0 4px 14px;
+    font-size: 11px;
+    color: var(--color-foreground-75, #9ca3af);
+    line-height: 1.3;
+  }
+
+  .sumup-cart-block--{{ block.id }} .sumup-cart-button {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 68px;
+    border-radius: {{ block.settings.button_radius | default: 34 }}px;
+    border: 2px solid {{ block.settings.accent_color | default: '#00a8ff' }};
+    background: {{ block.settings.button_background | default: '#050607' }};
+    color: {{ block.settings.button_text_color | default: '#ffffff' }};
+    font-size: 19px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba({{ block.settings.accent_color | default: '#00a8ff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.6);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  }
+
+  .sumup-cart-block--{{ block.id }} .sumup-cart-button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+  }
+
+  .sumup-cart-block--{{ block.id }} .sumup-cart-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+{% endstyle %}
+
+<script>
+  (function () {
+    function initSumUpCartBlock(root) {
+      if (!root || root.dataset.sumupBound === 'true') return;
+      root.dataset.sumupBound = 'true';
+
+      var button = root.querySelector('[data-sumup-cart-button]');
+      var emailInput = root.querySelector('[data-sumup-cart-email]');
+      var endpoint = root.getAttribute('data-sumup-cart-endpoint') || '/apps/sumup-pay/cart';
+      if (!button || !emailInput) return;
+
+      var defaultLabel = button.getAttribute('data-label') || button.textContent;
+      var loadingLabel = button.getAttribute('data-loading-label') || 'Chargement...';
+
+      button.addEventListener('click', async function () {
+        var email = emailInput.value.trim();
+        if (!email) {
+          alert('Veuillez renseigner votre adresse e-mail.');
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = loadingLabel;
+
+        try {
+          var response = await fetch('/cart.js', { headers: { Accept: 'application/json' } });
+          if (!response.ok) throw new Error('Impossible de récupérer le panier.');
+
+          var cart = await response.json();
+          if (!cart.items || cart.items.length === 0) {
+            alert('Votre panier est vide.');
+            button.disabled = false;
+            button.textContent = defaultLabel;
+            return;
+          }
+
+          var sumupForm = document.createElement('form');
+          sumupForm.method = 'POST';
+          sumupForm.action = endpoint;
+          sumupForm.style.display = 'none';
+
+          var emailField = document.createElement('input');
+          emailField.type = 'hidden';
+          emailField.name = 'email';
+          emailField.value = email;
+
+          var cartField = document.createElement('input');
+          cartField.type = 'hidden';
+          cartField.name = 'cart';
+          cartField.value = JSON.stringify(cart);
+
+          sumupForm.appendChild(emailField);
+          sumupForm.appendChild(cartField);
+          document.body.appendChild(sumupForm);
+          sumupForm.submit();
+        } catch (error) {
+          console.error('Erreur SumUp panier :', error);
+          alert('Impossible de préparer le paiement SumUp.');
+          button.disabled = false;
+          button.textContent = defaultLabel;
+        }
+      });
+    }
+
+    document.querySelectorAll('.sumup-cart-block').forEach(initSumUpCartBlock);
+    document.addEventListener('cart:updated', function () {
+      document.querySelectorAll('.sumup-cart-block').forEach(initSumUpCartBlock);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "SumUp — Paiement panier",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Envoie l'e-mail du client et le contenu de /cart.js vers l'App Proxy SumUp. Le backend existant reste seul responsable du prix et de la commande."
+    },
+    {
+      "type": "text",
+      "id": "app_proxy_endpoint",
+      "label": "Endpoint App Proxy",
+      "default": "/apps/sumup-pay/cart",
+      "info": "Ex. /apps/sumup-pay/cart — à adapter par boutique."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texte du bouton",
+      "default": "🚀 Obtenir mon accès"
+    },
+    {
+      "type": "text",
+      "id": "loading_text",
+      "label": "Texte pendant le chargement",
+      "default": "Chargement..."
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Placeholder du champ e-mail",
+      "default": "Votre adresse e-mail"
+    },
+    {
+      "type": "text",
+      "id": "warning_text",
+      "label": "Texte d'avertissement",
+      "default": "⚠️ Utilisez une adresse e-mail valide pour recevoir votre accès"
+    },
+    {
+      "type": "header",
+      "content": "Couleurs"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Couleur d'accent",
+      "default": "#00a8ff"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fond du bouton",
+      "default": "#050607"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texte du bouton",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "field_background",
+      "label": "Fond du champ e-mail",
+      "default": "#0b0d12"
+    },
+    {
+      "type": "color",
+      "id": "field_text_color",
+      "label": "Texte du champ e-mail",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Arrondi du bouton",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 34
+    },
+    {
+      "type": "range",
+      "id": "field_radius",
+      "label": "Arrondi du champ",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    }
+  ],
+  "presets": [
+    {
+      "name": "SumUp — Paiement panier",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

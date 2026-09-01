@@ -1,0 +1,222 @@
+{%- doc -%}
+  SumUp — Paiement produit (App Proxy)
+
+  Reconstruction propre, en tant que vrai block Horizon, des anciens
+  Custom Liquid Streamline "Chekout sumup 1" / "custom_xJTNL8" / "custom_64i3Bk".
+
+  Le thème n'envoie QUE l'e-mail du client et l'ID Shopify du produit à
+  l'App Proxy existante. Aucune clé, aucun secret, aucun calcul de prix
+  côté thème : la sécurité et la création de commande restent gérées par
+  l'application SumUp (backend) déjà en place.
+
+  Intended for use on the product page (main-product / product-information),
+  either dropped directly as a block or included inside a product-form.
+
+  @example
+  {% content_for 'block', type: 'sumup-payment', id: 'sumup-payment' %}
+{%- enddoc -%}
+
+{%- liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+
+  assign endpoint = block.settings.app_proxy_endpoint | default: '/apps/sumup-pay'
+  assign email_placeholder = block.settings.email_placeholder | default: 'Votre adresse e-mail'
+  assign button_text = block.settings.button_text | default: '🚀 Obtenir mon accès'
+  assign warning_text = block.settings.warning_text
+-%}
+
+{% if product != blank %}
+  <div
+    class="sumup-payment-block sumup-payment-block--{{ block.id }}"
+    {{ block.shopify_attributes }}
+  >
+    <form method="post" action="{{ endpoint }}" class="sumup-payment-form">
+      <input
+        type="email"
+        name="email"
+        class="sumup-payment-email"
+        placeholder="{{ email_placeholder }}"
+        value="{{ customer.email | escape }}"
+        required
+      >
+
+      {% if warning_text != blank %}
+        <p class="sumup-payment-warning">{{ warning_text }}</p>
+      {% endif %}
+
+      <input type="hidden" name="productId" value="{{ product.id }}">
+      {% if product.selected_or_first_available_variant %}
+        <input type="hidden" name="variantId" value="{{ product.selected_or_first_available_variant.id }}">
+      {% endif %}
+
+      <button type="submit" class="sumup-payment-button">
+        <span>{{ button_text }}</span>
+      </button>
+    </form>
+  </div>
+
+  {% style %}
+    .sumup-payment-block--{{ block.id }} {
+      width: 100%;
+      margin: var(--margin-lg, 18px) 0;
+    }
+
+    .sumup-payment-block--{{ block.id }} .sumup-payment-email {
+      width: 100%;
+      box-sizing: border-box;
+      background: {{ block.settings.field_background | default: '#0b0b0b' }};
+      color: {{ block.settings.field_text_color | default: '#ffffff' }};
+      border: 1.5px solid {{ block.settings.accent_color | default: '#008cff' }};
+      border-radius: {{ block.settings.field_radius | default: 18 }}px;
+      padding: 16px 18px;
+      font-size: 16px;
+      margin-bottom: 14px;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .sumup-payment-block--{{ block.id }} .sumup-payment-email:focus {
+      border-color: {{ block.settings.accent_color | default: '#00a8ff' }};
+      box-shadow: 0 0 12px rgba({{ block.settings.accent_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.35);
+    }
+
+    .sumup-payment-block--{{ block.id }} .sumup-payment-warning {
+      margin: -6px 4px 12px;
+      font-size: 11px;
+      color: var(--color-foreground-75, #9ca3af);
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    .sumup-payment-block--{{ block.id }} .sumup-payment-button {
+      width: 100%;
+      min-height: 70px;
+      border-radius: {{ block.settings.button_radius | default: 36 }}px;
+      border: 2px solid {{ block.settings.accent_color | default: '#008cff' }};
+      background: {{ block.settings.button_background | default: '#050505' }};
+      color: {{ block.settings.button_text_color | default: '#ffffff' }};
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba({{ block.settings.accent_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.6);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .sumup-payment-block--{{ block.id }} .sumup-payment-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 18px rgba({{ block.settings.accent_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.85);
+    }
+
+    .sumup-payment-block--{{ block.id }} .sumup-payment-button:active {
+      transform: scale(0.98);
+    }
+
+    @media screen and (max-width: 749px) {
+      .sumup-payment-block--{{ block.id }} .sumup-payment-button {
+        min-height: 62px;
+        font-size: 18px;
+      }
+    }
+  {% endstyle %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "SumUp — Paiement produit",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Envoie l'e-mail du client et l'ID produit vers l'App Proxy SumUp. Le backend existant reste seul responsable du prix et de la commande."
+    },
+    {
+      "type": "text",
+      "id": "app_proxy_endpoint",
+      "label": "Endpoint App Proxy",
+      "default": "/apps/sumup-pay",
+      "info": "Ex. /apps/sumup-pay — à adapter par boutique."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texte du bouton",
+      "default": "🚀 Obtenir mon accès"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "Placeholder du champ e-mail",
+      "default": "Votre adresse e-mail"
+    },
+    {
+      "type": "text",
+      "id": "warning_text",
+      "label": "Texte d'avertissement (optionnel)",
+      "default": "⚠️ Adresse e-mail valide obligatoire"
+    },
+    {
+      "type": "header",
+      "content": "Couleurs"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Couleur d'accent",
+      "default": "#008cff"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fond du bouton",
+      "default": "#050505"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texte du bouton",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "field_background",
+      "label": "Fond du champ e-mail",
+      "default": "#0b0b0b"
+    },
+    {
+      "type": "color",
+      "id": "field_text_color",
+      "label": "Texte du champ e-mail",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Arrondi du bouton",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "field_radius",
+      "label": "Arrondi du champ",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    }
+  ],
+  "presets": [
+    {
+      "name": "SumUp — Paiement produit",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

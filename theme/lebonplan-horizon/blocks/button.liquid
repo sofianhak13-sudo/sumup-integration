@@ -1,0 +1,266 @@
+
+{% render 'button', link: block.settings.link %}
+{% render 'premium-button-styles', block_settings: block.settings, block_id: block.id %}
+
+{% schema %}
+{
+  "name": "t:names.button",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "t:settings.label",
+      "default": "t:text_defaults.button_label"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:settings.link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_in_new_tab",
+      "label": "t:settings.open_new_tab",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "style_class",
+      "label": "t:settings.style",
+      "options": [
+        {
+          "value": "button",
+          "label": "t:options.primary"
+        },
+        {
+          "value": "button-secondary",
+          "label": "t:options.secondary"
+        },
+        {
+          "value": "button-unstyled",
+          "label": "t:options.link"
+        },
+        {
+          "value": "button-custom",
+          "label": "t:options.custom"
+        },
+        {
+          "value": "button-premium",
+          "label": "Premium Glow"
+        }
+      ],
+      "default": "button",
+      "info": "t:info.edit_button_style_in_theme_settings"
+    },
+    {
+      "type": "header",
+      "content": "Style Premium Glow",
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "color",
+      "id": "premium_bg_color",
+      "label": "Fond (début du dégradé)",
+      "default": "#07090d",
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "color",
+      "id": "premium_bg_gradient_color",
+      "label": "Fond (fin du dégradé)",
+      "default": "#11151c",
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "color",
+      "id": "premium_text_color",
+      "label": "Texte",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "color",
+      "id": "premium_border_color",
+      "label": "Bordure",
+      "default": "#00a8ff",
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "color",
+      "id": "premium_glow_color",
+      "label": "Couleur du glow",
+      "default": "#008cff",
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "range",
+      "id": "premium_glow_intensity",
+      "label": "Intensité du glow",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "default": 26,
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "range",
+      "id": "premium_border_width",
+      "label": "Épaisseur de bordure",
+      "min": 0,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "default": 2,
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "range",
+      "id": "premium_border_radius",
+      "label": "Arrondi",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 30,
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "premium_enable_shine",
+      "label": "Activer l'animation \"shine\"",
+      "default": true,
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "premium_enable_pulse",
+      "label": "Activer l'animation \"pulse\"",
+      "default": true,
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "range",
+      "id": "premium_pulse_duration",
+      "label": "Durée de l'animation (s)",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "visible_if": "{{ block.settings.style_class == 'button-premium' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.button_colors",
+      "visible_if": "{{ block.settings.style_class == \"button-custom\" }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_background",
+      "label": "t:settings.background",
+      "default": "{{ settings.color_palette.foreground }}",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_text",
+      "label": "t:settings.text",
+      "default": "{{ settings.color_palette.background }}",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "custom_button_border",
+      "label": "t:settings.borders",
+      "default": "{{ settings.color_palette.background }}",
+      "alpha": true,
+      "visible_if": "{{ block.settings.style_class == 'button-custom' }}"
+    },
+    {
+      "type": "color",
+      "id": "link_text_color",
+      "label": "t:settings.link_text_color",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ block.settings.style_class == 'button-unstyled' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.size"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:settings.width_desktop",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fit-content"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "t:settings.custom_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width == \"custom\" }}"
+    },
+    {
+      "type": "select",
+      "id": "width_mobile",
+      "label": "t:settings.width_mobile",
+      "options": [
+        {
+          "value": "fit-content",
+          "label": "t:options.fit_content"
+        },
+        {
+          "value": "custom",
+          "label": "t:options.custom"
+        }
+      ],
+      "default": "fit-content"
+    },
+    {
+      "type": "range",
+      "id": "custom_width_mobile",
+      "label": "t:settings.custom_width",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 100,
+      "visible_if": "{{ block.settings.width_mobile == \"custom\" }}"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:names.button",
+      "category": "t:categories.basic",
+      "settings": {
+        "link": "shopify://collections/all"
+      }
+    },
+    {
+      "name": "Bouton Premium Glow",
+      "category": "t:categories.basic",
+      "settings": {
+        "style_class": "button-premium",
+        "label": "🚀 Obtenir mon accès",
+        "link": "shopify://collections/all"
+      }
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,124 @@
+{% doc %}
+  Outputs scoped CSS custom properties + keyframes for the "button-premium"
+  (Premium Glow) style class, reconstructed from the legacy Streamline
+  "Bouton achat premium" / "Bouton ajout panier premium" custom-liquid blocks.
+
+  Fully merchant-configurable from the theme editor — no code required.
+
+  @param {object} block_settings - The block's settings object
+  @param {string} block_id - The block ID used to scope the CSS
+
+  @example
+  {% render 'premium-button-styles', block_settings: block.settings, block_id: block.id %}
+{% enddoc %}
+
+{% if block_settings.style_class == 'button-premium' %}
+  {%- assign bg_start = block_settings.premium_bg_color | default: '#07090d' -%}
+  {%- assign bg_end = block_settings.premium_bg_gradient_color | default: '#11151c' -%}
+  {%- assign text_color = block_settings.premium_text_color | default: '#ffffff' -%}
+  {%- assign border_color = block_settings.premium_border_color | default: '#00a8ff' -%}
+  {%- assign glow_color = block_settings.premium_glow_color | default: block_settings.premium_border_color | default: '#008cff' -%}
+  {%- assign glow_intensity = block_settings.premium_glow_intensity | default: 26 -%}
+  {%- assign radius = block_settings.premium_border_radius | default: 30 -%}
+  {%- assign border_width = block_settings.premium_border_width | default: 2 -%}
+  {%- assign pulse_duration = block_settings.premium_pulse_duration | default: 5 -%}
+
+  {% style %}
+    .button-premium--{{ block_id }} {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 62px;
+      padding: 0 var(--padding-2xl, 24px);
+      border-radius: {{ radius }}px;
+      border: {{ border_width }}px solid {{ border_color }};
+      background: linear-gradient(90deg, {{ bg_start }} 0%, {{ bg_end }} 50%, {{ bg_start }} 100%);
+      color: {{ text_color }};
+      font-weight: 700;
+      letter-spacing: 0.15px;
+      cursor: pointer;
+      box-shadow:
+        0 0 10px rgba({{ glow_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.65),
+        0 0 {{ glow_intensity }}px rgba({{ glow_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.32),
+        inset 0 0 0 1px rgba({{ border_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+    }
+
+    .button-premium--{{ block_id }} span,
+    .button-premium--{{ block_id }} .add-to-cart-button__inner {
+      position: relative;
+      z-index: 2;
+    }
+
+    .button-premium--{{ block_id }}::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -40%;
+      width: 25%;
+      height: 200%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.08),
+        transparent
+      );
+      transform: rotate(18deg);
+      {% if block_settings.premium_enable_shine %}
+        animation: premiumButtonShine {{ pulse_duration | times: 0.8 }}s ease-in-out infinite;
+      {% endif %}
+    }
+
+    .button-premium--{{ block_id }}:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    .button-premium--{{ block_id }}:active {
+      transform: scale(0.985);
+    }
+
+    .button-premium--{{ block_id }}:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      animation: none;
+    }
+
+    {% if block_settings.premium_enable_pulse %}
+      .button-premium--{{ block_id }} {
+        animation: premiumButtonPulse {{ pulse_duration }}s ease-in-out infinite;
+      }
+    {% endif %}
+
+    @keyframes premiumButtonShine {
+      0% { left: -40%; }
+      55% { left: 120%; }
+      100% { left: 120%; }
+    }
+
+    @keyframes premiumButtonPulse {
+      0%, 100% {
+        box-shadow:
+          0 0 10px rgba({{ glow_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.55),
+          0 0 {{ glow_intensity }}px rgba({{ glow_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.25);
+      }
+      50% {
+        box-shadow:
+          0 0 16px rgba({{ glow_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.9),
+          0 0 {{ glow_intensity | times: 1.4 }}px rgba({{ glow_color | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.4);
+      }
+    }
+
+    @media screen and (max-width: 749px) {
+      .button-premium--{{ block_id }} {
+        min-height: 58px;
+        border-radius: {{ radius | times: 0.9 }}px;
+      }
+    }
+  {% endstyle %}
+{% endif %}
