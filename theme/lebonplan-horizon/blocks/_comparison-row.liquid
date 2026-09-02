@@ -1,0 +1,66 @@
+{%- doc -%}
+  Une ligne de la Comparison Table : caractéristique + valeur par colonne
+  (texte libre, coche ✓ ou croix ✗).
+{%- enddoc -%}
+
+<tr {{ block.shopify_attributes }}>
+  <th scope="row">{{ block.settings.feature }}</th>
+  {%- for i in (1..5) -%}
+    {%- assign value_key = 'column_' | append: i | append: '_value' -%}
+    {%- assign value = block.settings[value_key] -%}
+    {%- assign has_column = true -%}
+    {%- if i == 3 and block.settings.column_3_value == blank -%}{%- assign has_column = false -%}{%- endif -%}
+    {%- if value != blank or i <= 2 -%}
+      {%- assign free_text_key = 'column_' | append: i | append: '_text' -%}
+      <td>
+        {%- case value -%}
+          {%- when 'check' -%}
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1fae5c" stroke-width="2.4" aria-label="Inclus"><path d="M4 12l5 5L20 6"/></svg>
+          {%- when 'cross' -%}
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9b9b9b" stroke-width="2.4" aria-label="Non inclus"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          {%- when 'text' -%}
+            {{ block.settings[free_text_key] }}
+          {%- else -%}
+            {{ value }}
+        {%- endcase -%}
+      </td>
+    {%- endif -%}
+  {%- endfor -%}
+</tr>
+
+{% schema %}
+{
+  "name": "Ligne de comparaison",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "feature", "label": "Caractéristique", "default": "Caractéristique" },
+    {
+      "type": "select",
+      "id": "column_1_value",
+      "label": "Colonne 1",
+      "options": [
+        { "value": "check", "label": "✓ Inclus" },
+        { "value": "cross", "label": "✗ Non inclus" },
+        { "value": "text", "label": "Texte libre (voir ci-dessous)" }
+      ],
+      "default": "check"
+    },
+    { "type": "text", "id": "column_1_text", "label": "↳ Texte libre colonne 1 (si sélectionné ci-dessus)" },
+    {
+      "type": "select",
+      "id": "column_2_value",
+      "label": "Colonne 2",
+      "options": [
+        { "value": "check", "label": "✓ Inclus" },
+        { "value": "cross", "label": "✗ Non inclus" },
+        { "value": "text", "label": "Texte libre (voir ci-dessous)" }
+      ],
+      "default": "check"
+    },
+    { "type": "text", "id": "column_2_text", "label": "↳ Texte libre colonne 2 (si sélectionné ci-dessus)" },
+    { "type": "text", "id": "column_3_value", "label": "Colonne 3 (check / cross / texte libre)" },
+    { "type": "text", "id": "column_4_value", "label": "Colonne 4 (check / cross / texte libre)" },
+    { "type": "text", "id": "column_5_value", "label": "Colonne 5 (check / cross / texte libre)" }
+  ]
+}
+{% endschema %}

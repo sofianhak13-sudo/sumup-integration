@@ -1,0 +1,205 @@
+{%- doc -%}
+  Promotional Popup — modal déclenchable par délai, scroll ou intention de
+  sortie (desktop). Contenu 100% composable avec les blocks natifs Horizon
+  (image, text, button, email-signup...) déposés dans la zone "blocks".
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+<dialog
+  id="PromoPopup-{{ section.id }}"
+  class="promo-popup"
+  data-promo-popup
+  data-trigger="{{ section.settings.trigger }}"
+  data-delay="{{ section.settings.delay_seconds | times: 1000 }}"
+  data-scroll-percent="{{ section.settings.scroll_percent }}"
+  data-frequency="{{ section.settings.frequency }}"
+  data-storage-key="promo-popup-{{ section.id }}"
+  aria-labelledby="PromoPopupTitle-{{ section.id }}"
+>
+  <div class="promo-popup__inner spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    <button type="button" class="promo-popup__close" data-promo-popup-close aria-label="Fermer">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div id="PromoPopupTitle-{{ section.id }}" class="promo-popup__content">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</dialog>
+
+<script>
+  (function () {
+    function initPromoPopup(dialog) {
+      if (!dialog || dialog.dataset.bound === 'true') return;
+      dialog.dataset.bound = 'true';
+
+      var storageKey = dialog.getAttribute('data-storage-key');
+      var frequency = dialog.getAttribute('data-frequency');
+      var closeBtn = dialog.querySelector('[data-promo-popup-close]');
+
+      function alreadyShown() {
+        if (frequency === 'always') return false;
+        try {
+          return sessionStorage.getItem(storageKey) === 'shown';
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function markShown() {
+        try {
+          sessionStorage.setItem(storageKey, 'shown');
+        } catch (e) {}
+      }
+
+      function openPopup() {
+        if (alreadyShown() || dialog.open) return;
+        dialog.showModal();
+        markShown();
+      }
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function () {
+          dialog.close();
+        });
+      }
+
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) dialog.close();
+      });
+
+      var trigger = dialog.getAttribute('data-trigger');
+
+      if (trigger === 'delay') {
+        var delay = parseInt(dialog.getAttribute('data-delay'), 10) || 4000;
+        setTimeout(openPopup, delay);
+      } else if (trigger === 'scroll') {
+        var targetPercent = parseInt(dialog.getAttribute('data-scroll-percent'), 10) || 50;
+        var handleScroll = function () {
+          var scrolled = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+          if (scrolled >= targetPercent) {
+            openPopup();
+            window.removeEventListener('scroll', handleScroll);
+          }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+      } else if (trigger === 'exit_intent') {
+        var handleExit = function (event) {
+          if (event.clientY <= 0) {
+            openPopup();
+            document.removeEventListener('mouseout', handleExit);
+          }
+        };
+        document.addEventListener('mouseout', handleExit);
+      } else if (trigger === 'manual') {
+        document.addEventListener('click', function (event) {
+          var opener = event.target.closest('[data-open-promo-popup="' + dialog.id + '"]');
+          if (opener) {
+            dialog.showModal();
+          }
+        });
+      }
+    }
+
+    document.querySelectorAll('[data-promo-popup]').forEach(initPromoPopup);
+  })();
+</script>
+
+{% style %}
+  .promo-popup {
+    border: none;
+    border-radius: var(--radius-lg, 16px);
+    padding: 0;
+    max-width: min(90vw, 480px);
+    background: var(--color-background, #fff);
+    color: var(--color-foreground, #000);
+  }
+
+  .promo-popup::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+
+  .promo-popup__inner {
+    position: relative;
+    padding: var(--padding-2xl, 40px) var(--padding-xl, 32px);
+  }
+
+  .promo-popup__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.6;
+  }
+
+  .promo-popup__close:hover {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .promo-popup[open] {
+      animation: promoPopupIn 0.25s ease;
+    }
+  }
+
+  @keyframes promoPopupIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Popup promotionnel",
+  "class": "section-wrapper",
+  "disabled_on": { "groups": ["header", "footer"] },
+  "blocks": [
+    { "type": "@theme" }
+  ],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Compose le contenu avec les blocks (image, texte, bouton, inscription newsletter...). Le déclenchement respecte une seule apparition par session sauf réglage contraire."
+    },
+    {
+      "type": "select",
+      "id": "trigger",
+      "label": "Déclencheur",
+      "options": [
+        { "value": "delay", "label": "Après un délai" },
+        { "value": "scroll", "label": "Au scroll" },
+        { "value": "exit_intent", "label": "Intention de sortie (desktop)" },
+        { "value": "manual", "label": "Manuel (lien \"data-open-promo-popup\")" }
+      ],
+      "default": "delay"
+    },
+    { "type": "range", "id": "delay_seconds", "label": "Délai (secondes)", "min": 1, "max": 60, "step": 1, "default": 5, "visible_if": "{{ section.settings.trigger == 'delay' }}" },
+    { "type": "range", "id": "scroll_percent", "label": "Pourcentage de scroll", "min": 10, "max": 90, "step": 5, "default": 50, "unit": "%", "visible_if": "{{ section.settings.trigger == 'scroll' }}" },
+    {
+      "type": "select",
+      "id": "frequency",
+      "label": "Fréquence",
+      "options": [
+        { "value": "session", "label": "Une fois par session" },
+        { "value": "always", "label": "À chaque chargement (déconseillé)" }
+      ],
+      "default": "session"
+    },
+    { "type": "header", "content": "Espacement du contenu" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 60, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 60, "step": 1, "unit": "px", "default": 8 }
+  ],
+  "presets": [
+    {
+      "name": "Popup promotionnel",
+      "category": "t:categories.basic",
+      "blocks": [
+        { "type": "text", "settings": { "text": "<h3>Ne manquez pas notre offre</h3>" } },
+        { "type": "email-signup" }
+      ]
+    }
+  ]
+}
+{% endschema %}

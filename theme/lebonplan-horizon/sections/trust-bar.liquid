@@ -1,0 +1,100 @@
+{%- doc -%}
+  Trust Bar — bandeau de réassurance (paiement sécurisé, livraison, garantie...).
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+{% liquid
+  assign custom_color = false
+  if section.settings.background_color != blank or section.settings.text_color != blank
+    assign custom_color = true
+    render 'contrast-override', background_color: section.settings.background_color, text_color: section.settings.text_color, section_id: section.id
+  endif
+%}
+
+<div class="section-background{% if custom_color %} color-custom-{{ section.id }}{% endif %}"></div>
+<div class="section{% if custom_color %} color-custom-{{ section.id }}{% endif %} section--{{ section.settings.section_width }}">
+  <div
+    class="trust-bar trust-bar--{{ section.settings.layout }} spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}"
+  >
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .trust-bar {
+    display: flex;
+    gap: var(--gap-xl, 32px);
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .trust-bar--marquee {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+
+  .trust-bar--marquee::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media screen and (max-width: 749px) {
+    .trust-bar:not(.trust-bar--marquee) {
+      justify-content: flex-start;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Trust Bar",
+  "class": "section-wrapper",
+  "blocks": [
+    { "type": "_trust-item" }
+  ],
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Disposition",
+      "options": [
+        { "value": "row", "label": "Ligne (desktop) / scroll (mobile)" },
+        { "value": "marquee", "label": "Défilement continu" }
+      ],
+      "default": "row"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Largeur",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Pleine largeur" }
+      ],
+      "default": "page-width"
+    },
+    { "type": "header", "content": "Couleurs" },
+    { "type": "color", "id": "background_color", "label": "Fond", "placeholder": "Par défaut" },
+    { "type": "color", "id": "text_color", "label": "Texte", "placeholder": "Par défaut" },
+    { "type": "header", "content": "Espacement" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 32 }
+  ],
+  "presets": [
+    {
+      "name": "Trust Bar",
+      "category": "t:categories.basic",
+      "blocks": [
+        { "type": "_trust-item", "settings": { "icon": "shield", "title": "Paiement sécurisé" } },
+        { "type": "_trust-item", "settings": { "icon": "bolt", "title": "Accès immédiat" } },
+        { "type": "_trust-item", "settings": { "icon": "headset", "title": "Support client" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

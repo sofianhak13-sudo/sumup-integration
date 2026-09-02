@@ -990,432 +990,90 @@
       }
     },
     "steps_lbp": {
-      "type": "_blocks",
+      "type": "steps",
       "blocks": {
-        "steps_heading": {
-          "type": "text",
+        "step_1": {
+          "type": "_step",
           "settings": {
-            "text": "<h2>Comment ça marche</h2>",
-            "width": "100%",
-            "max_width": "normal",
-            "alignment": "center",
-            "type_preset": "h3",
-            "font": "var(--font-body--family)",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
+            "number": "1",
+            "title": "Choisissez votre offre",
+            "text": "Sélectionnez la version qui vous convient parmi nos e-books."
           }
         },
-        "steps_row": {
-          "type": "group",
+        "step_2": {
+          "type": "_step",
           "settings": {
-            "content_direction": "row",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "space-between",
-            "vertical_alignment": "flex-start",
-            "align_baseline": false,
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "flex-start",
-            "gap": 16,
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "custom_height": 100,
-            "background_media": "none",
-            "background_color": "",
-            "video_position": "cover",
-            "background_image_position": "cover",
-            "toggle_overlay": false,
-            "overlay_color": "#00000026",
-            "overlay_style": "solid",
-            "gradient_direction": "to top",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "open_in_new_tab": false,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "step_1": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "step_1_num": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:13px;color:#00A8FF;font-weight:700;\">ÉTAPE 1</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "step_1_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Choisissez votre offre</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "step_1_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Sélectionnez la version qui vous convient parmi nos e-books.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "step_1_num",
-                "step_1_title",
-                "step_1_desc"
-              ]
-            },
-            "step_2": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "step_2_num": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:13px;color:#00A8FF;font-weight:700;\">ÉTAPE 2</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "step_2_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Payez en toute sécurité</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "step_2_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Réglez votre commande via SumUp, notre partenaire de paiement sécurisé.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "step_2_num",
-                "step_2_title",
-                "step_2_desc"
-              ]
-            },
-            "step_3": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "step_3_num": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:13px;color:#00A8FF;font-weight:700;\">ÉTAPE 3</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "step_3_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Recevez votre accès</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "step_3_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>E-book et accès aux canaux privés livrés immédiatement après paiement.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "step_3_num",
-                "step_3_title",
-                "step_3_desc"
-              ]
-            }
-          },
-          "block_order": [
-            "step_1",
-            "step_2",
-            "step_3"
-          ]
+            "number": "2",
+            "title": "Payez en toute sécurité",
+            "text": "Réglez votre commande via SumUp, notre partenaire de paiement sécurisé."
+          }
+        },
+        "step_3": {
+          "type": "_step",
+          "settings": {
+            "number": "3",
+            "title": "Recevez votre accès",
+            "text": "E-book et accès aux canaux privés livrés immédiatement après paiement."
+          }
         }
       },
       "block_order": [
-        "steps_heading",
-        "steps_row"
+        "step_1",
+        "step_2",
+        "step_3"
       ],
       "name": "Comment ça marche",
       "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "center",
-        "gap": 32,
-        "background_color": "{{ settings.color_palette.background }}",
+        "heading": "Comment ça marche",
+        "layout": "horizontal",
+        "show_progress_line": true,
+        "section_width": "page-width",
         "padding-block-start": 64,
         "padding-block-end": 64
+      }
+    },
+    "trust_bar_lbp": {
+      "type": "trust-bar",
+      "blocks": {
+        "trust_1": {
+          "type": "_trust-item",
+          "settings": {
+            "icon": "shield",
+            "title": "Paiement 100% sécurisé (SumUp)"
+          }
+        },
+        "trust_2": {
+          "type": "_trust-item",
+          "settings": {
+            "icon": "bolt",
+            "title": "Accès immédiat après paiement"
+          }
+        },
+        "trust_3": {
+          "type": "_trust-item",
+          "settings": {
+            "icon": "lock",
+            "title": "Aucun abonnement, paiement unique"
+          }
+        }
+      },
+      "block_order": [
+        "trust_1",
+        "trust_2",
+        "trust_3"
+      ],
+      "name": "Trust Bar",
+      "settings": {
+        "layout": "row",
+        "section_width": "page-width",
+        "padding-block-start": 24,
+        "padding-block-end": 24
       }
     }
   },
   "order": [
     "hero_jVaWmY",
+    "trust_bar_lbp",
     "marquee_lbp01",
     "benefits_lbp",
     "product_list_fa6P9H",

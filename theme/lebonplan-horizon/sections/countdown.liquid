@@ -1,0 +1,248 @@
+{%- doc -%}
+  Countdown — compte à rebours robuste avec gestion d'expiration.
+  Nouveau composant Horizon Premium Multistore v1.1.
+
+  La date/heure est saisie par le marchand au format ISO 8601 avec
+  décalage explicite (ex. 2026-12-31T23:59:00+01:00) pour éviter toute
+  ambiguïté de fuseau horaire : le navigateur du visiteur calcule le
+  compte à rebours par rapport à SA propre horloge locale, ce qui est
+  le comportement correct et non trompeur.
+{%- enddoc -%}
+
+<div class="section section--{{ section.settings.section_width }}">
+  <div
+    class="countdown-section spacing-style"
+    style="{% render 'spacing-style', settings: section.settings %}; background: {{ section.settings.background_color | default: 'transparent' }};"
+  >
+    {%- if section.settings.heading != blank -%}
+      <h2 class="countdown-section__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+
+    <div
+      class="countdown-timer"
+      data-countdown
+      data-target="{{ section.settings.target_datetime }}"
+      data-expired-behavior="{{ section.settings.expired_behavior }}"
+      data-expired-message="{{ section.settings.expired_message | escape }}"
+    >
+      <div class="countdown-timer__grid" data-countdown-grid>
+        <div class="countdown-timer__unit"><span data-days>00</span><small>Jours</small></div>
+        <div class="countdown-timer__unit"><span data-hours>00</span><small>Heures</small></div>
+        <div class="countdown-timer__unit"><span data-minutes>00</span><small>Min</small></div>
+        <div class="countdown-timer__unit"><span data-seconds>00</span><small>Sec</small></div>
+      </div>
+      <p class="countdown-timer__expired-message" data-countdown-expired-message hidden>{{ section.settings.expired_message }}</p>
+    </div>
+
+    {%- if section.settings.cta_label != blank -%}
+      <div class="countdown-section__cta" data-countdown-cta {% if section.settings.expired_behavior == 'hide_cta' %}data-hide-on-expire{% endif %}>
+        <a href="{{ section.settings.cta_link | default: '#' }}" class="countdown-cta countdown-cta--{{ section.id }}">
+          <span>{{ section.settings.cta_label }}</span>
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% if section.settings.cta_label != blank %}
+  {% style %}
+    .countdown-cta--{{ section.id }} {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 0 32px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 700;
+      background: linear-gradient(90deg, {{ section.settings.premium_bg_color | default: '#07090d' }} 0%, {{ section.settings.premium_bg_gradient_color | default: '#11151c' }} 100%);
+      color: {{ section.settings.premium_text_color | default: '#ffffff' }};
+      border: 2px solid {{ section.settings.premium_border_color | default: '#00a8ff' }};
+      box-shadow: 0 0 18px rgba({{ section.settings.premium_glow_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.55);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      {% if section.settings.premium_enable_pulse %}
+        animation: countdownPulse 3s ease-in-out infinite;
+      {% endif %}
+    }
+
+    .countdown-cta--{{ section.id }}:hover {
+      transform: translateY(-2px);
+    }
+
+    @keyframes countdownPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba({{ section.settings.premium_glow_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.45); }
+      50% { box-shadow: 0 0 26px rgba({{ section.settings.premium_glow_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.8); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .countdown-cta--{{ section.id }} { animation: none; }
+    }
+  {% endstyle %}
+{% endif %}
+
+<script>
+  (function () {
+    function initCountdown(root) {
+      if (!root || root.dataset.bound === 'true') return;
+      root.dataset.bound = 'true';
+
+      var target = new Date(root.getAttribute('data-target'));
+      var behavior = root.getAttribute('data-expired-behavior') || 'zero';
+      var grid = root.querySelector('[data-countdown-grid]');
+      var expiredMsg = root.querySelector('[data-countdown-expired-message]');
+      var ctaWrapper = root.parentElement.querySelector('[data-countdown-cta]');
+
+      if (isNaN(target.getTime())) return;
+
+      function render() {
+        var now = new Date();
+        var diff = target.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          clearInterval(interval);
+          if (behavior === 'hide') {
+            root.hidden = true;
+          } else if (behavior === 'message') {
+            grid.hidden = true;
+            expiredMsg.hidden = false;
+          } else if (behavior === 'hide_cta') {
+            if (ctaWrapper) ctaWrapper.hidden = true;
+          }
+          // 'zero' behavior: leave the grid at 00:00:00:00 (default, no-op)
+          if (behavior !== 'hide' && behavior !== 'message') {
+            setUnits(0, 0, 0, 0);
+          }
+          return;
+        }
+
+        var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        var minutes = Math.floor((diff / (1000 * 60)) % 60);
+        var seconds = Math.floor((diff / 1000) % 60);
+        setUnits(days, hours, minutes, seconds);
+      }
+
+      function pad(n) {
+        return String(n).padStart(2, '0');
+      }
+
+      function setUnits(d, h, m, s) {
+        root.querySelector('[data-days]').textContent = pad(d);
+        root.querySelector('[data-hours]').textContent = pad(h);
+        root.querySelector('[data-minutes]').textContent = pad(m);
+        root.querySelector('[data-seconds]').textContent = pad(s);
+      }
+
+      render();
+      var interval = setInterval(render, 1000);
+    }
+
+    document.querySelectorAll('[data-countdown]').forEach(initCountdown);
+  })();
+</script>
+
+{% style %}
+  .countdown-section__heading {
+    text-align: center;
+    margin-block-end: var(--margin-lg, 24px);
+  }
+
+  .countdown-timer__grid {
+    display: flex;
+    justify-content: center;
+    gap: var(--gap-md, 16px);
+  }
+
+  .countdown-timer__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 64px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(128, 128, 128, 0.08);
+  }
+
+  .countdown-timer__unit span {
+    font-size: 1.75rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .countdown-timer__unit small {
+    opacity: 0.65;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+
+  .countdown-timer__expired-message {
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .countdown-section__cta {
+    text-align: center;
+    margin-top: var(--margin-lg, 24px);
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Countdown",
+  "class": "section-wrapper",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Offre limitée" },
+    {
+      "type": "text",
+      "id": "target_datetime",
+      "label": "Date/heure de fin (ISO 8601 avec fuseau)",
+      "default": "2026-12-31T23:59:00+01:00",
+      "info": "Format ISO 8601 avec décalage horaire explicite, ex. 2026-12-31T23:59:00+01:00. Le compte à rebours s'affiche selon l'horloge locale de chaque visiteur."
+    },
+    {
+      "type": "select",
+      "id": "expired_behavior",
+      "label": "Comportement à expiration",
+      "options": [
+        { "value": "zero", "label": "Rester à zéro" },
+        { "value": "message", "label": "Afficher un message" },
+        { "value": "hide", "label": "Masquer tout le compteur" },
+        { "value": "hide_cta", "label": "Masquer uniquement le bouton" }
+      ],
+      "default": "message"
+    },
+    { "type": "text", "id": "expired_message", "label": "Message à l'expiration", "default": "Cette offre est terminée." },
+    { "type": "header", "content": "Bouton (Premium Glow)" },
+    { "type": "text", "id": "cta_label", "label": "Texte du bouton" },
+    { "type": "url", "id": "cta_link", "label": "Lien" },
+    { "type": "color", "id": "premium_bg_color", "label": "Fond (dégradé début)", "default": "#07090d" },
+    { "type": "color", "id": "premium_bg_gradient_color", "label": "Fond (dégradé fin)", "default": "#11151c" },
+    { "type": "color", "id": "premium_text_color", "label": "Texte", "default": "#ffffff" },
+    { "type": "color", "id": "premium_border_color", "label": "Bordure", "default": "#00a8ff" },
+    { "type": "color", "id": "premium_glow_color", "label": "Glow", "default": "#008cff" },
+    { "type": "checkbox", "id": "premium_enable_pulse", "label": "Activer le pulse", "default": true },
+    { "type": "header", "content": "Couleurs & largeur" },
+    { "type": "color", "id": "background_color", "label": "Fond de section" },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Largeur",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Pleine largeur" }
+      ],
+      "default": "page-width"
+    },
+    { "type": "header", "content": "Espacement" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    {
+      "name": "Countdown",
+      "category": "t:categories.basic"
+    }
+  ]
+}
+{% endschema %}

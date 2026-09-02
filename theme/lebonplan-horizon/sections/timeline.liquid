@@ -1,0 +1,103 @@
+{%- doc -%}
+  Timeline — chronologie premium (desktop horizontal/vertical, mobile vertical).
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+<div class="section section--{{ section.settings.section_width }}">
+  <div class="timeline-section spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="timeline-section__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    <div class="timeline-section__track timeline-section__track--{{ section.settings.desktop_layout }}">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  .timeline-section__heading {
+    text-align: center;
+    margin-block-end: var(--margin-xl, 32px);
+  }
+
+  .timeline-section__track--vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xl, 32px);
+    border-inline-start: 2px solid var(--color-border, rgba(128,128,128,0.25));
+    padding-inline-start: var(--padding-lg, 24px);
+  }
+
+  .timeline-section__track--horizontal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xl, 32px);
+  }
+
+  @media screen and (min-width: 750px) {
+    .timeline-section__track--horizontal {
+      flex-direction: row;
+      border-top: 2px solid var(--color-border, rgba(128,128,128,0.25));
+      padding-top: var(--padding-lg, 24px);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .timeline-item {
+      animation: timelineReveal 0.6s ease both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+
+  @keyframes timelineReveal {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Timeline",
+  "class": "section-wrapper",
+  "blocks": [
+    { "type": "_timeline-item" }
+  ],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Notre histoire" },
+    {
+      "type": "select",
+      "id": "desktop_layout",
+      "label": "Disposition (desktop)",
+      "options": [
+        { "value": "vertical", "label": "Verticale" },
+        { "value": "horizontal", "label": "Horizontale" }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Largeur",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Pleine largeur" }
+      ],
+      "default": "page-width"
+    },
+    { "type": "header", "content": "Espacement" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    {
+      "name": "Timeline",
+      "category": "t:categories.basic",
+      "blocks": [
+        { "type": "_timeline-item" },
+        { "type": "_timeline-item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

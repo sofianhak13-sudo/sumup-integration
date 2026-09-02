@@ -1,0 +1,129 @@
+{%- doc -%}
+  Comparison Table — comparaison de produits/offres en colonnes.
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+<div class="section section--{{ section.settings.section_width }}">
+  <div class="comparison-table spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="comparison-table__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    <div class="comparison-table__scroll">
+      <table class="comparison-table__table">
+        <thead>
+          <tr>
+            <th scope="col" class="comparison-table__feature-col"></th>
+            {%- for i in (1..5) -%}
+              {%- assign col_title_key = 'column_' | append: i | append: '_title' -%}
+              {%- assign col_title = section.settings[col_title_key] -%}
+              {%- if col_title != blank -%}
+                {%- assign col_highlight_key = 'column_' | append: i | append: '_highlight' -%}
+                <th scope="col" class="{% if section.settings[col_highlight_key] %}comparison-table__col--highlight{% endif %}">
+                  {{ col_title }}
+                </th>
+              {%- endif -%}
+            {%- endfor -%}
+          </tr>
+        </thead>
+        <tbody>
+          {% content_for 'blocks' %}
+        </tbody>
+      </table>
+    </div>
+    {%- if section.settings.cta_label != blank -%}
+      <div class="comparison-table__cta">
+        <a href="{{ section.settings.cta_link | default: '#' }}" class="button">{{ section.settings.cta_label }}</a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% style %}
+  .comparison-table__heading {
+    text-align: center;
+    margin-block-end: var(--margin-xl, 32px);
+  }
+
+  .comparison-table__scroll {
+    overflow-x: auto;
+  }
+
+  .comparison-table__table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 480px;
+  }
+
+  .comparison-table__table th,
+  .comparison-table__table td {
+    padding: 14px 16px;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border, rgba(128,128,128,0.25));
+  }
+
+  .comparison-table__feature-col,
+  .comparison-table__table td:first-child {
+    text-align: left;
+    font-weight: 600;
+  }
+
+  .comparison-table__col--highlight {
+    background: rgba(0, 168, 255, 0.08);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .comparison-table__cta {
+    text-align: center;
+    margin-top: var(--margin-lg, 24px);
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Comparison Table",
+  "class": "section-wrapper",
+  "blocks": [
+    { "type": "_comparison-row" }
+  ],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Comparez les offres" },
+    { "type": "header", "content": "Colonnes (2 à 5)" },
+    { "type": "text", "id": "column_1_title", "label": "Colonne 1", "default": "Basique" },
+    { "type": "text", "id": "column_2_title", "label": "Colonne 2", "default": "Premium" },
+    { "type": "checkbox", "id": "column_2_highlight", "label": "Mettre en avant colonne 2", "default": true },
+    { "type": "text", "id": "column_3_title", "label": "Colonne 3" },
+    { "type": "checkbox", "id": "column_3_highlight", "label": "Mettre en avant colonne 3", "default": false },
+    { "type": "text", "id": "column_4_title", "label": "Colonne 4" },
+    { "type": "checkbox", "id": "column_4_highlight", "label": "Mettre en avant colonne 4", "default": false },
+    { "type": "text", "id": "column_5_title", "label": "Colonne 5" },
+    { "type": "checkbox", "id": "column_5_highlight", "label": "Mettre en avant colonne 5", "default": false },
+    { "type": "header", "content": "CTA final (optionnel)" },
+    { "type": "text", "id": "cta_label", "label": "Texte du bouton" },
+    { "type": "url", "id": "cta_link", "label": "Lien" },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Largeur",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Pleine largeur" }
+      ],
+      "default": "page-width"
+    },
+    { "type": "header", "content": "Espacement" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    {
+      "name": "Comparison Table",
+      "category": "t:categories.basic",
+      "blocks": [
+        { "type": "_comparison-row" },
+        { "type": "_comparison-row" },
+        { "type": "_comparison-row" }
+      ]
+    }
+  ]
+}
+{% endschema %}

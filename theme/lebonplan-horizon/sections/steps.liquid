@@ -1,0 +1,104 @@
+{%- doc -%}
+  Steps / Process — "Comment ça marche", étapes numérotées.
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+<div class="section section--{{ section.settings.section_width }}">
+  <div class="steps-section spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="steps-section__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    <div class="steps-section__track steps-section__track--{{ section.settings.layout }}{% if section.settings.show_progress_line %} steps-section__track--line{% endif %}">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  .steps-section__heading {
+    text-align: center;
+    margin-block-end: var(--margin-xl, 32px);
+  }
+
+  .steps-section__track--horizontal {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap-xl, 32px);
+  }
+
+  @media screen and (min-width: 750px) {
+    .steps-section__track--horizontal {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+    }
+  }
+
+  .steps-section__track--vertical {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-xl, 32px);
+  }
+
+  .steps-section__track--line.steps-section__track--horizontal {
+    position: relative;
+  }
+
+  .steps-section__track--line.steps-section__track--horizontal::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 5%;
+    right: 5%;
+    height: 2px;
+    background: var(--color-border, rgba(128,128,128,0.25));
+    z-index: 0;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Steps / Comment ça marche",
+  "class": "section-wrapper",
+  "blocks": [
+    { "type": "_step" }
+  ],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Comment ça marche" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Disposition",
+      "options": [
+        { "value": "horizontal", "label": "Horizontale (desktop)" },
+        { "value": "vertical", "label": "Verticale" }
+      ],
+      "default": "horizontal"
+    },
+    { "type": "checkbox", "id": "show_progress_line", "label": "Afficher la ligne de progression", "default": true },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Largeur",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Pleine largeur" }
+      ],
+      "default": "page-width"
+    },
+    { "type": "header", "content": "Espacement" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    {
+      "name": "Steps / Comment ça marche",
+      "category": "t:categories.basic",
+      "blocks": [
+        { "type": "_step", "settings": { "number": "1", "title": "Commandez" } },
+        { "type": "_step", "settings": { "number": "2", "title": "Recevez" } },
+        { "type": "_step", "settings": { "number": "3", "title": "Profitez" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

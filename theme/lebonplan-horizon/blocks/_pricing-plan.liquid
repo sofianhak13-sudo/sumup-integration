@@ -1,0 +1,201 @@
+{%- doc -%}
+  Une offre de la Pricing Table : nom, prix, features, CTA.
+{%- enddoc -%}
+
+<div
+  class="pricing-plan border-style{% if block.settings.highlighted %} pricing-plan--highlighted{% endif %}"
+  {{ block.shopify_attributes }}
+>
+  {%- if block.settings.badge != blank -%}
+    <span class="pricing-plan__badge">{{ block.settings.badge }}</span>
+  {%- endif -%}
+
+  <h3 class="pricing-plan__name">{{ block.settings.name }}</h3>
+
+  {%- if block.settings.description != blank -%}
+    <p class="pricing-plan__description">{{ block.settings.description }}</p>
+  {%- endif -%}
+
+  <div class="pricing-plan__price-row">
+    {%- if block.settings.compare_price != blank -%}
+      <span class="pricing-plan__compare-price">{{ block.settings.compare_price }}</span>
+    {%- endif -%}
+    <span class="pricing-plan__price">{{ block.settings.price }}</span>
+    {%- if block.settings.period != blank -%}
+      <span class="pricing-plan__period">{{ block.settings.period }}</span>
+    {%- endif -%}
+  </div>
+
+  {%- if block.settings.features != blank -%}
+    <ul class="pricing-plan__features">
+      {%- for line in block.settings.features | newline_to_br | split: '<br />' -%}
+        {%- assign trimmed = line | strip -%}
+        {%- if trimmed != blank -%}
+          <li>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>
+            {{ trimmed }}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if block.settings.unavailable_features != blank -%}
+    <ul class="pricing-plan__features pricing-plan__features--unavailable">
+      {%- for line in block.settings.unavailable_features | newline_to_br | split: '<br />' -%}
+        {%- assign trimmed = line | strip -%}
+        {%- if trimmed != blank -%}
+          <li>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            {{ trimmed }}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  {%- if block.settings.button_label != blank -%}
+    <a
+      href="{{ block.settings.button_link | default: '#' }}"
+      class="pricing-plan__cta{% if block.settings.highlighted %} pricing-plan__cta--premium pricing-plan__cta--premium-{{ block.id }}{% else %} button-secondary{% endif %}"
+    >
+      <span>{{ block.settings.button_label }}</span>
+    </a>
+  {%- endif -%}
+</div>
+
+{% if block.settings.highlighted and block.settings.button_label != blank %}
+  {% style %}
+    .pricing-plan__cta--premium-{{ block.id }} {
+      background: linear-gradient(90deg, {{ block.settings.premium_bg_color | default: '#07090d' }} 0%, {{ block.settings.premium_bg_gradient_color | default: '#11151c' }} 100%);
+      color: {{ block.settings.premium_text_color | default: '#ffffff' }};
+      border: 2px solid {{ block.settings.premium_border_color | default: '#00a8ff' }};
+      box-shadow: 0 0 18px rgba({{ block.settings.premium_glow_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.5);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pricing-plan__cta--premium-{{ block.id }}:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 26px rgba({{ block.settings.premium_glow_color | default: '#008cff' | color_to_rgb | remove: 'rgb(' | remove: ')' }}, 0.7);
+    }
+  {% endstyle %}
+{% endif %}
+
+{% style %}
+  .pricing-plan {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: var(--padding-xl, 32px);
+    border-radius: var(--radius-lg, 16px);
+    position: relative;
+  }
+
+  .pricing-plan--highlighted {
+    border-color: var(--color-accent, #00a8ff);
+    transform: scale(1.02);
+  }
+
+  .pricing-plan__badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-accent, #00a8ff);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 999px;
+  }
+
+  .pricing-plan__name {
+    margin: 0;
+  }
+
+  .pricing-plan__description {
+    margin: 0;
+    opacity: 0.75;
+    font-size: var(--font-size--sm, 0.9rem);
+  }
+
+  .pricing-plan__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .pricing-plan__price {
+    font-size: 2rem;
+    font-weight: 800;
+  }
+
+  .pricing-plan__compare-price {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+
+  .pricing-plan__period {
+    opacity: 0.6;
+    font-size: var(--font-size--sm, 0.875rem);
+  }
+
+  .pricing-plan__features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pricing-plan__features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pricing-plan__features--unavailable li {
+    opacity: 0.45;
+  }
+
+  .pricing-plan__cta {
+    margin-top: auto;
+    text-align: center;
+    padding: 14px;
+    border-radius: var(--radius-md, 10px);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .pricing-plan__cta.button-secondary {
+    border: 1px solid currentColor;
+    color: inherit;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Offre",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "name", "label": "Nom de l'offre", "default": "Offre" },
+    { "type": "text", "id": "badge", "label": "Badge (ex. \"Populaire\")" },
+    { "type": "checkbox", "id": "highlighted", "label": "Mettre en avant", "default": false },
+    { "type": "text", "id": "description", "label": "Description courte" },
+    { "type": "text", "id": "price", "label": "Prix", "default": "29,90 €" },
+    { "type": "text", "id": "compare_price", "label": "Ancien prix (optionnel)" },
+    { "type": "text", "id": "period", "label": "Période (ex. \"/mois\")" },
+    { "type": "textarea", "id": "features", "label": "Fonctionnalités incluses (une par ligne)" },
+    { "type": "textarea", "id": "unavailable_features", "label": "Fonctionnalités non incluses (une par ligne)" },
+    { "type": "text", "id": "button_label", "label": "Texte du bouton", "default": "Choisir cette offre" },
+    { "type": "url", "id": "button_link", "label": "Lien du bouton" },
+    { "type": "header", "content": "Style du bouton mis en avant (Premium Glow)" },
+    { "type": "color", "id": "premium_bg_color", "label": "Fond (dégradé début)", "default": "#07090d" },
+    { "type": "color", "id": "premium_bg_gradient_color", "label": "Fond (dégradé fin)", "default": "#11151c" },
+    { "type": "color", "id": "premium_text_color", "label": "Texte", "default": "#ffffff" },
+    { "type": "color", "id": "premium_border_color", "label": "Bordure", "default": "#00a8ff" },
+    { "type": "color", "id": "premium_glow_color", "label": "Glow", "default": "#008cff" }
+  ]
+}
+{% endschema %}

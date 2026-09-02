@@ -1,0 +1,76 @@
+{%- doc -%}
+  Une étape du composant Steps/Process.
+{%- enddoc -%}
+
+<div class="step-item" {{ block.shopify_attributes }}>
+  {%- if block.settings.image != blank -%}
+    <img src="{{ block.settings.image | image_url: width: 160 }}" width="64" height="64" loading="lazy" alt="" class="step-item__image">
+  {%- else -%}
+    <span class="step-item__number">{{ block.settings.number }}</span>
+  {%- endif -%}
+  <h3 class="step-item__title">{{ block.settings.title }}</h3>
+  {%- if block.settings.text != blank -%}
+    <p class="step-item__text">{{ block.settings.text }}</p>
+  {%- endif -%}
+  {%- if block.settings.cta_label != blank -%}
+    <a href="{{ block.settings.cta_link | default: '#' }}" class="step-item__cta">{{ block.settings.cta_label }} →</a>
+  {%- endif -%}
+</div>
+
+{% style %}
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-item__number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-accent, #008cff);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .step-item__image {
+    border-radius: 12px;
+    object-fit: cover;
+  }
+
+  .step-item__title {
+    margin: 0;
+  }
+
+  .step-item__text {
+    margin: 0;
+    opacity: 0.75;
+  }
+
+  .step-item__cta {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--color-accent, #008cff);
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Étape",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "number", "label": "Numéro", "default": "1" },
+    { "type": "image_picker", "id": "image", "label": "Image (remplace le numéro)" },
+    { "type": "text", "id": "title", "label": "Titre", "default": "Étape" },
+    { "type": "textarea", "id": "text", "label": "Texte" },
+    { "type": "text", "id": "cta_label", "label": "Texte du lien (optionnel)" },
+    { "type": "url", "id": "cta_link", "label": "Lien" }
+  ]
+}
+{% endschema %}

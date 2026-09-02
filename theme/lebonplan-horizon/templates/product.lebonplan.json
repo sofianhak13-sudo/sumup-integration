@@ -301,6 +301,73 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "sumup_payment_lbp": {
+              "type": "sumup-payment",
+              "name": "SumUp — Paiement produit",
+              "settings": {
+                "app_proxy_endpoint": "/apps/sumup-pay",
+                "button_text": "🚀 Obtenir mon accès",
+                "email_placeholder": "Votre adresse e-mail",
+                "warning_text": "⚠️ Adresse e-mail valide obligatoire",
+                "accent_color": "#008cff",
+                "button_background": "#050505",
+                "button_text_color": "#ffffff",
+                "field_background": "#0b0b0b",
+                "field_text_color": "#ffffff",
+                "button_radius": 36,
+                "field_radius": 18
+              }
+            },
+            "accordion_lbp_faq": {
+              "type": "accordion",
+              "name": "FAQ produit",
+              "blocks": {
+                "row_1": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "📖 Que contient Le Bon Plan ?"
+                  },
+                  "blocks": {
+                    "text_1": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<p>Un guide complet accompagné d'un accès à nos canaux privés, où nous partageons régulièrement des liens soigneusement sélectionnés et des astuces pour acheter au meilleur prix.</p>"
+                      }
+                    }
+                  },
+                  "block_order": [
+                    "text_1"
+                  ]
+                },
+                "row_2": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "💳 Paiement unique"
+                  },
+                  "blocks": {
+                    "text_2": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<p>Un seul paiement. Aucun abonnement, aucun frais caché. Votre accès est à vie.</p>"
+                      }
+                    }
+                  },
+                  "block_order": [
+                    "text_2"
+                  ]
+                }
+              },
+              "block_order": [
+                "row_1",
+                "row_2"
+              ],
+              "settings": {
+                "icon": "plus",
+                "dividers": true,
+                "background_color": "#0b0b0b",
+                "text_color": "#cccccc"
+              }
             }
           },
           "block_order": [
@@ -308,7 +375,9 @@
             "divider_VJhene",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi",
-            "text_aEtTtq"
+            "sumup_payment_lbp",
+            "text_aEtTtq",
+            "accordion_lbp_faq"
           ]
         }
       },

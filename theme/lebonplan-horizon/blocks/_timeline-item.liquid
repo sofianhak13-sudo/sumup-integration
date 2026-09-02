@@ -1,0 +1,75 @@
+{%- doc -%}
+  Un événement de la Timeline.
+{%- enddoc -%}
+
+<div class="timeline-item" {{ block.shopify_attributes }}>
+  <span class="timeline-item__dot" aria-hidden="true"></span>
+  {%- if block.settings.date != blank -%}
+    <span class="timeline-item__date">{{ block.settings.date }}</span>
+  {%- endif -%}
+  {%- if block.settings.image != blank -%}
+    <img src="{{ block.settings.image | image_url: width: 400 }}" width="200" loading="lazy" alt="" class="timeline-item__image">
+  {%- endif -%}
+  <h3 class="timeline-item__title">{{ block.settings.title }}</h3>
+  {%- if block.settings.text != blank -%}
+    <p class="timeline-item__text">{{ block.settings.text }}</p>
+  {%- endif -%}
+</div>
+
+{% style %}
+  .timeline-item {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .timeline-item__dot {
+    position: absolute;
+    top: 4px;
+    inset-inline-start: calc(-1 * var(--padding-lg, 24px) - 5px);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-accent, #008cff);
+  }
+
+  .timeline-section__track--horizontal .timeline-item__dot {
+    top: calc(-1 * var(--padding-lg, 24px) - 5px);
+    inset-inline-start: 0;
+  }
+
+  .timeline-item__date {
+    display: block;
+    font-weight: 700;
+    color: var(--color-accent, #008cff);
+    margin-bottom: 4px;
+  }
+
+  .timeline-item__image {
+    border-radius: 12px;
+    margin-bottom: 8px;
+    object-fit: cover;
+  }
+
+  .timeline-item__title {
+    margin: 0 0 4px;
+  }
+
+  .timeline-item__text {
+    margin: 0;
+    opacity: 0.75;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Événement",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "date", "label": "Date / label", "default": "2024" },
+    { "type": "image_picker", "id": "image", "label": "Image (optionnel)" },
+    { "type": "text", "id": "title", "label": "Titre", "default": "Étape clé" },
+    { "type": "textarea", "id": "text", "label": "Texte" }
+  ]
+}
+{% endschema %}

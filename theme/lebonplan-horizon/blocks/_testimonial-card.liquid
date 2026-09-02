@@ -1,0 +1,141 @@
+{%- doc -%}
+  Carte témoignage/avis/UGC : photo ou vidéo, nom, note, texte, badge vérifié.
+{%- enddoc -%}
+
+<div class="testimonial-card border-style" {{ block.shopify_attributes }}>
+  {%- if block.settings.rating > 0 -%}
+    <div class="testimonial-card__rating" aria-label="{{ block.settings.rating }} sur 5">
+      {%- for i in (1..5) -%}
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="{% if i <= block.settings.rating %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <path d="M12 2l2.9 6.6 7.1.7-5.4 4.7 1.6 7-6.2-3.7L5.8 21l1.6-7-5.4-4.7 7.1-.7L12 2z"/>
+        </svg>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  {%- if block.settings.text != blank -%}
+    <p class="testimonial-card__text">{{ block.settings.text }}</p>
+  {%- endif -%}
+
+  <div class="testimonial-card__author">
+    {%- if block.settings.video != blank -%}
+      <div class="testimonial-card__video">
+        {{ block.settings.video | video_tag: autoplay: false, controls: true, muted: false }}
+      </div>
+    {%- elsif block.settings.avatar != blank -%}
+      <img
+        src="{{ block.settings.avatar | image_url: width: 80 }}"
+        width="40"
+        height="40"
+        loading="lazy"
+        alt="{{ block.settings.name | escape }}"
+        class="testimonial-card__avatar"
+      >
+    {%- endif -%}
+    <span class="testimonial-card__author-text">
+      <span class="testimonial-card__name">
+        {{ block.settings.name }}
+        {%- if block.settings.verified -%}
+          <span class="testimonial-card__verified" title="Achat vérifié" aria-label="Achat vérifié">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V5l-8-3Z"/></svg>
+          </span>
+        {%- endif -%}
+      </span>
+      {%- if block.settings.username != blank -%}
+        <span class="testimonial-card__username">{{ block.settings.username }}</span>
+      {%- endif -%}
+    </span>
+  </div>
+
+  {%- if block.settings.product != blank -%}
+    <a href="{{ block.settings.product.url }}" class="testimonial-card__product">
+      {{ block.settings.product.title }} →
+    </a>
+  {%- endif -%}
+</div>
+
+{% style %}
+  .testimonial-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: var(--padding-lg, 24px);
+    border-radius: var(--radius-lg, 12px);
+  }
+
+  .testimonial-card__rating {
+    display: flex;
+    gap: 2px;
+    color: {{ block.settings.rating_color | default: '#f5b301' }};
+  }
+
+  .testimonial-card__text {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .testimonial-card__author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .testimonial-card__avatar {
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .testimonial-card__video video {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .testimonial-card__author-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  .testimonial-card__name {
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .testimonial-card__verified {
+    color: var(--color-accent, #008cff);
+  }
+
+  .testimonial-card__username {
+    font-size: var(--font-size--xs, 0.75rem);
+    opacity: 0.65;
+  }
+
+  .testimonial-card__product {
+    font-size: var(--font-size--sm, 0.875rem);
+    text-decoration: underline;
+    color: inherit;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Carte témoignage",
+  "tag": null,
+  "settings": [
+    { "type": "range", "id": "rating", "label": "Note (0 = masquer)", "min": 0, "max": 5, "step": 1, "default": 5 },
+    { "type": "color", "id": "rating_color", "label": "Couleur des étoiles", "default": "#f5b301" },
+    { "type": "textarea", "id": "text", "label": "Texte du témoignage", "default": "Un service et un produit exceptionnels !" },
+    { "type": "image_picker", "id": "avatar", "label": "Photo / avatar" },
+    { "type": "video", "id": "video", "label": "Vidéo témoignage (optionnel, remplace la photo)" },
+    { "type": "text", "id": "name", "label": "Nom", "default": "Client satisfait" },
+    { "type": "text", "id": "username", "label": "Pseudo réseau social (optionnel)" },
+    { "type": "checkbox", "id": "verified", "label": "Badge \"vérifié\"", "default": true },
+    { "type": "product", "id": "product", "label": "Produit associé (optionnel)" }
+  ]
+}
+{% endschema %}

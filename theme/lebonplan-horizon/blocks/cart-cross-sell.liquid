@@ -1,0 +1,129 @@
+{%- doc -%}
+  Cart Cross-Sell — mini-suggestions manuelles dans le panier (page ou zone
+  "blocks"). Complément léger au natif `product-recommendations` d'Horizon
+  (recommandations automatiques Shopify) pour un contrôle 100% manuel
+  quand le marchand préfère choisir lui-même les produits associés.
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+{%- liquid
+  assign products_to_show = block.settings.product_list
+-%}
+
+{% if products_to_show.count > 0 %}
+  <div class="cart-cross-sell cart-cross-sell--{{ block.id }}" {{ block.shopify_attributes }}>
+    {%- if block.settings.heading != blank -%}
+      <p class="cart-cross-sell__heading">{{ block.settings.heading }}</p>
+    {%- endif -%}
+    <div class="cart-cross-sell__list">
+      {%- for product in products_to_show -%}
+        <div class="cart-cross-sell__item">
+          {%- if product.featured_media -%}
+            <img
+              src="{{ product.featured_media | image_url: width: 120 }}"
+              width="56"
+              height="56"
+              loading="lazy"
+              alt="{{ product.title | escape }}"
+              class="cart-cross-sell__image"
+            >
+          {%- endif -%}
+          <div class="cart-cross-sell__info">
+            <a href="{{ product.url }}" class="cart-cross-sell__title">{{ product.title }}</a>
+            <span class="cart-cross-sell__price">{{ product.price | money }}</span>
+          </div>
+          {%- form 'product', product -%}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+            <button
+              type="submit"
+              class="cart-cross-sell__add"
+              {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
+            >
+              {%- if product.selected_or_first_available_variant.available -%}+{%- else -%}—{%- endif -%}
+            </button>
+          {%- endform -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+
+  {% style %}
+    .cart-cross-sell--{{ block.id }} {
+      margin: 16px 0;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__heading {
+      font-weight: 600;
+      margin: 0 0 10px;
+      font-size: var(--font-size--sm, 0.875rem);
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__image {
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__title {
+      text-decoration: none;
+      color: inherit;
+      font-size: var(--font-size--sm, 0.875rem);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__price {
+      font-size: var(--font-size--xs, 0.75rem);
+      opacity: 0.7;
+    }
+
+    .cart-cross-sell--{{ block.id }} .cart-cross-sell__add {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      background: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+  {% endstyle %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "Cart Cross-Sell (manuel)",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Suggestions choisies manuellement. Pour des recommandations automatiques Shopify, utilise plutôt la section native \"Product recommendations\"."
+    },
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Vous pourriez aussi aimer" },
+    { "type": "product_list", "id": "product_list", "label": "Produits suggérés", "limit": 4 }
+  ],
+  "presets": [
+    { "name": "Cart Cross-Sell (manuel)" }
+  ]
+}
+{% endschema %}

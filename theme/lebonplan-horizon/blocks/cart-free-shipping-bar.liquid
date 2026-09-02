@@ -1,0 +1,99 @@
+{%- doc -%}
+  Barre de progression panier (ex. livraison gratuite dès un seuil).
+  Se dépose dans la zone "blocks" de la page panier (main-cart).
+  Désactivable pour les boutiques 100% digitales (ex. LE BON PLAN).
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+{%- liquid
+  assign threshold_cents = block.settings.threshold | times: 100
+  assign current_total = cart.total_price
+  assign remaining_cents = threshold_cents | minus: current_total
+  if remaining_cents < 0
+    assign remaining_cents = 0
+  endif
+  assign progress_percent = 0
+  if threshold_cents > 0
+    assign progress_percent = current_total | times: 100.0 | divided_by: threshold_cents
+    if progress_percent > 100
+      assign progress_percent = 100
+    endif
+  endif
+  assign is_reached = false
+  if current_total >= threshold_cents
+    assign is_reached = true
+  endif
+-%}
+
+<div
+  class="cart-free-shipping-bar cart-free-shipping-bar--{{ block.id }}"
+  {{ block.shopify_attributes }}
+>
+  <p class="cart-free-shipping-bar__message">
+    {%- if is_reached -%}
+      {%- if block.settings.reached_message != blank -%}
+        {{ block.settings.reached_message }}
+      {%- else -%}
+        🎉 {{ 'sections.cart.free_shipping_reached' | t: default: 'Livraison gratuite débloquée !' }}
+      {%- endif -%}
+    {%- else -%}
+      {%- assign remaining_amount = remaining_cents | money -%}
+      {{ block.settings.progress_message | replace: '{{ remaining }}', remaining_amount }}
+    {%- endif -%}
+  </p>
+  <div class="cart-free-shipping-bar__track" role="progressbar" aria-valuenow="{{ progress_percent | round }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="cart-free-shipping-bar__fill" style="width: {{ progress_percent }}%;"></div>
+  </div>
+</div>
+
+{% style %}
+  .cart-free-shipping-bar--{{ block.id }} {
+    width: 100%;
+    margin: 12px 0;
+  }
+
+  .cart-free-shipping-bar--{{ block.id }} .cart-free-shipping-bar__message {
+    margin: 0 0 8px;
+    font-size: var(--font-size--sm, 0.875rem);
+    text-align: center;
+  }
+
+  .cart-free-shipping-bar--{{ block.id }} .cart-free-shipping-bar__track {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(128, 128, 128, 0.2);
+    overflow: hidden;
+  }
+
+  .cart-free-shipping-bar--{{ block.id }} .cart-free-shipping-bar__fill {
+    height: 100%;
+    background: {{ block.settings.bar_color | default: 'var(--color-accent, #008cff)' }};
+    transition: width 0.4s ease;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Barre livraison gratuite",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "À désactiver/retirer pour les boutiques 100% digitales (pas de livraison physique)."
+    },
+    { "type": "number", "id": "threshold", "label": "Seuil (dans la devise de la boutique, ex. 50)", "default": 50 },
+    {
+      "type": "text",
+      "id": "progress_message",
+      "label": "Message avant d'atteindre le seuil",
+      "default": "Plus que {{ remaining }} pour la livraison gratuite !",
+      "info": "Utilisez {{ remaining }} pour insérer le montant restant."
+    },
+    { "type": "text", "id": "reached_message", "label": "Message une fois le seuil atteint", "default": "🎉 Livraison gratuite débloquée !" },
+    { "type": "color", "id": "bar_color", "label": "Couleur de la barre" }
+  ],
+  "presets": [
+    { "name": "Barre livraison gratuite" }
+  ]
+}
+{% endschema %}

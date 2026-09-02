@@ -1,0 +1,108 @@
+{%- doc -%}
+  Item individuel du Trust Bar : icône + titre + sous-texte optionnel.
+{%- enddoc -%}
+
+{% liquid
+  assign icons = 'shield,bolt,headset,truck,check,gift,lock,refresh,star,globe' | split: ','
+%}
+
+<a
+  {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% else %}role="listitem"{% endif %}
+  class="trust-item"
+  {{ block.shopify_attributes }}
+>
+  <span class="trust-item__icon" aria-hidden="true">
+    {%- case block.settings.icon -%}
+      {%- when 'shield' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V5l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+      {%- when 'bolt' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+      {%- when 'headset' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 13v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="13" width="5" height="7" rx="1.5"/><rect x="17" y="13" width="5" height="7" rx="1.5"/></svg>
+      {%- when 'truck' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="6" width="14" height="11" rx="1"/><path d="M15 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17.5" cy="19" r="1.6"/></svg>
+      {%- when 'gift' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9h18v4H3zM12 9v12M12 9C9 9 8 6 9 4.5S13 3 12 9ZM12 9c3 0 4-3 3-4.5S11 3 12 9Z"/></svg>
+      {%- when 'lock' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      {%- when 'refresh' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 11A8 8 0 1 0 18.7 16"/><path d="M20 5v6h-6"/></svg>
+      {%- when 'star' -%}
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.7-5.4 4.7 1.6 7-6.2-3.7L5.8 21l1.6-7-5.4-4.7 7.1-.7L12 2z"/></svg>
+      {%- when 'globe' -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18Z"/></svg>
+      {%- else -%}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+    {%- endcase -%}
+  </span>
+  <span class="trust-item__text">
+    <span class="trust-item__title">{{ block.settings.title }}</span>
+    {%- if block.settings.subtext != blank -%}
+      <span class="trust-item__subtext">{{ block.settings.subtext }}</span>
+    {%- endif -%}
+  </span>
+</a>
+
+{% style %}
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .trust-item__icon svg {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .trust-item__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .trust-item__title {
+    font-weight: 600;
+    font-size: var(--font-size--sm, 0.875rem);
+  }
+
+  .trust-item__subtext {
+    font-size: var(--font-size--xs, 0.75rem);
+    opacity: 0.7;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Item Trust Bar",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "Icône",
+      "options": [
+        { "value": "shield", "label": "Bouclier (sécurité)" },
+        { "value": "bolt", "label": "Éclair (rapidité)" },
+        { "value": "headset", "label": "Casque (support)" },
+        { "value": "truck", "label": "Camion (livraison)" },
+        { "value": "gift", "label": "Cadeau" },
+        { "value": "lock", "label": "Cadenas" },
+        { "value": "refresh", "label": "Retour/échange" },
+        { "value": "star", "label": "Étoile" },
+        { "value": "globe", "label": "International" },
+        { "value": "check", "label": "Coche" }
+      ],
+      "default": "shield"
+    },
+    { "type": "text", "id": "title", "label": "Titre", "default": "Paiement sécurisé" },
+    { "type": "text", "id": "subtext", "label": "Sous-texte (optionnel)" },
+    { "type": "url", "id": "link", "label": "Lien (optionnel)" }
+  ]
+}
+{% endschema %}

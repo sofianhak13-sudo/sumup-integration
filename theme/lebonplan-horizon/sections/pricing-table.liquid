@@ -1,0 +1,72 @@
+{%- doc -%}
+  Pricing Table — 2 à 5 offres, idéal pour services, ebooks, abonnements.
+  Nouveau composant Horizon Premium Multistore v1.1.
+{%- enddoc -%}
+
+<div class="section section--{{ section.settings.section_width }}">
+  <div class="pricing-table spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="pricing-table__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    <div class="pricing-table__grid" style="--pricing-columns: {{ section.blocks.size | at_most: 5 }};">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  .pricing-table__heading {
+    text-align: center;
+    margin-block-end: var(--margin-xl, 32px);
+  }
+
+  .pricing-table__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--gap-lg, 24px);
+    align-items: stretch;
+  }
+
+  @media screen and (min-width: 750px) {
+    .pricing-table__grid {
+      grid-template-columns: repeat(var(--pricing-columns, 3), 1fr);
+    }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Pricing Table",
+  "class": "section-wrapper",
+  "blocks": [
+    { "type": "_pricing-plan" }
+  ],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Choisissez votre offre" },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Largeur",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Pleine largeur" }
+      ],
+      "default": "page-width"
+    },
+    { "type": "header", "content": "Espacement" },
+    { "type": "range", "id": "padding-block-start", "label": "Haut", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding-block-end", "label": "Bas", "min": 0, "max": 150, "step": 1, "unit": "px", "default": 64 }
+  ],
+  "presets": [
+    {
+      "name": "Pricing Table",
+      "category": "t:categories.basic",
+      "blocks": [
+        { "type": "_pricing-plan", "settings": { "name": "Essentiel" } },
+        { "type": "_pricing-plan", "settings": { "name": "Premium", "highlighted": true, "badge": "Populaire" } },
+        { "type": "_pricing-plan", "settings": { "name": "Pro" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
