@@ -1,0 +1,39 @@
+{%- comment -%}
+  Real progress bar driven by cart.total_price — never a fabricated
+  countdown or fake threshold. Merchant sets the real threshold in
+  Theme Settings > Cart.
+{%- endcomment -%}
+
+{%- liquid
+  assign threshold_cents = settings.cart_free_shipping_threshold | times: 100
+  assign current_total = cart.total_price
+  assign is_reached = false
+  if current_total >= threshold_cents
+    assign is_reached = true
+  endif
+  assign progress = 100
+  if threshold_cents > 0 and is_reached == false
+    assign progress = current_total | times: 100.0 | divided_by: threshold_cents
+  endif
+-%}
+
+<div class="free-shipping-bar" data-free-shipping-bar data-threshold-cents="{{ threshold_cents }}">
+  <p class="free-shipping-bar__message">
+    {%- if is_reached -%}
+      {{ 'cart.free_shipping_reached' | t }}
+    {%- else -%}
+      {%- assign remaining = threshold_cents | minus: current_total | money -%}
+      {{ 'cart.free_shipping_progress' | t: amount: remaining }}
+    {%- endif -%}
+  </p>
+  <div class="free-shipping-bar__track" role="progressbar" aria-valuenow="{{ progress | round }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="free-shipping-bar__fill" style="width: {{ progress }}%;"></div>
+  </div>
+</div>
+
+{% style %}
+  .free-shipping-bar { margin-bottom: var(--space-sm); }
+  .free-shipping-bar__message { font-size: 0.8125rem; margin-bottom: var(--space-2xs); text-align: center; }
+  .free-shipping-bar__track { height: 6px; border-radius: 999px; background: rgb(var(--color-surface)); overflow: hidden; }
+  .free-shipping-bar__fill { height: 100%; background: rgb(var(--color-accent)); transition: width var(--duration-slow) var(--ease-standard); }
+{% endstyle %}

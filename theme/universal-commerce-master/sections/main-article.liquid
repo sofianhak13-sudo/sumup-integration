@@ -1,0 +1,40 @@
+<article class="section article-page">
+  <div class="container" style="max-width: 720px;">
+    <header class="article-page__header">
+      <h1>{{ article.title }}</h1>
+      <p class="article-page__meta">{{ article.author }} &middot; {{ article.published_at | date: '%B %d, %Y' }}</p>
+    </header>
+
+    {%- if article.image -%}
+      {{ article.image | image_url: width: 1200 | image_tag: loading: 'eager', alt: article.title, class: 'article-page__image' }}
+    {%- endif -%}
+
+    <div class="rte article-page__content">{{ article.content }}</div>
+
+    {%- if blog.comments_enabled? -%}
+      <div class="article-page__comments">
+        {%- form 'new_comment', article -%}
+          <h2>{{ 'blogs.comments.title' | t }}</h2>
+          {%- if form.posted_successfully? -%}
+            <p>{{ 'blogs.comments.success' | t }}</p>
+          {%- endif -%}
+          <input type="text" name="comment[author]" class="field" placeholder="{{ 'blogs.comments.name' | t }}" required>
+          <input type="email" name="comment[email]" class="field" placeholder="{{ 'blogs.comments.email' | t }}" required>
+          <textarea name="comment[body]" class="field" rows="4" placeholder="{{ 'blogs.comments.message' | t }}" required></textarea>
+          <button type="submit" class="btn">{{ 'blogs.comments.submit' | t }}</button>
+        {%- endform -%}
+      </div>
+    {%- endif -%}
+  </div>
+</article>
+
+{% style %}
+  .article-page__meta { color: rgb(var(--color-text-muted)); font-size: 0.875rem; margin-top: -var(--space-sm); }
+  .article-page__image { width: 100%; border-radius: var(--radius-card); margin: var(--space-md) 0; aspect-ratio: 16/9; object-fit: cover; }
+  .article-page__comments { margin-top: var(--space-xl); border-top: 1px solid rgb(var(--color-border)); padding-top: var(--space-lg); }
+  .article-page__comments .field { display: block; width: 100%; margin-bottom: var(--space-sm); }
+{% endstyle %}
+
+{% schema %}
+{ "name": "t:names.article_page" }
+{% endschema %}

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ shop.name }} - {{ 'general.gift_card' | t }}</title>
+  {%- render 'design-tokens' -%}
+  {{ 'base.css' | asset_url | stylesheet_tag }}
+  <style>@media print { .no-print { display: none; } }</style>
+</head>
+<body class="template-gift-card">
+  <main class="container section" style="max-width: 480px; text-align: center;">
+    <h1>{{ shop.name }}</h1>
+    <p>{{ 'general.gift_card' | t }}</p>
+    <p class="price" style="font-size: 2rem;">{{ gift_card.initial_value | money }}</p>
+    <p style="font-family: monospace; font-size: 1.25rem; letter-spacing: 2px;">{{ gift_card.code | format_code }}</p>
+    <a href="{{ shop.url }}" class="btn no-print">{{ 'general.back_to_home' | t }}</a>
+  </main>
+</body>
+</html>

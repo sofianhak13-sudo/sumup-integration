@@ -1,0 +1,44 @@
+<section class="section">
+  <div class="container">
+    <h1>{{ 'search.title' | t }}</h1>
+    <form action="{{ routes.search_url }}" method="get" role="search" class="search-page__form">
+      <input type="search" name="q" class="field" value="{{ search.terms | escape }}" placeholder="{{ 'search.placeholder' | t }}">
+      <input type="hidden" name="type" value="product,collection,page,article">
+      <button type="submit" class="btn">{{ 'search.submit' | t }}</button>
+    </form>
+
+    {%- if search.performed -%}
+      {%- if search.results_count == 0 -%}
+        <div class="collection-empty">
+          <p>{{ 'search.no_results' | t: terms: search.terms }}</p>
+          <p class="collection-empty__suggestion">{{ 'search.no_results_suggestion' | t }}</p>
+        </div>
+      {%- else -%}
+        <p class="search-page__count">{{ 'search.results_count' | t: count: search.results_count }}</p>
+        <div class="grid" style="--grid-cols-mobile: 2; --grid-cols-desktop: 4;">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' -%}
+              {%- render 'product-card', product: item -%}
+            {%- else -%}
+              <a href="{{ item.url }}" class="card">
+                <div class="card__body">
+                  <p class="badge">{{ item.object_type | capitalize }}</p>
+                  <p>{{ item.title }}</p>
+                </div>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% style %}
+  .search-page__form { display: flex; gap: var(--space-2xs); max-width: 480px; margin: var(--space-md) 0; }
+  .search-page__count { color: rgb(var(--color-text-muted)); margin-bottom: var(--space-md); }
+{% endstyle %}
+
+{% schema %}
+{ "name": "t:names.search_page" }
+{% endschema %}

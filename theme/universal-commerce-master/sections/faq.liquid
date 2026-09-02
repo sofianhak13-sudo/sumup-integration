@@ -1,0 +1,27 @@
+<div class="section faq-section">
+  <div class="container" style="max-width: 720px;">
+    {%- if section.settings.heading != blank -%}<h2 class="faq-section__heading">{{ section.settings.heading }}</h2>{%- endif -%}
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .faq-section__heading { text-align: center; margin-bottom: var(--space-lg); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.faq",
+  "class": "section-faq",
+  "blocks": [{ "type": "faq_item" }],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "t:content.heading", "default": "Frequently asked questions" }
+  ],
+  "presets": [
+    {
+      "name": "t:names.faq",
+      "blocks": [{ "type": "faq_item" }, { "type": "faq_item" }]
+    }
+  ]
+}
+{% endschema %}

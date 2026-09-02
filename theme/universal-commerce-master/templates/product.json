@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": { "type": "title", "settings": { "show_vendor": true } },
+        "price": { "type": "price", "settings": {} },
+        "buy_box": { "type": "buy_box", "settings": {} },
+        "shipping_note": { "type": "shipping_note", "settings": { "text": "Shipping calculated at checkout." } },
+        "trust_items": { "type": "trust_items", "settings": {} },
+        "description": { "type": "description", "settings": {} }
+      },
+      "block_order": ["title", "price", "buy_box", "shipping_note", "trust_items", "description"],
+      "settings": { "show_recommendations": true, "recommendations_count": 4 }
+    }
+  },
+  "order": ["main"]
+}

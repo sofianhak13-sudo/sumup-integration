@@ -1,0 +1,128 @@
+{%- comment -%}
+  Commerce Engine — the single product form used everywhere a product can
+  be purchased (PDP, quick add). Native Shopify {% form 'product' %} +
+  AJAX Cart API; Buy Now uses Shopify's own {{ form | payment_button }}
+  (dynamic checkout buttons) rather than a custom implementation, so it
+  automatically reflects whatever accelerated-checkout methods the
+  merchant has enabled (Shop Pay, PayPal, etc.) with zero theme code.
+
+  @param {object} product
+  @param {boolean} [show_quantity] - default true
+  @param {string} [context] - 'page' or 'quick-add', for id scoping
+{%- endcomment -%}
+
+{%- liquid
+  assign show_quantity = show_quantity | default: true
+  assign context = context | default: 'page'
+  assign current_variant = product.selected_or_first_available_variant
+-%}
+
+<product-form
+  class="product-form"
+  data-product-form
+  data-product-handle="{{ product.handle }}"
+  data-section-id="{{ section.id }}"
+>
+  {%- form 'product', product, id: 'ProductForm-' | append: context | append: '-' | append: section.id, class: 'product-form__form' -%}
+    <input type="hidden" name="id" value="{{ current_variant.id }}" data-product-form-variant-id>
+
+    {%- unless product.has_only_default_variant -%}
+      <div class="product-form__options">
+        {%- for option in product.options_with_values -%}
+          <fieldset class="product-form__option" data-option-position="{{ option.position }}">
+            <legend class="product-form__option-label">
+              {{ option.name }}: <span data-selected-option-value>{{ option.selected_value }}</span>
+            </legend>
+            <div class="product-form__values">
+              {%- for value in option.values -%}
+                <label class="product-option-value{% if value == option.selected_value %} is-selected{% endif %}">
+                  <input
+                    type="radio"
+                    name="option-{{ option.position }}"
+                    value="{{ value | escape }}"
+                    {% if value == option.selected_value %}checked{% endif %}
+                    data-option-input
+                  >
+                  <span class="pill">{{ value }}</span>
+                </label>
+              {%- endfor -%}
+            </div>
+          </fieldset>
+        {%- endfor -%}
+      </div>
+    {%- endunless -%}
+
+    {%- if show_quantity -%}
+      <div class="product-form__quantity">
+        <label for="Quantity-{{ context }}-{{ section.id }}">{{ 'products.product.quantity' | t }}</label>
+        <div class="quantity-stepper">
+          <button type="button" class="touch-target" data-quantity-decrease aria-label="{{ 'accessibility.decrease_quantity' | t }}">&minus;</button>
+          <input
+            type="number"
+            id="Quantity-{{ context }}-{{ section.id }}"
+            name="quantity"
+            class="field quantity-stepper__input"
+            value="1"
+            min="1"
+            inputmode="numeric"
+          >
+          <button type="button" class="touch-target" data-quantity-increase aria-label="{{ 'accessibility.increase_quantity' | t }}">+</button>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="product-form__stock" data-stock-message>
+      {%- render 'product-stock-message', variant: current_variant -%}
+    </div>
+
+    <div class="product-form__buttons">
+      <button
+        type="submit"
+        name="add"
+        class="btn btn--full product-form__submit"
+        data-add-to-cart
+        {% unless current_variant.available %}disabled aria-disabled="true"{% endunless %}
+      >
+        <span data-add-to-cart-text>
+          {%- if current_variant.available -%}
+            {{ 'products.product.add_to_cart' | t }}
+          {%- else -%}
+            {{ 'products.product.sold_out' | t }}
+          {%- endif -%}
+        </span>
+      </button>
+
+      {%- if current_variant.available -%}
+        {{ form | payment_button }}
+      {%- endif -%}
+    </div>
+
+    <div class="product-form__error" role="alert" data-product-form-error hidden></div>
+  {%- endform -%}
+</product-form>
+
+{% style %}
+  .product-form__options { margin-bottom: var(--space-md); }
+  .product-form__option { border: none; padding: 0; margin: 0 0 var(--space-sm); }
+  .product-form__option-label { font-size: 0.875rem; margin-bottom: var(--space-2xs); padding: 0; }
+  .product-form__values { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .product-option-value { cursor: pointer; }
+  .product-option-value input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .product-option-value .pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 40px; padding: 0 var(--space-sm);
+    border: 1px solid rgb(var(--color-border)); border-radius: var(--radius-button);
+  }
+  .product-option-value.is-selected .pill { border-color: rgb(var(--color-accent)); box-shadow: inset 0 0 0 1px rgb(var(--color-accent)); }
+  .product-option-value input:focus-visible + .pill { box-shadow: var(--focus-ring); }
+
+  .product-form__quantity { margin-bottom: var(--space-md); }
+  .product-form__quantity label { display: block; font-size: 0.875rem; margin-bottom: var(--space-2xs); }
+  .quantity-stepper { display: inline-flex; align-items: center; border: 1px solid rgb(var(--color-border)); border-radius: var(--radius-input); overflow: hidden; }
+  .quantity-stepper__input { width: 48px; text-align: center; border: none; min-height: 44px; -moz-appearance: textfield; }
+  .quantity-stepper__input::-webkit-outer-spin-button, .quantity-stepper__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  .product-form__stock { margin-bottom: var(--space-sm); font-size: 0.875rem; }
+  .product-form__buttons { display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .product-form__error { color: rgb(var(--color-error)); font-size: 0.875rem; margin-top: var(--space-2xs); }
+{% endstyle %}

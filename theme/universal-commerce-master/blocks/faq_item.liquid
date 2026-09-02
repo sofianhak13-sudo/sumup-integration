@@ -1,0 +1,15 @@
+<details class="product-accordion faq-item" {{ block.shopify_attributes }}>
+  <summary>{{ block.settings.question }}</summary>
+  <div class="product-accordion__content rte">{{ block.settings.answer }}</div>
+</details>
+
+{% schema %}
+{
+  "name": "t:names.faq",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "question", "label": "t:content.question", "default": "Frequently asked question?" },
+    { "type": "richtext", "id": "answer", "label": "t:content.answer", "default": "<p>Answer goes here.</p>" }
+  ]
+}
+{% endschema %}

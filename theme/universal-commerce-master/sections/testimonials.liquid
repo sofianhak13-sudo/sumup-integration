@@ -1,0 +1,29 @@
+<div class="section testimonials">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}<h2 class="testimonials__heading">{{ section.settings.heading }}</h2>{%- endif -%}
+    <div class="grid" style="--grid-cols-mobile: 1; --grid-cols-desktop: 3;">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  .testimonials__heading { text-align: center; margin-bottom: var(--space-lg); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.testimonials",
+  "class": "section-testimonials",
+  "blocks": [{ "type": "testimonial_item" }],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "t:content.heading", "default": "What our customers say" }
+  ],
+  "presets": [
+    {
+      "name": "t:names.testimonials",
+      "blocks": [{ "type": "testimonial_item" }, { "type": "testimonial_item" }, { "type": "testimonial_item" }]
+    }
+  ]
+}
+{% endschema %}

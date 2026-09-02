@@ -1,0 +1,42 @@
+{%- liquid
+  assign style_class = block.settings.style | default: 'primary'
+  assign btn_class = 'btn'
+  if style_class == 'secondary'
+    assign btn_class = 'btn btn--secondary'
+  elsif style_class == 'tertiary'
+    assign btn_class = 'btn btn--tertiary'
+  endif
+-%}
+{%- if block.settings.label != blank -%}
+  <a
+    href="{{ block.settings.link | default: '#' }}"
+    class="{{ btn_class }}"
+    {% if block.settings.open_in_new_tab %}target="_blank" rel="noopener"{% endif %}
+    {{ block.shopify_attributes }}
+  >
+    {{ block.settings.label }}
+  </a>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:names.button",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "label", "label": "t:content.label", "default": "Shop now" },
+    { "type": "url", "id": "link", "label": "t:content.link" },
+    { "type": "checkbox", "id": "open_in_new_tab", "label": "t:content.open_in_new_tab", "default": false },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "t:content.style",
+      "options": [
+        { "value": "primary", "label": "t:content.primary" },
+        { "value": "secondary", "label": "t:content.secondary" },
+        { "value": "tertiary", "label": "t:content.tertiary" }
+      ],
+      "default": "primary"
+    }
+  ]
+}
+{% endschema %}

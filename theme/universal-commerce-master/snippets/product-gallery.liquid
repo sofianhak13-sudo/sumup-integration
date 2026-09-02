@@ -1,0 +1,85 @@
+{%- comment -%}
+  Gallery: swipeable scroll-snap track on all breakpoints (works
+  identically on mobile touch and desktop trackpad/mouse-drag-free),
+  thumbnails on desktop, native zoom via a link to the full-size image.
+  Supports images, video, and 3D models through Shopify's generic
+  `media` object — no per-media-type duplication.
+  @param {object} product
+{%- endcomment -%}
+
+{%- liquid
+  assign media_list = product.media
+  if media_list.size == 0
+    assign media_list = null
+  endif
+-%}
+
+<div class="product-gallery" data-product-gallery>
+  <div class="product-gallery__track" data-gallery-track>
+    {%- if media_list -%}
+      {%- for media in media_list -%}
+        <div class="product-gallery__slide" data-gallery-slide data-media-id="{{ media.id }}">
+          {%- case media.media_type -%}
+            {%- when 'image' -%}
+              <a href="{{ media | image_url: width: 2048 }}" class="product-gallery__zoom" data-gallery-zoom aria-label="{{ 'products.product.zoom' | t }}">
+                {{
+                  media
+                  | image_url: width: 1600
+                  | image_tag:
+                    loading: forloop.index0 == 0 ? 'eager' : 'lazy',
+                    widths: '400,600,800,1200,1600',
+                    sizes: '(min-width: 990px) 50vw, 100vw',
+                    alt: media.alt | default: product.title
+                }}
+              </a>
+            {%- when 'video', 'external_video' -%}
+              {{ media | media_tag: controls: true }}
+            {%- when 'model' -%}
+              {{ media | media_tag }}
+            {%- else -%}
+              {{ media | media_tag }}
+          {%- endcase -%}
+        </div>
+      {%- endfor -%}
+    {%- else -%}
+      <div class="product-gallery__slide product-gallery__slide--placeholder">
+        {{ 'product-1' | placeholder_svg_tag }}
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if media_list.size > 1 -%}
+    <div class="product-gallery__thumbs" data-gallery-thumbs>
+      {%- for media in media_list -%}
+        <button
+          type="button"
+          class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+          data-gallery-thumb
+          data-target-index="{{ forloop.index0 }}"
+        >
+          {{ media.preview_image | image_url: width: 160 | image_tag: alt: '', loading: 'lazy' }}
+        </button>
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+</div>
+
+{% style %}
+  .product-gallery__track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    border-radius: var(--radius-card);
+    background: rgb(var(--color-surface));
+  }
+  .product-gallery__slide { flex: 0 0 100%; scroll-snap-align: start; aspect-ratio: 1; }
+  .product-gallery__slide img, .product-gallery__slide video, .product-gallery__slide model-viewer { width: 100%; height: 100%; object-fit: cover; }
+  .product-gallery__zoom { display: block; height: 100%; cursor: zoom-in; }
+  .product-gallery__thumbs { display: flex; gap: var(--space-2xs); margin-top: var(--space-2xs); overflow-x: auto; }
+  .product-gallery__thumb { flex: 0 0 64px; width: 64px; height: 64px; padding: 0; border: 2px solid transparent; border-radius: var(--radius-input); overflow: hidden; cursor: pointer; background: none; }
+  .product-gallery__thumb.is-active { border-color: rgb(var(--color-accent)); }
+  .product-gallery__thumb img { width: 100%; height: 100%; object-fit: cover; }
+  @media (prefers-reduced-motion: no-preference) {
+    .product-gallery__track { scroll-behavior: smooth; }
+  }
+{% endstyle %}

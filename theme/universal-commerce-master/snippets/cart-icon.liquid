@@ -1,0 +1,39 @@
+{%- comment -%}
+  Cart icon with a live item-count bubble. data-cart-count is updated by
+  assets/cart.js after every AJAX add/update/remove — never a full page
+  reload for the count itself.
+{%- endcomment -%}
+
+<a
+  href="{{ routes.cart_url }}"
+  class="cart-icon touch-target"
+  {% if settings.cart_type == 'drawer' %}data-cart-drawer-toggle{% endif %}
+>
+  <span class="visually-hidden">
+    {{ 'accessibility.cart_items_count' | t: count: cart.item_count }}
+  </span>
+  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M6 6L5 3H2"/>
+  </svg>
+  <span class="cart-icon__count" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</span>
+</a>
+
+{% style %}
+  .cart-icon { position: relative; }
+  .cart-icon__count {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: rgb(var(--color-accent));
+    color: rgb(var(--color-accent-contrast));
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+{% endstyle %}

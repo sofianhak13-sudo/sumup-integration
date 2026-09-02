@@ -1,0 +1,30 @@
+{%- comment -%}
+  Optional payment adapter — SumUp, single-product checkout.
+  Same isolation rules as sumup-cart-adapter.liquid: only rendered when
+  settings.enable_sumup is on, talks only to the existing App Proxy
+  (settings.sumup_proxy_path), no secret, no client-side price.
+  @param {object} product
+{%- endcomment -%}
+
+<div class="sumup-product-adapter" data-sumup-product-adapter data-endpoint="{{ settings.sumup_proxy_path }}" data-product-id="{{ product.id }}">
+  <label class="visually-hidden" for="SumUpProductEmail-{{ product.id }}">{{ 'integrations.sumup.email_placeholder' | t }}</label>
+  <input
+    type="email"
+    id="SumUpProductEmail-{{ product.id }}"
+    class="field sumup-product-adapter__email"
+    placeholder="{{ 'integrations.sumup.email_placeholder' | t }}"
+    autocomplete="email"
+    value="{{ customer.email | escape }}"
+    data-sumup-email
+  >
+  <button type="button" class="btn btn--full btn--secondary" data-sumup-pay-button>
+    {{ 'integrations.sumup.pay_button' | t }}
+  </button>
+  <p class="sumup-product-adapter__error" role="alert" data-sumup-error hidden></p>
+</div>
+
+{% style %}
+  .sumup-product-adapter { margin-top: var(--space-sm); }
+  .sumup-product-adapter__email { margin-bottom: var(--space-2xs); }
+  .sumup-product-adapter__error { color: rgb(var(--color-error)); font-size: 0.8125rem; margin-top: var(--space-2xs); }
+{% endstyle %}

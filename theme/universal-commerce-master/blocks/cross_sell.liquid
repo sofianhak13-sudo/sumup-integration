@@ -1,0 +1,47 @@
+{%- comment -%}
+  Manual cross-sell: products chosen by the merchant, not an automated
+  recommendation — useful when the merchant wants full control over what
+  is suggested in the cart (e.g. a complementary accessory).
+{%- endcomment -%}
+
+{%- if block.settings.products.count > 0 -%}
+  <div class="cart-cross-sell" {{ block.shopify_attributes }}>
+    {%- if block.settings.heading != blank -%}
+      <p class="cart-cross-sell__heading">{{ block.settings.heading }}</p>
+    {%- endif -%}
+    <div class="cart-cross-sell__list">
+      {%- for product in block.settings.products -%}
+        <div class="cart-cross-sell__item">
+          {{ product.featured_media | image_url: width: 120 | image_tag: alt: product.title, loading: 'lazy', width: 56, height: 56 }}
+          <div class="cart-cross-sell__info">
+            <a href="{{ product.url }}">{{ product.title }}</a>
+            {%- render 'price', product: product -%}
+          </div>
+          {%- form 'product', product -%}
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+            <button type="submit" class="btn btn--secondary touch-target" {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}>+</button>
+          {%- endform -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+{%- endif -%}
+
+{% style %}
+  .cart-cross-sell { margin: var(--space-md) 0; padding-top: var(--space-md); border-top: 1px solid rgb(var(--color-border)); }
+  .cart-cross-sell__heading { font-weight: 600; margin-bottom: var(--space-sm); }
+  .cart-cross-sell__item { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .cart-cross-sell__item img { border-radius: var(--radius-input); object-fit: cover; }
+  .cart-cross-sell__info { flex: 1; min-width: 0; }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.cart_cross_sell",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "t:content.label", "default": "You may also like" },
+    { "type": "product_list", "id": "products", "label": "t:content.products", "limit": 4 }
+  ]
+}
+{% endschema %}

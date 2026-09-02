@@ -1,0 +1,47 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__grid">
+      {% content_for 'blocks' %}
+    </div>
+
+    <div class="site-footer__bottom">
+      <p class="site-footer__copyright">&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</p>
+
+      {%- if shop.enabled_payment_types.size > 0 -%}
+        <ul class="site-footer__payment-icons" aria-hidden="true">
+          {%- for type in shop.enabled_payment_types -%}
+            <li>{{ type | payment_type_svg_tag: class: 'site-footer__payment-icon' }}</li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if settings.social_instagram != blank or settings.social_facebook != blank or settings.social_tiktok != blank or settings.social_youtube != blank or settings.social_x != blank -%}
+        <ul class="site-footer__social">
+          {%- if settings.social_instagram != blank -%}<li><a href="{{ settings.social_instagram }}">Instagram</a></li>{%- endif -%}
+          {%- if settings.social_facebook != blank -%}<li><a href="{{ settings.social_facebook }}">Facebook</a></li>{%- endif -%}
+          {%- if settings.social_tiktok != blank -%}<li><a href="{{ settings.social_tiktok }}">TikTok</a></li>{%- endif -%}
+          {%- if settings.social_youtube != blank -%}<li><a href="{{ settings.social_youtube }}">YouTube</a></li>{%- endif -%}
+          {%- if settings.social_x != blank -%}<li><a href="{{ settings.social_x }}">X</a></li>{%- endif -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+{% style %}
+  .site-footer { padding-block: var(--space-xl); border-top: 1px solid rgb(var(--color-border)); background: rgb(var(--color-surface)); }
+  .site-footer__grid { display: grid; gap: var(--space-lg); grid-template-columns: 1fr; margin-bottom: var(--space-lg); }
+  @media screen and (min-width: 750px) { .site-footer__grid { grid-template-columns: repeat(3, 1fr); } }
+  .site-footer__bottom { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm); padding-top: var(--space-md); border-top: 1px solid rgb(var(--color-border)); font-size: 0.8125rem; color: rgb(var(--color-text-muted)); }
+  .site-footer__copyright { margin: 0; margin-inline-end: auto; }
+  .site-footer__payment-icons, .site-footer__social { display: flex; gap: var(--space-2xs); }
+  .site-footer__payment-icon { height: 24px; width: auto; }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.footer",
+  "blocks": [{ "type": "@theme" }],
+  "settings": []
+}
+{% endschema %}

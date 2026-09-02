@@ -1,0 +1,94 @@
+{%- comment -%}
+  Shared cart line-item list + summary, used identically by the cart
+  drawer section and the cart page section so there is exactly one
+  implementation of "what a cart line looks like" in the whole theme.
+  @param {string} context - 'drawer' or 'page', used only for id scoping
+{%- endcomment -%}
+
+{%- if cart.item_count == 0 -%}
+  <div class="cart-empty">
+    <p>{{ 'cart.empty' | t }}</p>
+    <a href="{{ routes.all_products_collection_url }}" class="btn">{{ 'cart.empty_cta' | t }}</a>
+  </div>
+{%- else -%}
+  <ul class="cart-items" data-cart-items>
+    {%- for item in cart.items -%}
+      <li class="cart-item" data-cart-item data-line="{{ forloop.index }}" data-variant-id="{{ item.variant_id }}">
+        <a href="{{ item.url }}" class="cart-item__image">
+          {{ item.image | image_url: width: 200 | image_tag: alt: item.product_title, loading: 'lazy', width: 80, height: 80 }}
+        </a>
+        <div class="cart-item__info">
+          <a href="{{ item.url }}" class="cart-item__title">{{ item.product_title }}</a>
+          {%- if item.variant.title != 'Default Title' -%}
+            <p class="cart-item__variant">{{ item.variant.title }}</p>
+          {%- endif -%}
+          {%- if item.original_line_price != item.final_line_price -%}
+            <p class="cart-item__price"><span class="price--compare">{{ item.original_line_price | money }}</span> <span class="price--sale">{{ item.final_line_price | money }}</span></p>
+          {%- else -%}
+            <p class="cart-item__price">{{ item.final_line_price | money }}</p>
+          {%- endif -%}
+
+          <div class="cart-item__controls">
+            <div class="quantity-stepper quantity-stepper--sm">
+              <button type="button" class="touch-target" data-cart-quantity-decrease aria-label="{{ 'accessibility.decrease_quantity' | t }}">&minus;</button>
+              <input
+                type="number"
+                class="field quantity-stepper__input"
+                value="{{ item.quantity }}"
+                min="0"
+                inputmode="numeric"
+                data-cart-quantity-input
+                aria-label="{{ 'cart.quantity' | t }}"
+              >
+              <button type="button" class="touch-target" data-cart-quantity-increase aria-label="{{ 'accessibility.increase_quantity' | t }}">+</button>
+            </div>
+            <button type="button" class="btn btn--tertiary" data-cart-remove aria-label="{{ 'accessibility.remove_item' | t: title: item.product_title }}">
+              {{ 'cart.remove' | t }}
+            </button>
+          </div>
+        </div>
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  {%- if settings.cart_show_free_shipping_bar and settings.digital_mode == false -%}
+    {%- render 'cart-free-shipping-bar' -%}
+  {%- endif -%}
+
+  {% content_for 'blocks' %}
+
+  <div class="cart-summary">
+    <div class="cart-summary__row">
+      <span>{{ 'cart.subtotal' | t }}</span>
+      <span class="price">{{ cart.total_price | money }}</span>
+    </div>
+    <p class="cart-summary__note">{{ 'cart.shipping_at_checkout' | t }}</p>
+
+    <a href="{{ routes.cart_url }}/checkout" class="btn btn--full cart-summary__checkout" data-cart-checkout>
+      {{ 'cart.checkout' | t }}
+    </a>
+
+    {%- if settings.enable_sumup -%}
+      {%- render 'sumup-cart-adapter' -%}
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+<div class="cart-error" role="alert" data-cart-error hidden></div>
+
+{% style %}
+  .cart-empty { text-align: center; padding: var(--space-xl) 0; }
+  .cart-empty p { color: rgb(var(--color-text-muted)); }
+  .cart-item { display: flex; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid rgb(var(--color-border)); }
+  .cart-item__image img { width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-input); background: rgb(var(--color-surface)); }
+  .cart-item__info { flex: 1; min-width: 0; }
+  .cart-item__title { text-decoration: none; font-weight: 600; }
+  .cart-item__variant { font-size: 0.8125rem; color: rgb(var(--color-text-muted)); margin: 2px 0; }
+  .cart-item__price { margin: var(--space-3xs) 0; }
+  .cart-item__controls { display: flex; align-items: center; gap: var(--space-sm); margin-top: var(--space-2xs); }
+  .quantity-stepper--sm .quantity-stepper__input { width: 36px; min-height: 36px; }
+  .cart-summary { margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid rgb(var(--color-border)); }
+  .cart-summary__row { display: flex; justify-content: space-between; font-size: 1.1rem; margin-bottom: var(--space-3xs); }
+  .cart-summary__note { font-size: 0.8125rem; color: rgb(var(--color-text-muted)); margin-bottom: var(--space-sm); }
+  .cart-error { color: rgb(var(--color-error)); margin-top: var(--space-sm); }
+{% endstyle %}

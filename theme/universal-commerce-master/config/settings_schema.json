@@ -1,0 +1,148 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Universal Commerce Master",
+    "theme_version": "0.1.0",
+    "theme_author": "Internal",
+    "theme_documentation_url": "https://github.com/",
+    "theme_support_url": "https://github.com/"
+  },
+  {
+    "name": "t:settings.colors.name",
+    "settings": [
+      { "type": "header", "content": "t:settings.colors.surfaces" },
+      { "type": "color", "id": "color_bg", "label": "t:settings.colors.background", "default": "#FFFFFF" },
+      { "type": "color", "id": "color_surface", "label": "t:settings.colors.surface", "default": "#F5F5F5" },
+      { "type": "color", "id": "color_border", "label": "t:settings.colors.border", "default": "#E3E3E3" },
+      { "type": "header", "content": "t:settings.colors.text" },
+      { "type": "color", "id": "color_text", "label": "t:settings.colors.text_primary", "default": "#141414" },
+      { "type": "color", "id": "color_text_muted", "label": "t:settings.colors.text_muted", "default": "#6B6B6B" },
+      { "type": "header", "content": "t:settings.colors.accent" },
+      { "type": "color", "id": "color_accent", "label": "t:settings.colors.accent_primary", "default": "#141414" },
+      { "type": "color", "id": "color_accent_contrast", "label": "t:settings.colors.accent_contrast", "default": "#FFFFFF" },
+      { "type": "color", "id": "color_accent_2", "label": "t:settings.colors.accent_secondary", "default": "#6B6B6B" },
+      { "type": "header", "content": "t:settings.colors.feedback" },
+      { "type": "color", "id": "color_success", "label": "t:settings.colors.success", "default": "#1F8A4C" },
+      { "type": "color", "id": "color_error", "label": "t:settings.colors.error", "default": "#C0392B" },
+      { "type": "color", "id": "color_sale", "label": "t:settings.colors.sale", "default": "#C0392B" }
+    ]
+  },
+  {
+    "name": "t:settings.typography.name",
+    "settings": [
+      { "type": "header", "content": "t:settings.typography.heading" },
+      { "type": "font_picker", "id": "font_heading", "label": "t:settings.typography.font", "default": "inter_n7" },
+      { "type": "range", "id": "font_heading_scale", "label": "t:settings.typography.scale", "min": 90, "max": 130, "step": 2, "unit": "%", "default": 100 },
+      { "type": "checkbox", "id": "heading_uppercase", "label": "t:settings.typography.uppercase", "default": false },
+      { "type": "range", "id": "heading_letter_spacing", "label": "t:settings.typography.letter_spacing", "min": -2, "max": 6, "step": 0.5, "unit": "px", "default": 0 },
+      { "type": "header", "content": "t:settings.typography.body" },
+      { "type": "font_picker", "id": "font_body", "label": "t:settings.typography.font", "default": "inter_n4" },
+      { "type": "range", "id": "font_body_size", "label": "t:settings.typography.base_size", "min": 14, "max": 19, "step": 1, "unit": "px", "default": 16 },
+      { "type": "select", "id": "font_body_line_height", "label": "t:settings.typography.line_height", "options": [
+        { "value": "1.4", "label": "t:options.tight" },
+        { "value": "1.55", "label": "t:options.normal" },
+        { "value": "1.7", "label": "t:options.loose" }
+      ], "default": "1.55" }
+    ]
+  },
+  {
+    "name": "t:settings.layout.name",
+    "settings": [
+      { "type": "range", "id": "page_width", "label": "t:settings.layout.page_width", "min": 1080, "max": 1600, "step": 20, "unit": "px", "default": 1280 },
+      { "type": "select", "id": "density", "label": "t:settings.layout.density", "options": [
+        { "value": "compact", "label": "t:options.compact" },
+        { "value": "normal", "label": "t:options.normal" },
+        { "value": "spacious", "label": "t:options.spacious" }
+      ], "default": "normal", "info": "t:settings.layout.density_info" },
+      { "type": "range", "id": "grid_gap", "label": "t:settings.layout.grid_gap", "min": 4, "max": 40, "step": 2, "unit": "px", "default": 20 }
+    ]
+  },
+  {
+    "name": "t:settings.shape.name",
+    "settings": [
+      { "type": "header", "content": "t:settings.shape.buttons" },
+      { "type": "range", "id": "button_radius", "label": "t:settings.shape.radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 6 },
+      { "type": "checkbox", "id": "button_uppercase", "label": "t:settings.typography.uppercase", "default": false },
+      { "type": "header", "content": "t:settings.shape.cards" },
+      { "type": "range", "id": "card_radius", "label": "t:settings.shape.radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 8 },
+      { "type": "select", "id": "card_hover", "label": "t:settings.shape.card_hover", "options": [
+        { "value": "none", "label": "t:options.none" },
+        { "value": "lift", "label": "t:options.lift" },
+        { "value": "zoom", "label": "t:options.zoom" }
+      ], "default": "lift" },
+      { "type": "header", "content": "t:settings.shape.inputs" },
+      { "type": "range", "id": "input_radius", "label": "t:settings.shape.radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 6 },
+      { "type": "header", "content": "t:settings.shape.glow" },
+      { "type": "checkbox", "id": "enable_glow", "label": "t:settings.shape.enable_glow", "default": false, "info": "t:settings.shape.enable_glow_info" },
+      { "type": "color", "id": "glow_color", "label": "t:settings.shape.glow_color", "default": "#008CFF", "visible_if": "{{ settings.enable_glow }}" },
+      { "type": "range", "id": "glow_intensity", "label": "t:settings.shape.glow_intensity", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 18, "visible_if": "{{ settings.enable_glow }}" }
+    ]
+  },
+  {
+    "name": "t:settings.product_cards.name",
+    "settings": [
+      { "type": "checkbox", "id": "show_vendor_on_cards", "label": "t:settings.product_cards.show_vendor", "default": false }
+    ]
+  },
+  {
+    "name": "t:settings.motion.name",
+    "settings": [
+      { "type": "checkbox", "id": "enable_animations", "label": "t:settings.motion.enable_animations", "default": true, "info": "t:settings.motion.reduced_motion_info" },
+      { "type": "select", "id": "animation_intensity", "label": "t:settings.motion.intensity", "options": [
+        { "value": "subtle", "label": "t:options.subtle" },
+        { "value": "standard", "label": "t:options.standard" },
+        { "value": "expressive", "label": "t:options.expressive" }
+      ], "default": "standard", "visible_if": "{{ settings.enable_animations }}" }
+    ]
+  },
+  {
+    "name": "t:settings.header.name",
+    "settings": [
+      { "type": "image_picker", "id": "logo", "label": "t:settings.header.logo" },
+      { "type": "select", "id": "header_behavior", "label": "t:settings.header.behavior", "options": [
+        { "value": "static", "label": "t:options.static" },
+        { "value": "sticky", "label": "t:options.sticky" },
+        { "value": "overlay", "label": "t:options.overlay" }
+      ], "default": "sticky" },
+      { "type": "range", "id": "logo_height", "label": "t:settings.header.logo_height", "min": 20, "max": 80, "step": 2, "unit": "px", "default": 32 }
+    ]
+  },
+  {
+    "name": "t:settings.cart.name",
+    "settings": [
+      { "type": "select", "id": "cart_type", "label": "t:settings.cart.type", "options": [
+        { "value": "drawer", "label": "t:options.drawer" },
+        { "value": "page", "label": "t:options.page" },
+        { "value": "notification", "label": "t:options.notification" }
+      ], "default": "drawer" },
+      { "type": "checkbox", "id": "cart_show_free_shipping_bar", "label": "t:settings.cart.show_free_shipping_bar", "default": false, "info": "t:settings.cart.free_shipping_bar_info" },
+      { "type": "number", "id": "cart_free_shipping_threshold", "label": "t:settings.cart.free_shipping_threshold", "default": 50, "visible_if": "{{ settings.cart_show_free_shipping_bar }}" }
+    ]
+  },
+  {
+    "name": "t:settings.commerce_mode.name",
+    "settings": [
+      { "type": "paragraph", "content": "t:settings.commerce_mode.info" },
+      { "type": "checkbox", "id": "digital_mode", "label": "t:settings.commerce_mode.digital_mode", "default": false, "info": "t:settings.commerce_mode.digital_mode_info" }
+    ]
+  },
+  {
+    "name": "t:settings.integrations.name",
+    "settings": [
+      { "type": "paragraph", "content": "t:settings.integrations.info" },
+      { "type": "checkbox", "id": "enable_sumup", "label": "t:settings.integrations.enable_sumup", "default": false },
+      { "type": "text", "id": "sumup_proxy_path", "label": "t:settings.integrations.sumup_proxy_path", "default": "/apps/sumup-pay", "visible_if": "{{ settings.enable_sumup }}" }
+    ]
+  },
+  {
+    "name": "t:settings.social.name",
+    "settings": [
+      { "type": "image_picker", "id": "share_image", "label": "t:settings.social.share_image", "info": "t:settings.social.share_image_info" },
+      { "type": "text", "id": "social_instagram", "label": "Instagram" },
+      { "type": "text", "id": "social_facebook", "label": "Facebook" },
+      { "type": "text", "id": "social_tiktok", "label": "TikTok" },
+      { "type": "text", "id": "social_youtube", "label": "YouTube" },
+      { "type": "text", "id": "social_x", "label": "X" }
+    ]
+  }
+]

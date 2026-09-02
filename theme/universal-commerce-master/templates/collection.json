@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": { "products_per_page": 24, "columns_desktop": 4, "columns_mobile": 2 }
+    }
+  },
+  "order": ["main"]
+}

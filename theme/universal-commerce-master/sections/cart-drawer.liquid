@@ -1,0 +1,35 @@
+{%- comment -%}
+  Always rendered once in layout/theme.liquid (hidden until opened), and
+  re-fetched wholesale via the Section Rendering API
+  (?sections=cart-drawer) after every add/update/remove — the native
+  Shopify way to keep the drawer in sync without hand-rolled JSON→HTML
+  templating in JavaScript.
+{%- endcomment -%}
+
+{%- if settings.cart_type == 'drawer' -%}
+  <dialog id="CartDrawer" class="cart-drawer" aria-label="{{ 'cart.title' | t }}">
+    <div class="cart-drawer__header">
+      <h2 class="cart-drawer__title">{{ 'cart.title' | t }}</h2>
+      <button type="button" class="touch-target" data-cart-drawer-close>
+        <span class="visually-hidden">{{ 'accessibility.close' | t }}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="cart-drawer__body" data-cart-drawer-body>
+      {%- render 'cart-items', context: 'drawer' -%}
+    </div>
+  </dialog>
+
+  {% style %}
+    .cart-drawer {
+      position: fixed; inset: 0 0 0 auto;
+      width: min(90vw, 420px); height: 100%; max-height: 100%;
+      margin: 0; border: none; padding: var(--space-md);
+      background: rgb(var(--color-bg)); color: rgb(var(--color-text));
+      overflow-y: auto;
+    }
+    .cart-drawer::backdrop { background: rgba(0,0,0,0.4); }
+    .cart-drawer__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md); }
+    .cart-drawer__title { margin: 0; font-size: 1.1rem; }
+  {% endstyle %}
+{%- endif -%}

@@ -1,0 +1,167 @@
+{
+  "accessibility": {
+    "skip_to_content": "Passer au contenu",
+    "close": "Fermer",
+    "menu": "Menu",
+    "open_menu": "Ouvrir le menu",
+    "close_menu": "Fermer le menu",
+    "cart": "Panier",
+    "cart_items_count": {
+      "one": "{{ count }} article dans le panier",
+      "other": "{{ count }} articles dans le panier"
+    },
+    "search": "Recherche",
+    "account": "Compte",
+    "next_slide": "Diapositive suivante",
+    "previous_slide": "Diapositive précédente",
+    "slide_of": "Diapositive {{ current }} sur {{ total }}",
+    "increase_quantity": "Augmenter la quantité",
+    "decrease_quantity": "Diminuer la quantité",
+    "remove_item": "Supprimer {{ title }}",
+    "loading": "Chargement",
+    "star_rating": "Noté {{ rating }} sur 5 étoiles",
+    "current_page": "Page actuelle"
+  },
+  "general": {
+    "learn_more": "En savoir plus",
+    "view_all": "Voir tout",
+    "back_to_home": "Retour à l'accueil",
+    "read_more": "Lire la suite",
+    "close": "Fermer",
+    "enter": "Entrer",
+    "gift_card": "Carte cadeau",
+    "password": "Mot de passe",
+    "password_page_error": "Mot de passe incorrect.",
+    "password_page_text": "Cette boutique est actuellement protégée par mot de passe."
+  },
+  "header": {
+    "announcement": {
+      "default": "Bienvenue dans notre boutique"
+    }
+  },
+  "search": {
+    "title": "Recherche",
+    "placeholder": "Rechercher des produits, pages, articles...",
+    "submit": "Rechercher",
+    "no_results": "Aucun résultat pour \"{{ terms }}\"",
+    "no_results_suggestion": "Essayez un autre terme de recherche.",
+    "results_count": {
+      "one": "{{ count }} résultat",
+      "other": "{{ count }} résultats"
+    },
+    "products": "Produits",
+    "collections": "Collections",
+    "pages": "Pages",
+    "articles": "Articles"
+  },
+  "collection": {
+    "empty": "Aucun produit trouvé",
+    "empty_suggestion": "Essayez de retirer des filtres ou parcourez tous les produits.",
+    "clear_filters": "Tout effacer",
+    "filter_and_sort": "Filtrer et trier",
+    "sort_by": "Trier par",
+    "product_count": {
+      "one": "{{ count }} produit",
+      "other": "{{ count }} produits"
+    },
+    "pagination": "Pagination"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Ajouter au panier",
+      "adding": "Ajout en cours...",
+      "added": "Ajouté",
+      "buy_now": "Acheter maintenant",
+      "sold_out": "Épuisé",
+      "unavailable": "Indisponible",
+      "quantity": "Quantité",
+      "sku": "Référence : {{ sku }}",
+      "vendor": "{{ vendor }}",
+      "from_price": "À partir de {{ price }}",
+      "description": "Description",
+      "size_guide": "Guide des tailles",
+      "in_stock": "En stock",
+      "low_stock": "Seulement {{ count }} en stock",
+      "select_option": "Choisir {{ option }}",
+      "zoom": "Zoomer l'image",
+      "sale_price": "Prix promotionnel",
+      "sale": "Promo"
+    }
+  },
+  "cart": {
+    "title": "Votre panier",
+    "empty": "Votre panier est vide",
+    "empty_cta": "Continuer mes achats",
+    "subtotal": "Sous-total",
+    "taxes_included": "Taxes incluses",
+    "shipping_at_checkout": "Livraison et réductions calculées au paiement",
+    "checkout": "Commander",
+    "remove": "Supprimer",
+    "quantity": "Quantité",
+    "note": "Ajouter une note",
+    "discount_code": "Code de réduction",
+    "apply": "Appliquer",
+    "free_shipping_reached": "🎉 Livraison gratuite débloquée !",
+    "free_shipping_progress": "Ajoutez {{ amount }} pour la livraison gratuite",
+    "error_generic": "Une erreur est survenue. Veuillez réessayer.",
+    "updating": "Mise à jour du panier..."
+  },
+  "digital": {
+    "instant_access": "Accès numérique immédiat",
+    "no_shipping": "Aucune livraison — remis numériquement",
+    "one_time_payment": "Paiement unique, accès à vie"
+  },
+  "newsletter": {
+    "heading": "Rejoignez notre liste",
+    "text": "Recevez nos actualités et offres directement dans votre boîte mail.",
+    "placeholder": "Votre e-mail",
+    "submit": "S'inscrire",
+    "success": "Merci pour votre inscription !"
+  },
+  "sections": {
+    "trust_bar": {
+      "secure_checkout": "Paiement sécurisé",
+      "easy_returns": "Retours faciles",
+      "customer_support": "Support client"
+    },
+    "countdown": {
+      "days": "Jours",
+      "hours": "Heures",
+      "minutes": "Min",
+      "seconds": "Sec",
+      "expired": "Cette offre est terminée"
+    },
+    "comparison": {
+      "included": "Inclus",
+      "not_included": "Non inclus"
+    },
+    "testimonial": {
+      "verified": "Achat vérifié"
+    }
+  },
+  "integrations": {
+    "sumup": {
+      "email_placeholder": "Votre adresse e-mail",
+      "pay_button": "Payer avec SumUp",
+      "loading": "Redirection vers le paiement sécurisé...",
+      "error_email": "Veuillez saisir une adresse e-mail valide.",
+      "error_cart_empty": "Votre panier est vide.",
+      "error_generic": "Impossible de démarrer le paiement SumUp. Veuillez réessayer."
+    }
+  },
+  "404": {
+    "title": "Page introuvable",
+    "text": "La page que vous cherchez n'existe pas.",
+    "cta": "Retour à l'accueil"
+  },
+  "blogs": {
+    "comments": {
+      "email": "E-mail",
+      "message": "Message",
+      "name": "Nom",
+      "submit": "Publier le commentaire",
+      "success": "Votre commentaire a été publié avec succès.",
+      "title": "Laisser un commentaire"
+    }
+  }
+}

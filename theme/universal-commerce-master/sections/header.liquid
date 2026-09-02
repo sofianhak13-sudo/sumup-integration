@@ -1,0 +1,74 @@
+<header class="site-header site-header--{{ settings.header_behavior }}" data-site-header>
+  <div class="container site-header__inner">
+    <button
+      type="button"
+      class="site-header__menu-toggle touch-target"
+      data-mobile-menu-toggle
+      aria-expanded="false"
+      aria-controls="MobileMenu"
+    >
+      <span class="visually-hidden">{{ 'accessibility.open_menu' | t }}</span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+
+    <a href="{{ routes.root_url }}" class="site-header__logo">
+      {%- if settings.logo -%}
+        {{ settings.logo | image_url: width: 400 | image_tag: height: settings.logo_height, alt: shop.name, loading: 'eager' }}
+      {%- else -%}
+        <span class="site-header__logo-text">{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+
+    <nav class="site-header__nav" aria-label="{{ 'accessibility.menu' | t }}">
+      {%- render 'header-nav', menu: section.settings.menu -%}
+    </nav>
+
+    <div class="site-header__actions">
+      <button type="button" class="touch-target" data-search-toggle aria-haspopup="dialog">
+        <span class="visually-hidden">{{ 'accessibility.search' | t }}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+
+      <a href="{{ routes.account_url }}" class="touch-target">
+        <span class="visually-hidden">{{ 'accessibility.account' | t }}</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      </a>
+
+      {%- render 'cart-icon' -%}
+    </div>
+  </div>
+</header>
+
+{%- render 'mobile-menu', menu: section.settings.menu -%}
+{%- render 'predictive-search' -%}
+
+{% style %}
+  .site-header--sticky { position: sticky; top: 0; z-index: 40; }
+  .site-header--overlay { position: absolute; inset-inline: 0; top: 0; z-index: 40; background: transparent; }
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: 64px;
+  }
+  .site-header__logo { display: flex; align-items: center; margin-inline-end: auto; }
+  .site-header__logo-text { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 1.25rem; text-decoration: none; }
+  .site-header__nav { display: none; }
+  .site-header__actions { display: flex; align-items: center; gap: var(--space-2xs); margin-inline-start: auto; }
+  @media screen and (min-width: 990px) {
+    .site-header__menu-toggle { display: none; }
+    .site-header__logo { margin-inline-end: var(--space-lg); }
+    .site-header__nav { display: block; margin-inline-end: auto; }
+    .site-header__actions { margin-inline-start: 0; }
+  }
+  .site-header { background: rgb(var(--color-bg)); border-bottom: 1px solid rgb(var(--color-border)); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.header",
+  "settings": [
+    { "type": "link_list", "id": "menu", "label": "t:content.menu", "default": "main-menu" }
+  ]
+}
+{% endschema %}

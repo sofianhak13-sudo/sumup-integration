@@ -1,0 +1,35 @@
+<div class="section newsletter-section" style="text-align: center;">
+  <div class="container" style="max-width: 480px;">
+    <h2>{%- if section.settings.heading != blank -%}{{ section.settings.heading }}{%- else -%}{{ 'newsletter.heading' | t }}{%- endif -%}</h2>
+    <p>{{ section.settings.text }}</p>
+
+    {%- form 'customer', class: 'newsletter-section__form' -%}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      {%- if form.posted_successfully? -%}
+        <p>{{ 'newsletter.success' | t }}</p>
+      {%- else -%}
+        <div class="newsletter-section__row">
+          <label class="visually-hidden" for="NewsletterEmail-{{ section.id }}">{{ 'newsletter.placeholder' | t }}</label>
+          <input type="email" name="contact[email]" id="NewsletterEmail-{{ section.id }}" class="field" placeholder="{{ 'newsletter.placeholder' | t }}" required>
+          <button type="submit" class="btn">{{ 'newsletter.submit' | t }}</button>
+        </div>
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+</div>
+
+{% style %}
+  .newsletter-section__row { display: flex; gap: var(--space-2xs); margin-top: var(--space-md); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.newsletter",
+  "class": "section-newsletter",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "t:content.heading" },
+    { "type": "text", "id": "text", "label": "t:content.text" }
+  ],
+  "presets": [{ "name": "t:names.newsletter" }]
+}
+{% endschema %}

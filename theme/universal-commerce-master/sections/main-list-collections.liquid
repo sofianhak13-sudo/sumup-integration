@@ -1,0 +1,23 @@
+<section class="section">
+  <div class="container">
+    <h1>{{ 'general.view_all' | t }}</h1>
+    <div class="grid" style="--grid-cols-mobile: 2; --grid-cols-desktop: 3;">
+      {%- for collection in collections -%}
+        <a href="{{ collection.url }}" class="card card--hover-{{ settings.card_hover }}">
+          <div class="card__media">
+            {%- if collection.featured_image -%}
+              {{ collection.featured_image | image_url: width: 600 | image_tag: loading: 'lazy', alt: collection.title }}
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag }}
+            {%- endif -%}
+          </div>
+          <div class="card__body"><p class="product-card__title">{{ collection.title }}</p></div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "t:names.list_collections_page" }
+{% endschema %}

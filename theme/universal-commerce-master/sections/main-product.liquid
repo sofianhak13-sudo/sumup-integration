@@ -1,0 +1,139 @@
+<section class="section product-page">
+  <div class="container product-page__grid">
+    <div class="product-page__media">
+      {%- render 'product-gallery', product: product -%}
+    </div>
+
+    <div class="product-page__info">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when 'title' -%}
+            <div {{ block.shopify_attributes }}>
+              {%- if block.settings.show_vendor and product.vendor != blank -%}
+                <p class="product-page__vendor">{{ product.vendor }}</p>
+              {%- endif -%}
+              <h1 class="product-page__title">{{ product.title }}</h1>
+            </div>
+
+          {%- when 'price' -%}
+            {%- assign price_display_id = 'ProductPrice-' | append: section.id -%}
+            <div {{ block.shopify_attributes }}>
+              {%- render 'price', product: product, id: price_display_id -%}
+              {%- if settings.digital_mode -%}
+                <p class="product-page__digital-note">{{ 'digital.one_time_payment' | t }}</p>
+              {%- endif -%}
+            </div>
+
+          {%- when 'buy_box' -%}
+            <div {{ block.shopify_attributes }}>
+              {%- render 'product-form', product: product -%}
+              <script type="application/json" id="ProductVariants-{{ section.id }}">
+                [
+                  {%- for variant in product.variants -%}
+                    {
+                      "id": {{ variant.id | json }},
+                      "available": {{ variant.available | json }},
+                      "price": {{ variant.price | money | json }},
+                      "compare_at_price": {{ variant.compare_at_price | money | json }},
+                      "option1": {{ variant.option1 | json }},
+                      "option2": {{ variant.option2 | json }},
+                      "option3": {{ variant.option3 | json }}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              </script>
+            </div>
+
+          {%- when 'sumup' -%}
+            {%- if settings.enable_sumup -%}
+              <div {{ block.shopify_attributes }}>
+                {%- render 'sumup-product-adapter', product: product -%}
+              </div>
+            {%- endif -%}
+
+          {%- when 'shipping_note' -%}
+            {%- unless settings.digital_mode -%}
+              <p class="product-page__note">🚚 {{ block.settings.text | default: 'Shipping calculated at checkout.' }}</p>
+            {%- else -%}
+              <p class="product-page__note">⚡ {{ 'digital.instant_access' | t }}</p>
+            {%- endunless -%}
+
+          {%- when 'trust_items' -%}
+            <ul class="product-page__trust" {{ block.shopify_attributes }}>
+              {%- if block.settings.item_1 != blank -%}<li>{{ block.settings.item_1 }}</li>{%- endif -%}
+              {%- if block.settings.item_2 != blank -%}<li>{{ block.settings.item_2 }}</li>{%- endif -%}
+              {%- if block.settings.item_3 != blank -%}<li>{{ block.settings.item_3 }}</li>{%- endif -%}
+            </ul>
+
+          {%- when 'description' -%}
+            <div class="product-page__description rte" {{ block.shopify_attributes }}>
+              {{ product.description }}
+            </div>
+
+          {%- when 'accordion' -%}
+            <details class="product-accordion" {{ block.shopify_attributes }}>
+              <summary>{{ block.settings.heading }}</summary>
+              <div class="product-accordion__content rte">{{ block.settings.content }}</div>
+            </details>
+
+          {%- when '@app' -%}
+            {% render block %}
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- if section.settings.show_recommendations -%}
+  <div data-product-recommendations data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}-recommendations&product_id={{ product.id }}&limit={{ section.settings.recommendations_count }}">
+    {%- comment -%} Populated client-side from Shopify's native recommendation endpoint — see assets/global.js §recommendations. {%- endcomment -%}
+  </div>
+{%- endif -%}
+
+{% style %}
+  .product-page__grid { display: grid; gap: var(--space-lg); grid-template-columns: 1fr; }
+  @media screen and (min-width: 750px) { .product-page__grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .product-page__vendor { font-size: 0.8125rem; color: rgb(var(--color-text-muted)); margin-bottom: var(--space-3xs); }
+  .product-page__title { margin-bottom: var(--space-sm); }
+  .product-page__digital-note, .product-page__note { font-size: 0.875rem; color: rgb(var(--color-text-muted)); margin: var(--space-2xs) 0 var(--space-md); }
+  .product-page__trust { display: flex; flex-direction: column; gap: var(--space-2xs); margin: var(--space-md) 0; font-size: 0.875rem; }
+  .product-page__trust li::before { content: '✓ '; color: rgb(var(--color-success)); }
+  .product-accordion { border-bottom: 1px solid rgb(var(--color-border)); padding: var(--space-sm) 0; }
+  .product-accordion summary { cursor: pointer; font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+  .product-accordion__content { padding-top: var(--space-sm); }
+  @media screen and (min-width: 750px) { .product-page__info { position: sticky; top: calc(64px + var(--space-md)); } }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.product_page",
+  "blocks": [
+    { "type": "title", "name": "t:names.title", "limit": 1, "settings": [
+      { "type": "checkbox", "id": "show_vendor", "label": "t:content.show_vendor", "default": true }
+    ]},
+    { "type": "price", "name": "t:names.price", "limit": 1 },
+    { "type": "buy_box", "name": "t:names.buy_box", "limit": 1 },
+    { "type": "sumup", "name": "t:names.sumup", "limit": 1 },
+    { "type": "shipping_note", "name": "t:names.shipping_note", "limit": 1, "settings": [
+      { "type": "text", "id": "text", "label": "t:content.text", "default": "Shipping calculated at checkout." }
+    ]},
+    { "type": "trust_items", "name": "t:names.trust_items", "limit": 1, "settings": [
+      { "type": "text", "id": "item_1", "label": "t:content.item", "default": "30-day returns" },
+      { "type": "text", "id": "item_2", "label": "t:content.item", "default": "Secure payment" },
+      { "type": "text", "id": "item_3", "label": "t:content.item", "default": "Customer support" }
+    ]},
+    { "type": "description", "name": "t:names.description", "limit": 1 },
+    { "type": "accordion", "name": "t:names.accordion", "settings": [
+      { "type": "text", "id": "heading", "label": "t:content.label", "default": "Details" },
+      { "type": "richtext", "id": "content", "label": "t:content.text" }
+    ]},
+    { "type": "@app" }
+  ],
+  "settings": [
+    { "type": "checkbox", "id": "show_recommendations", "label": "t:content.show_recommendations", "default": true },
+    { "type": "range", "id": "recommendations_count", "label": "t:content.count", "min": 2, "max": 8, "step": 1, "default": 4 }
+  ]
+}
+{% endschema %}

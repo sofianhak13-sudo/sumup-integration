@@ -1,0 +1,29 @@
+<div class="announcement-bar" style="background: rgb(var(--color-text)); color: rgb(var(--color-bg));">
+  <div class="container announcement-bar__inner">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .announcement-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    font-size: 0.8125rem;
+    text-align: center;
+    gap: var(--space-sm);
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.announcement_bar",
+  "class": "section-announcement-bar",
+  "blocks": [{ "type": "@theme" }],
+  "settings": [],
+  "presets": [
+    { "name": "t:names.announcement_bar", "blocks": [{ "type": "text", "settings": { "text": "Welcome to our store" } }] }
+  ]
+}
+{% endschema %}

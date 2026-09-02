@@ -1,0 +1,40 @@
+<div class="section countdown-section" style="text-align: center;">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}<h2>{{ section.settings.heading }}</h2>{%- endif -%}
+    <div
+      class="countdown-timer"
+      data-countdown
+      data-target="{{ section.settings.target_datetime }}"
+      data-expired-message="{{ 'sections.countdown.expired' | t }}"
+    >
+      <div class="countdown-timer__grid">
+        <div class="countdown-timer__unit"><span data-days>00</span><small>{{ 'sections.countdown.days' | t }}</small></div>
+        <div class="countdown-timer__unit"><span data-hours>00</span><small>{{ 'sections.countdown.hours' | t }}</small></div>
+        <div class="countdown-timer__unit"><span data-minutes>00</span><small>{{ 'sections.countdown.minutes' | t }}</small></div>
+        <div class="countdown-timer__unit"><span data-seconds>00</span><small>{{ 'sections.countdown.seconds' | t }}</small></div>
+      </div>
+      <p class="countdown-timer__expired" data-countdown-expired hidden></p>
+    </div>
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .countdown-timer__grid { display: flex; justify-content: center; gap: var(--space-sm); margin: var(--space-md) 0; }
+  .countdown-timer__unit { min-width: 64px; padding: var(--space-sm); border-radius: var(--radius-card); background: rgb(var(--color-surface)); }
+  .countdown-timer__unit span { display: block; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .countdown-timer__unit small { font-size: 0.7rem; text-transform: uppercase; color: rgb(var(--color-text-muted)); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.countdown",
+  "class": "section-countdown",
+  "blocks": [{ "type": "button" }],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "t:content.heading", "default": "Limited-time offer" },
+    { "type": "text", "id": "target_datetime", "label": "t:content.target_datetime", "info": "t:content.target_datetime_info", "default": "2026-12-31T23:59:00+00:00" }
+  ],
+  "presets": [{ "name": "t:names.countdown" }]
+}
+{% endschema %}

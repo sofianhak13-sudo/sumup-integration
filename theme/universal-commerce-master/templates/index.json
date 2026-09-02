@@ -1,0 +1,58 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "blocks": {
+        "heading": { "type": "text", "settings": { "text": "<h1>Welcome to our store</h1>" } },
+        "text": { "type": "text", "settings": { "text": "<p>Discover our latest collection.</p>" } },
+        "cta": { "type": "button", "settings": { "label": "Shop now", "link": "shopify://collections/all" } }
+      },
+      "block_order": ["heading", "text", "cta"],
+      "settings": { "height": "medium", "alignment": "left", "overlay_opacity": 20 }
+    },
+    "trust_bar": {
+      "type": "trust-bar",
+      "blocks": {
+        "t1": { "type": "trust_item", "settings": { "icon": "shield", "label": "Secure checkout" } },
+        "t2": { "type": "trust_item", "settings": { "icon": "truck", "label": "Fast shipping" } },
+        "t3": { "type": "trust_item", "settings": { "icon": "refresh", "label": "Easy returns" } }
+      },
+      "block_order": ["t1", "t2", "t3"],
+      "settings": {}
+    },
+    "featured": {
+      "type": "featured-collection",
+      "settings": { "heading": "Featured products", "products_count": 8, "columns_desktop": 4 }
+    },
+    "steps": {
+      "type": "steps",
+      "blocks": {
+        "s1": { "type": "step_item", "settings": { "number": "1", "title": "Choose", "text": "Browse our collection and pick what you love." } },
+        "s2": { "type": "step_item", "settings": { "number": "2", "title": "Checkout", "text": "Pay securely through Shopify Checkout." } },
+        "s3": { "type": "step_item", "settings": { "number": "3", "title": "Enjoy", "text": "Your order is on its way." } }
+      },
+      "block_order": ["s1", "s2", "s3"],
+      "settings": { "heading": "How it works" }
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "r1": { "type": "testimonial_item", "settings": {} },
+        "r2": { "type": "testimonial_item", "settings": {} },
+        "r3": { "type": "testimonial_item", "settings": {} }
+      },
+      "block_order": ["r1", "r2", "r3"],
+      "settings": { "heading": "What our customers say" }
+    },
+    "faq": {
+      "type": "faq",
+      "blocks": {
+        "q1": { "type": "faq_item", "settings": { "question": "What is your shipping policy?", "answer": "<p>Add your real shipping information here.</p>" } },
+        "q2": { "type": "faq_item", "settings": { "question": "What is your return policy?", "answer": "<p>Add your real return policy here.</p>" } }
+      },
+      "block_order": ["q1", "q2"],
+      "settings": { "heading": "Frequently asked questions" }
+    }
+  },
+  "order": ["hero", "trust_bar", "featured", "steps", "testimonials", "faq"]
+}

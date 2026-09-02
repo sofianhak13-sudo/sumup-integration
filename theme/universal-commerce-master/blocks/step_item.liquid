@@ -1,0 +1,23 @@
+<div class="step-item" {{ block.shopify_attributes }}>
+  <span class="step-item__number">{{ block.settings.number }}</span>
+  <h3 class="step-item__title">{{ block.settings.title }}</h3>
+  {%- if block.settings.text != blank -%}<p class="step-item__text">{{ block.settings.text }}</p>{%- endif -%}
+</div>
+
+{% style %}
+  .step-item__number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: rgb(var(--color-accent)); color: rgb(var(--color-accent-contrast)); font-weight: 700; margin-bottom: var(--space-sm); }
+  .step-item__title { margin-bottom: var(--space-2xs); }
+  .step-item__text { color: rgb(var(--color-text-muted)); margin: 0; }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.steps",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "number", "label": "t:content.number", "default": "1" },
+    { "type": "text", "id": "title", "label": "t:content.label", "default": "Step" },
+    { "type": "textarea", "id": "text", "label": "t:content.text" }
+  ]
+}
+{% endschema %}

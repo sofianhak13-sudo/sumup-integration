@@ -1,0 +1,29 @@
+<div class="section section--tight trust-bar">
+  <div class="container trust-bar__row">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .trust-bar__row { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-lg); }
+  @media screen and (max-width: 749px) { .trust-bar__row { gap: var(--space-md); justify-content: flex-start; overflow-x: auto; } }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.trust_bar",
+  "class": "section-trust-bar",
+  "blocks": [{ "type": "trust_item" }],
+  "settings": [],
+  "presets": [
+    {
+      "name": "t:names.trust_bar",
+      "blocks": [
+        { "type": "trust_item", "settings": { "icon": "shield", "label": "Secure checkout" } },
+        { "type": "trust_item", "settings": { "icon": "truck", "label": "Fast shipping" } },
+        { "type": "trust_item", "settings": { "icon": "refresh", "label": "Easy returns" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

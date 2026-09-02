@@ -1,0 +1,29 @@
+{%- comment -%}
+  Real inventory status only — never a fabricated "X people viewing this"
+  or fake urgency. Silent (renders nothing) when Shopify isn't tracking
+  inventory for this variant, since there is nothing true to say.
+  @param {object} variant
+{%- endcomment -%}
+
+{%- if variant == blank -%}
+  <p class="stock-message stock-message--unavailable">{{ 'products.product.unavailable' | t }}</p>
+{%- elsif variant.inventory_management == 'shopify' -%}
+  {%- if variant.inventory_quantity <= 0 and variant.inventory_policy == 'continue' -%}
+    <p class="stock-message stock-message--in-stock">{{ 'products.product.in_stock' | t }}</p>
+  {%- elsif variant.inventory_quantity <= 0 -%}
+    <p class="stock-message stock-message--sold-out">{{ 'products.product.sold_out' | t }}</p>
+  {%- elsif variant.inventory_quantity <= 10 -%}
+    <p class="stock-message stock-message--low">{{ 'products.product.low_stock' | t: count: variant.inventory_quantity }}</p>
+  {%- else -%}
+    <p class="stock-message stock-message--in-stock">{{ 'products.product.in_stock' | t }}</p>
+  {%- endif -%}
+{%- elsif variant.available == false -%}
+  <p class="stock-message stock-message--sold-out">{{ 'products.product.sold_out' | t }}</p>
+{%- endif -%}
+
+{% style %}
+  .stock-message { margin: 0; font-weight: 600; }
+  .stock-message--in-stock { color: rgb(var(--color-success)); }
+  .stock-message--low { color: rgb(var(--color-accent-2)); }
+  .stock-message--sold-out, .stock-message--unavailable { color: rgb(var(--color-error)); }
+{% endstyle %}

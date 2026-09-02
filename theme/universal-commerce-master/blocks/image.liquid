@@ -1,0 +1,28 @@
+{%- liquid
+  assign img = block.settings.image
+  assign ratio = 1
+  if img
+    assign ratio = img.aspect_ratio | default: 1
+  endif
+-%}
+<div class="image-block" style="--ratio: {{ ratio }};" {{ block.shopify_attributes }}>
+  {%- if img -%}
+    {{ img | image_url: width: 1600 | image_tag: loading: 'lazy', widths: '400,600,800,1200,1600', sizes: 'auto' }}
+  {%- else -%}
+    <div class="image-block__placeholder" style="aspect-ratio: var(--ratio); background: rgb(var(--color-surface));"></div>
+  {%- endif -%}
+</div>
+
+{% style %}
+  .image-block img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: var(--ratio); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.image",
+  "tag": null,
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "t:names.image" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="{{ settings.color_bg }}">
+  {%- if settings.share_image -%}
+    <link rel="icon" href="{{ settings.share_image | image_url: width: 32, height: 32 }}" sizes="any">
+  {%- endif -%}
+
+  {%- render 'meta-tags' -%}
+
+  {{ content_for_header }}
+
+  {%- render 'design-tokens' -%}
+  {{ 'base.css' | asset_url | stylesheet_tag }}
+
+  <script>
+    window.themeStrings = {
+      searchNoResultsSuggestion: {{ 'search.no_results_suggestion' | t | json }},
+      addToCart: {{ 'products.product.add_to_cart' | t | json }},
+      soldOut: {{ 'products.product.sold_out' | t | json }},
+      unavailable: {{ 'products.product.unavailable' | t | json }},
+      cartError: {{ 'cart.error_generic' | t | json }}
+      {%- if settings.enable_sumup -%}
+      ,
+      sumupErrorEmail: {{ 'integrations.sumup.error_email' | t | json }},
+      sumupErrorCartEmpty: {{ 'integrations.sumup.error_cart_empty' | t | json }},
+      sumupErrorGeneric: {{ 'integrations.sumup.error_generic' | t | json }}
+      {%- endif -%}
+    };
+  </script>
+  <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'collection.js' | asset_url }}" defer="defer"></script>
+  {%- if settings.enable_sumup -%}
+    <script src="{{ 'sumup-adapter.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+</head>
+<body class="template-{{ template.name | handle }}">
+  <a class="skip-link btn" href="#MainContent">{{ 'accessibility.skip_to_content' | t }}</a>
+
+  {% sections 'header-group' %}
+
+  <main id="MainContent" tabindex="-1">
+    {{ content_for_layout }}
+  </main>
+
+  {% sections 'footer-group' %}
+
+  {% section 'cart-drawer' %}
+
+  <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+</body>
+</html>

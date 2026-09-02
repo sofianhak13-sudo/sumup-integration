@@ -1,0 +1,26 @@
+<div class="section rich-text-section" style="text-align: {{ section.settings.alignment }};">
+  <div class="container" style="max-width: 640px;">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:names.rich_text",
+  "class": "section-rich-text",
+  "blocks": [{ "type": "@theme" }],
+  "settings": [
+    { "type": "select", "id": "alignment", "label": "t:content.alignment", "options": [
+      { "value": "left", "label": "t:options.left" },
+      { "value": "center", "label": "t:options.center" },
+      { "value": "right", "label": "t:options.right" }
+    ], "default": "center" }
+  ],
+  "presets": [
+    {
+      "name": "t:names.rich_text",
+      "blocks": [{ "type": "text", "settings": { "text": "<h2>Tell your brand's story</h2><p>Use this section to share more about your products, your values, or your story.</p>" } }]
+    }
+  ]
+}
+{% endschema %}

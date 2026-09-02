@@ -1,0 +1,42 @@
+<div class="footer-newsletter" {{ block.shopify_attributes }}>
+  <h3 class="footer-newsletter__heading">{{ 'newsletter.heading' | t }}</h3>
+  <p class="footer-newsletter__text">{{ 'newsletter.text' | t }}</p>
+
+  {%- form 'customer', class: 'footer-newsletter__form' -%}
+    <input type="hidden" name="contact[tags]" value="newsletter">
+    {%- if form.posted_successfully? -%}
+      <p class="footer-newsletter__success">{{ 'newsletter.success' | t }}</p>
+    {%- else -%}
+      <div class="footer-newsletter__row">
+        <label class="visually-hidden" for="NewsletterEmail-{{ block.id }}">{{ 'newsletter.placeholder' | t }}</label>
+        <input
+          type="email"
+          name="contact[email]"
+          id="NewsletterEmail-{{ block.id }}"
+          class="field"
+          placeholder="{{ 'newsletter.placeholder' | t }}"
+          required
+        >
+        <button type="submit" class="btn">{{ 'newsletter.submit' | t }}</button>
+      </div>
+      {%- if form.errors -%}
+        <p class="footer-newsletter__error" role="alert">{{ form.errors.messages['email'] }}</p>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endform -%}
+</div>
+
+{% style %}
+  .footer-newsletter__heading { font-size: 0.9rem; margin-bottom: var(--space-2xs); }
+  .footer-newsletter__text { font-size: 0.875rem; color: rgb(var(--color-text-muted)); margin-bottom: var(--space-sm); }
+  .footer-newsletter__row { display: flex; gap: var(--space-2xs); }
+  .footer-newsletter__error { color: rgb(var(--color-error)); font-size: 0.8125rem; margin-top: var(--space-2xs); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.newsletter",
+  "tag": null,
+  "settings": []
+}
+{% endschema %}

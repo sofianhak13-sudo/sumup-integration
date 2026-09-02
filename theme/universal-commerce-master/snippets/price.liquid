@@ -1,0 +1,30 @@
+{%- comment -%}
+  Reusable price primitive — product card, PDP, quick add all render
+  price through this one snippet so a currency-format change or a new
+  "from" logic only needs to happen once.
+  @param {object} product
+  @param {object} [variant] - defaults to product.selected_or_first_available_variant
+  @param {string} [id] - element id, used by product-form.js to live-update on variant change
+{%- endcomment -%}
+
+{%- liquid
+  assign variant = variant | default: product.selected_or_first_available_variant
+  assign formatted_price = variant.price | money
+  assign show_from = false
+  if product.variants.size > 1 and product.price_varies
+    assign show_from = true
+  endif
+-%}
+
+<span class="price-display" {% if id %}id="{{ id }}"{% endif %} data-price-display>
+  {%- if variant.compare_at_price > variant.price -%}
+    <span class="price price--sale">
+      {%- if show_from -%}{{ 'products.product.from_price' | t: price: formatted_price }}{%- else -%}{{ formatted_price }}{%- endif -%}
+    </span>
+    <span class="price--compare">{{ variant.compare_at_price | money }}</span>
+  {%- else -%}
+    <span class="price">
+      {%- if show_from -%}{{ 'products.product.from_price' | t: price: formatted_price }}{%- else -%}{{ formatted_price }}{%- endif -%}
+    </span>
+  {%- endif -%}
+</span>

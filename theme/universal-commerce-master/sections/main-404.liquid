@@ -1,0 +1,11 @@
+<section class="section" style="text-align: center;">
+  <div class="container">
+    <h1>{{ '404.title' | t }}</h1>
+    <p>{{ '404.text' | t }}</p>
+    <a href="{{ routes.root_url }}" class="btn">{{ '404.cta' | t }}</a>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "t:names.error_page" }
+{% endschema %}

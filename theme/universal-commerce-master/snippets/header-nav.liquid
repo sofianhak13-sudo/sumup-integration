@@ -1,0 +1,47 @@
+{%- comment -%}
+  Desktop navigation, one level of dropdown. Renders nothing gracefully
+  if the merchant hasn't picked a menu yet (new-store empty state).
+  @param {object} menu - a linklist object
+{%- endcomment -%}
+
+{%- if menu -%}
+  <ul class="header-nav__list">
+    {%- for link in menu.links -%}
+      <li class="header-nav__item{% if link.links.size > 0 %} header-nav__item--has-children{% endif %}">
+        <a href="{{ link.url }}" class="header-nav__link"{% if link.active %} aria-current="page"{% endif %}>
+          {{ link.title }}
+        </a>
+        {%- if link.links.size > 0 -%}
+          <ul class="header-nav__submenu">
+            {%- for child in link.links -%}
+              <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+{%- endif -%}
+
+{% style %}
+  .header-nav__list { display: flex; gap: var(--space-md); }
+  .header-nav__link { text-decoration: none; font-weight: 500; padding: var(--space-2xs) 0; }
+  .header-nav__item { position: relative; }
+  .header-nav__submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: rgb(var(--color-bg));
+    border: 1px solid rgb(var(--color-border));
+    border-radius: var(--radius-card);
+    padding: var(--space-2xs);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    z-index: 10;
+  }
+  .header-nav__submenu li a { display: block; padding: var(--space-2xs) var(--space-sm); text-decoration: none; border-radius: var(--radius-input); }
+  .header-nav__submenu li a:hover { background: rgb(var(--color-surface)); }
+  .header-nav__item--has-children:hover .header-nav__submenu,
+  .header-nav__item--has-children:focus-within .header-nav__submenu { display: block; }
+{% endstyle %}

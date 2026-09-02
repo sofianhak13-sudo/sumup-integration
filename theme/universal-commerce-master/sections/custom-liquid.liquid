@@ -1,0 +1,16 @@
+<div class="section">
+  <div class="container">
+    {{ section.settings.custom_liquid }}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:names.custom_liquid",
+  "class": "section-custom-liquid",
+  "settings": [
+    { "type": "liquid", "id": "custom_liquid", "label": "t:content.liquid_code", "info": "t:content.liquid_code_info" }
+  ],
+  "presets": [{ "name": "t:names.custom_liquid" }]
+}
+{% endschema %}

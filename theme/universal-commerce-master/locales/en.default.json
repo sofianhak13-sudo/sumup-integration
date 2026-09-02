@@ -1,0 +1,167 @@
+{
+  "accessibility": {
+    "skip_to_content": "Skip to content",
+    "close": "Close",
+    "menu": "Menu",
+    "open_menu": "Open menu",
+    "close_menu": "Close menu",
+    "cart": "Cart",
+    "cart_items_count": {
+      "one": "{{ count }} item in cart",
+      "other": "{{ count }} items in cart"
+    },
+    "search": "Search",
+    "account": "Account",
+    "next_slide": "Next slide",
+    "previous_slide": "Previous slide",
+    "slide_of": "Slide {{ current }} of {{ total }}",
+    "increase_quantity": "Increase quantity",
+    "decrease_quantity": "Decrease quantity",
+    "remove_item": "Remove {{ title }}",
+    "loading": "Loading",
+    "star_rating": "Rated {{ rating }} out of 5 stars",
+    "current_page": "Current page"
+  },
+  "general": {
+    "learn_more": "Learn more",
+    "view_all": "View all",
+    "back_to_home": "Back to home",
+    "read_more": "Read more",
+    "close": "Close",
+    "enter": "Enter",
+    "gift_card": "Gift card",
+    "password": "Password",
+    "password_page_error": "Incorrect password.",
+    "password_page_text": "This store is currently password-protected."
+  },
+  "header": {
+    "announcement": {
+      "default": "Welcome to our store"
+    }
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Search products, pages, articles...",
+    "submit": "Search",
+    "no_results": "No results for \"{{ terms }}\"",
+    "no_results_suggestion": "Try a different search term.",
+    "results_count": {
+      "one": "{{ count }} result",
+      "other": "{{ count }} results"
+    },
+    "products": "Products",
+    "collections": "Collections",
+    "pages": "Pages",
+    "articles": "Articles"
+  },
+  "collection": {
+    "empty": "No products found",
+    "empty_suggestion": "Try removing some filters or browse all products.",
+    "clear_filters": "Clear all",
+    "filter_and_sort": "Filter and sort",
+    "sort_by": "Sort by",
+    "product_count": {
+      "one": "{{ count }} product",
+      "other": "{{ count }} products"
+    },
+    "pagination": "Pagination"
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to cart",
+      "adding": "Adding...",
+      "added": "Added",
+      "buy_now": "Buy now",
+      "sold_out": "Sold out",
+      "unavailable": "Unavailable",
+      "quantity": "Quantity",
+      "sku": "SKU: {{ sku }}",
+      "vendor": "{{ vendor }}",
+      "from_price": "From {{ price }}",
+      "description": "Description",
+      "size_guide": "Size guide",
+      "in_stock": "In stock",
+      "low_stock": "Only {{ count }} left",
+      "select_option": "Select {{ option }}",
+      "zoom": "Zoom image",
+      "sale_price": "Sale price",
+      "sale": "Sale"
+    }
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty",
+    "empty_cta": "Continue shopping",
+    "subtotal": "Subtotal",
+    "taxes_included": "Taxes included",
+    "shipping_at_checkout": "Shipping and discounts calculated at checkout",
+    "checkout": "Checkout",
+    "remove": "Remove",
+    "quantity": "Quantity",
+    "note": "Add a note",
+    "discount_code": "Discount code",
+    "apply": "Apply",
+    "free_shipping_reached": "🎉 You've unlocked free shipping!",
+    "free_shipping_progress": "Add {{ amount }} more for free shipping",
+    "error_generic": "Something went wrong. Please try again.",
+    "updating": "Updating cart..."
+  },
+  "digital": {
+    "instant_access": "Instant digital access",
+    "no_shipping": "No shipping — delivered digitally",
+    "one_time_payment": "One-time payment, lifetime access"
+  },
+  "newsletter": {
+    "heading": "Join our list",
+    "text": "Get news and offers straight to your inbox.",
+    "placeholder": "Your email",
+    "submit": "Subscribe",
+    "success": "Thanks for subscribing!"
+  },
+  "sections": {
+    "trust_bar": {
+      "secure_checkout": "Secure checkout",
+      "easy_returns": "Easy returns",
+      "customer_support": "Customer support"
+    },
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec",
+      "expired": "This offer has ended"
+    },
+    "comparison": {
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "testimonial": {
+      "verified": "Verified purchase"
+    }
+  },
+  "integrations": {
+    "sumup": {
+      "email_placeholder": "Your email address",
+      "pay_button": "Pay with SumUp",
+      "loading": "Redirecting to secure payment...",
+      "error_email": "Please enter a valid email address.",
+      "error_cart_empty": "Your cart is empty.",
+      "error_generic": "Could not start the SumUp payment. Please try again."
+    }
+  },
+  "404": {
+    "title": "Page not found",
+    "text": "The page you're looking for doesn't exist.",
+    "cta": "Back to home"
+  },
+  "blogs": {
+    "comments": {
+      "email": "Email",
+      "message": "Message",
+      "name": "Name",
+      "submit": "Post comment",
+      "success": "Your comment was posted successfully.",
+      "title": "Leave a comment"
+    }
+  }
+}

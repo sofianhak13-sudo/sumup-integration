@@ -1,0 +1,24 @@
+<div class="text-block text-{{ block.settings.alignment }}" {{ block.shopify_attributes }}>
+  {{ block.settings.text }}
+</div>
+
+{% schema %}
+{
+  "name": "t:names.text",
+  "tag": null,
+  "settings": [
+    { "type": "richtext", "id": "text", "label": "t:names.text", "default": "<p>Text block</p>" },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "t:content.alignment",
+      "options": [
+        { "value": "left", "label": "t:options.left" },
+        { "value": "center", "label": "t:options.center" },
+        { "value": "right", "label": "t:options.right" }
+      ],
+      "default": "left"
+    }
+  ]
+}
+{% endschema %}

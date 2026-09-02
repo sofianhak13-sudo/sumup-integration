@@ -1,0 +1,115 @@
+<section class="section collection-page">
+  <div class="container">
+    <div class="collection-page__header">
+      <h1>{{ collection.title }}</h1>
+      {%- if collection.description != blank -%}
+        <div class="collection-page__description rte">{{ collection.description }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- paginate collection.products by section.settings.products_per_page -%}
+      <div class="collection-page__toolbar">
+        <button type="button" class="btn btn--secondary" data-filters-toggle aria-controls="CollectionFilters" aria-expanded="false">
+          {{ 'collection.filter_and_sort' | t }}
+        </button>
+        <p class="collection-page__count">{{ 'collection.product_count' | t: count: collection.products_size }}</p>
+
+        <form class="collection-page__sort" data-sort-form>
+          <label for="SortBy" class="visually-hidden">{{ 'collection.sort_by' | t }}</label>
+          <select name="sort_by" id="SortBy" class="field" data-sort-select>
+            {%- for option in collection.sort_options -%}
+              <option value="{{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
+            {%- endfor -%}
+          </select>
+        </form>
+      </div>
+
+      <div class="collection-page__layout">
+        {%- if collection.filters.size > 0 -%}
+          <aside class="collection-filters" id="CollectionFilters" data-filters-panel hidden>
+            <form data-filters-form>
+              {%- for filter in collection.filters -%}
+                <fieldset class="collection-filters__group">
+                  <legend>{{ filter.label }}</legend>
+                  {%- for value in filter.values -%}
+                    <label class="collection-filters__option">
+                      <input
+                        type="checkbox"
+                        name="{{ value.param_name }}"
+                        value="{{ value.value }}"
+                        {% if value.active %}checked{% endif %}
+                        {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                      >
+                      {{ value.label }} ({{ value.count }})
+                    </label>
+                  {%- endfor -%}
+                </fieldset>
+              {%- endfor -%}
+              {%- if collection.current_vendor or collection.current_type -%}
+                <a href="{{ collection.url }}" class="btn btn--tertiary">{{ 'collection.clear_filters' | t }}</a>
+              {%- endif -%}
+            </form>
+          </aside>
+        {%- endif -%}
+
+        <div class="collection-page__grid-wrap">
+          {%- if collection.products.size == 0 -%}
+            <div class="collection-empty">
+              <p>{{ 'collection.empty' | t }}</p>
+              <p class="collection-empty__suggestion">{{ 'collection.empty_suggestion' | t }}</p>
+            </div>
+          {%- else -%}
+            <div
+              class="grid collection-page__grid"
+              style="--grid-cols-mobile: {{ section.settings.columns_mobile }}; --grid-cols-desktop: {{ section.settings.columns_desktop }};"
+            >
+              {%- for product in collection.products -%}
+                {%- render 'product-card', product: product -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          {%- if paginate.pages > 1 -%}
+            <nav class="pagination" aria-label="{{ 'collection.pagination' | t }}">
+              {%- if paginate.previous -%}<a href="{{ paginate.previous.url }}">&larr;</a>{%- endif -%}
+              {%- for part in paginate.parts -%}
+                {%- if part.is_link -%}<a href="{{ part.url }}">{{ part.title }}</a>{%- else -%}<span aria-current="page">{{ part.title }}</span>{%- endif -%}
+              {%- endfor -%}
+              {%- if paginate.next -%}<a href="{{ paginate.next.url }}">&rarr;</a>{%- endif -%}
+            </nav>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endpaginate -%}
+  </div>
+</section>
+
+{% style %}
+  .collection-page__header { margin-bottom: var(--space-md); text-align: center; }
+  .collection-page__toolbar { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md); flex-wrap: wrap; }
+  .collection-page__count { margin: 0 auto 0 var(--space-sm); font-size: 0.875rem; color: rgb(var(--color-text-muted)); }
+  .collection-page__layout { display: flex; gap: var(--space-lg); align-items: flex-start; }
+  .collection-filters { width: 240px; flex-shrink: 0; }
+  .collection-filters[hidden] { display: none; }
+  .collection-filters__group { border: none; padding: 0; margin: 0 0 var(--space-md); }
+  .collection-filters__group legend { font-weight: 600; margin-bottom: var(--space-2xs); }
+  .collection-filters__option { display: block; padding: var(--space-3xs) 0; font-size: 0.875rem; }
+  .collection-page__grid-wrap { flex: 1; min-width: 0; }
+  .collection-empty { text-align: center; padding: var(--space-2xl) 0; }
+  .collection-empty__suggestion { color: rgb(var(--color-text-muted)); }
+  .pagination { display: flex; justify-content: center; gap: var(--space-sm); margin-top: var(--space-lg); }
+  @media screen and (max-width: 749px) {
+    .collection-filters { position: fixed; inset: 0; z-index: 50; width: 100%; background: rgb(var(--color-bg)); padding: var(--space-md); overflow-y: auto; }
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.collection_page",
+  "settings": [
+    { "type": "range", "id": "products_per_page", "label": "t:content.products_per_page", "min": 8, "max": 48, "step": 4, "default": 24 },
+    { "type": "range", "id": "columns_desktop", "label": "t:content.columns_desktop", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "range", "id": "columns_mobile", "label": "t:content.columns_mobile", "min": 1, "max": 2, "step": 1, "default": 2 }
+  ]
+}
+{% endschema %}

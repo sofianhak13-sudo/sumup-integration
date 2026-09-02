@@ -1,0 +1,80 @@
+{%- comment -%}
+  Product Card Engine — the one card implementation used by the
+  collection grid, featured-collection section, search results, and
+  cart cross-sell. Preset-adaptive purely through CSS custom properties
+  (--radius-card, --color-*) — never a preset-specific fork of this file.
+  @param {object} product
+  @param {boolean} [quick_add] - default true
+{%- endcomment -%}
+
+{%- liquid
+  assign quick_add = quick_add | default: true
+  assign card_variant = product.selected_or_first_available_variant
+  assign secondary_image = product.media[1]
+-%}
+
+<div class="product-card card card--hover-{{ settings.card_hover }}" data-product-card>
+  <a href="{{ product.url }}" class="product-card__media card__media">
+    {%- if product.featured_media -%}
+      {{
+        product.featured_media
+        | image_url: width: 800
+        | image_tag:
+          loading: 'lazy',
+          widths: '300,450,600,800',
+          sizes: '(min-width: 990px) 25vw, 50vw',
+          alt: product.featured_media.alt | default: product.title,
+          class: 'product-card__image product-card__image--primary'
+      }}
+      {%- if secondary_image -%}
+        {{ secondary_image | image_url: width: 800 | image_tag: loading: 'lazy', alt: '', class: 'product-card__image product-card__image--secondary' }}
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'product-card__image' }}
+    {%- endif -%}
+
+    <div class="product-card__badges">
+      {%- if card_variant.available == false -%}
+        <span class="badge badge--sold-out">{{ 'products.product.sold_out' | t }}</span>
+      {%- elsif card_variant.compare_at_price > card_variant.price -%}
+        <span class="badge badge--sale">{{ 'products.product.sale' | t }}</span>
+      {%- endif -%}
+    </div>
+  </a>
+
+  <div class="card__body product-card__body">
+    {%- if product.vendor != blank and settings.show_vendor_on_cards -%}
+      <p class="product-card__vendor">{{ product.vendor }}</p>
+    {%- endif -%}
+    <a href="{{ product.url }}" class="product-card__title">{{ product.title }}</a>
+    {%- render 'price', product: product -%}
+
+    {%- if quick_add and product.has_only_default_variant -%}
+      <product-form data-product-form data-section-id="card-{{ product.id }}">
+        {%- form 'product', product, class: 'product-card__quick-add' -%}
+          <input type="hidden" name="id" value="{{ card_variant.id }}" data-product-form-variant-id>
+          <button
+            type="submit"
+            class="btn btn--secondary btn--full touch-target"
+            data-add-to-cart
+            {% unless card_variant.available %}disabled aria-disabled="true"{% endunless %}
+          >
+            <span data-add-to-cart-text>
+              {%- if card_variant.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}
+            </span>
+          </button>
+        {%- endform -%}
+      </product-form>
+    {%- endif -%}
+  </div>
+</div>
+
+{% style %}
+  .product-card__media { position: relative; }
+  .product-card__badges { position: absolute; top: var(--space-2xs); left: var(--space-2xs); display: flex; gap: var(--space-3xs); }
+  .product-card__image--secondary { position: absolute; inset: 0; opacity: 0; transition: opacity var(--duration-base) var(--ease-standard); }
+  .product-card:hover .product-card__image--secondary { opacity: 1; }
+  .product-card__vendor { font-size: 0.75rem; color: rgb(var(--color-text-muted)); margin: 0 0 2px; }
+  .product-card__title { display: block; text-decoration: none; font-weight: 600; margin-bottom: var(--space-3xs); }
+  .product-card__quick-add { margin-top: var(--space-sm); }
+{% endstyle %}

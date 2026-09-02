@@ -1,0 +1,102 @@
+{%- comment -%}
+  Design System — single source of truth for every visual token in the
+  theme. Every section/snippet/block reads these CSS custom properties
+  instead of hardcoding colors, spacing, or radii. Swapping a store
+  profile (theme preset) only ever changes settings_data.json — never
+  this file, never a section file.
+{%- endcomment -%}
+
+{%- liquid
+  case settings.density
+    when 'compact'
+      assign space_unit = 0.75
+    when 'spacious'
+      assign space_unit = 1.35
+    else
+      assign space_unit = 1
+  endcase
+
+  assign glow_rgb = settings.glow_color | color_to_rgb | remove: 'rgb(' | remove: ')'
+  assign accent_rgb = settings.color_accent | color_to_rgb | remove: 'rgb(' | remove: ')'
+-%}
+
+{% style %}
+  :root {
+    /* Color */
+    --color-bg: {{ settings.color_bg.red }}, {{ settings.color_bg.green }}, {{ settings.color_bg.blue }};
+    --color-surface: {{ settings.color_surface.red }}, {{ settings.color_surface.green }}, {{ settings.color_surface.blue }};
+    --color-border: {{ settings.color_border.red }}, {{ settings.color_border.green }}, {{ settings.color_border.blue }};
+    --color-text: {{ settings.color_text.red }}, {{ settings.color_text.green }}, {{ settings.color_text.blue }};
+    --color-text-muted: {{ settings.color_text_muted.red }}, {{ settings.color_text_muted.green }}, {{ settings.color_text_muted.blue }};
+    --color-accent: {{ accent_rgb }};
+    --color-accent-contrast: {{ settings.color_accent_contrast.red }}, {{ settings.color_accent_contrast.green }}, {{ settings.color_accent_contrast.blue }};
+    --color-accent-2: {{ settings.color_accent_2.red }}, {{ settings.color_accent_2.green }}, {{ settings.color_accent_2.blue }};
+    --color-success: {{ settings.color_success.red }}, {{ settings.color_success.green }}, {{ settings.color_success.blue }};
+    --color-error: {{ settings.color_error.red }}, {{ settings.color_error.green }}, {{ settings.color_error.blue }};
+    --color-sale: {{ settings.color_sale.red }}, {{ settings.color_sale.green }}, {{ settings.color_sale.blue }};
+
+    /* Typography */
+    --font-heading: {{ settings.font_heading.family }}, {{ settings.font_heading.fallback_families }};
+    --font-heading-weight: {{ settings.font_heading.weight }};
+    --font-heading-style: {{ settings.font_heading.style }};
+    --font-body: {{ settings.font_body.family }}, {{ settings.font_body.fallback_families }};
+    --font-body-weight: {{ settings.font_body.weight }};
+    --font-body-style: {{ settings.font_body.style }};
+    --font-body-size: {{ settings.font_body_size }}px;
+    --font-body-line-height: {{ settings.font_body_line_height }};
+    --font-heading-scale: {{ settings.font_heading_scale | divided_by: 100.0 }};
+    --heading-letter-spacing: {{ settings.heading_letter_spacing }}px;
+    --heading-transform: {% if settings.heading_uppercase %}uppercase{% else %}none{% endif %};
+
+    /* Layout */
+    --page-width: {{ settings.page_width }}px;
+    --grid-gap: {{ settings.grid_gap }}px;
+    --space-unit: {{ space_unit }};
+    --space-3xs: calc(4px * var(--space-unit));
+    --space-2xs: calc(8px * var(--space-unit));
+    --space-xs: calc(12px * var(--space-unit));
+    --space-sm: calc(16px * var(--space-unit));
+    --space-md: calc(24px * var(--space-unit));
+    --space-lg: calc(40px * var(--space-unit));
+    --space-xl: calc(64px * var(--space-unit));
+    --space-2xl: calc(96px * var(--space-unit));
+
+    /* Shape */
+    --radius-button: {{ settings.button_radius }}px;
+    --radius-card: {{ settings.card_radius }}px;
+    --radius-input: {{ settings.input_radius }}px;
+    --button-transform: {% if settings.button_uppercase %}uppercase{% else %}none{% endif %};
+
+    /* Glow */
+    --glow-color-rgb: {{ glow_rgb }};
+    --glow-intensity: {{ settings.glow_intensity }}px;
+    --glow-shadow: {% if settings.enable_glow %}0 0 var(--glow-intensity) rgba(var(--glow-color-rgb), 0.55){% else %}none{% endif %};
+    --glow-shadow-hover: {% if settings.enable_glow %}0 0 calc(var(--glow-intensity) * 1.4) rgba(var(--glow-color-rgb), 0.75){% else %}none{% endif %};
+
+    /* Motion */
+    --motion-enabled: {% if settings.enable_animations %}1{% else %}0{% endif %};
+    --duration-fast: 150ms;
+    --duration-base: 250ms;
+    --duration-slow: 400ms;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Focus */
+    --focus-ring: 0 0 0 2px rgb(var(--color-bg)), 0 0 0 4px rgb(var(--color-accent));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-fast: 0ms;
+      --duration-base: 0ms;
+      --duration-slow: 0ms;
+    }
+  }
+
+  {% unless settings.enable_animations %}
+    :root {
+      --duration-fast: 0ms;
+      --duration-base: 0ms;
+      --duration-slow: 0ms;
+    }
+  {% endunless %}
+{% endstyle %}

@@ -1,0 +1,42 @@
+{%- comment -%}
+  Predictive search modal. Uses Shopify's native Predictive Search API
+  (/search/suggest.json) client-side — no custom backend, no third-party
+  search service.
+{%- endcomment -%}
+
+<dialog id="PredictiveSearch" class="predictive-search" aria-label="{{ 'search.title' | t }}">
+  <form action="{{ routes.search_url }}" method="get" role="search" class="predictive-search__form">
+    <input
+      type="search"
+      name="q"
+      class="field predictive-search__input"
+      placeholder="{{ 'search.placeholder' | t }}"
+      autocomplete="off"
+      data-predictive-search-input
+    >
+    <input type="hidden" name="type" value="product,collection,page,article">
+    <button type="button" class="touch-target" data-search-close>
+      <span class="visually-hidden">{{ 'accessibility.close' | t }}</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </form>
+  <div class="predictive-search__results" data-predictive-search-results aria-live="polite"></div>
+</dialog>
+
+<template id="PredictiveSearchResultsTemplate">
+  <div class="predictive-search__group" data-group="products">
+    <p class="predictive-search__group-title">{{ 'search.products' | t }}</p>
+    <ul data-group-list></ul>
+  </div>
+</template>
+
+{% style %}
+  .predictive-search { position: fixed; inset: 0; width: 100%; height: 100%; max-width: 100%; max-height: 100%; margin: 0; border: none; padding: var(--space-md); background: rgb(var(--color-bg)); }
+  .predictive-search::backdrop { background: rgba(0,0,0,0.4); }
+  .predictive-search__form { display: flex; gap: var(--space-2xs); max-width: 640px; margin-inline: auto; }
+  .predictive-search__results { max-width: 640px; margin: var(--space-md) auto 0; }
+  .predictive-search__group-title { font-size: 0.75rem; text-transform: uppercase; color: rgb(var(--color-text-muted)); margin-bottom: var(--space-2xs); }
+  .predictive-search__result { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-2xs) 0; text-decoration: none; }
+  .predictive-search__result img { width: 48px; height: 48px; object-fit: cover; border-radius: var(--radius-input); background: rgb(var(--color-surface)); }
+  .predictive-search__empty { color: rgb(var(--color-text-muted)); text-align: center; padding: var(--space-lg) 0; }
+{% endstyle %}

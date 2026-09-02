@@ -1,0 +1,59 @@
+<div class="hero hero--{{ section.settings.height }}" style="{% if section.settings.image %}background-image: url({{ section.settings.image | image_url: width: 2000 }});{% endif %}">
+  {%- if section.settings.image and section.settings.overlay_opacity > 0 -%}
+    <div class="hero__overlay" style="opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+  {%- endif -%}
+  <div class="container hero__content hero__content--{{ section.settings.alignment }}">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% style %}
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-color: rgb(var(--color-surface));
+    color: {% if section.settings.image %}#fff{% else %}rgb(var(--color-text)){% endif %};
+    min-height: 40vh;
+  }
+  .hero--small { min-height: 40vh; }
+  .hero--medium { min-height: 60vh; }
+  .hero--large { min-height: 85vh; }
+  .hero__overlay { position: absolute; inset: 0; background: #000; }
+  .hero__content { position: relative; z-index: 1; max-width: 560px; }
+  .hero__content--center { max-width: 640px; margin-inline: auto; text-align: center; }
+  .hero__content--right { margin-inline-start: auto; text-align: right; }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.hero",
+  "class": "section-hero",
+  "blocks": [{ "type": "@theme" }],
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "t:names.image" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:content.overlay_opacity", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 30 },
+    { "type": "select", "id": "height", "label": "t:content.height", "options": [
+      { "value": "small", "label": "t:options.small" },
+      { "value": "medium", "label": "t:options.medium" },
+      { "value": "large", "label": "t:options.large" }
+    ], "default": "medium" },
+    { "type": "select", "id": "alignment", "label": "t:content.alignment", "options": [
+      { "value": "left", "label": "t:options.left" },
+      { "value": "center", "label": "t:options.center" },
+      { "value": "right", "label": "t:options.right" }
+    ], "default": "left" }
+  ],
+  "presets": [
+    {
+      "name": "t:names.hero",
+      "blocks": [
+        { "type": "text", "settings": { "text": "<h1>Welcome to our store</h1>" } },
+        { "type": "button", "settings": { "label": "Shop now", "link": "shopify://collections/all" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

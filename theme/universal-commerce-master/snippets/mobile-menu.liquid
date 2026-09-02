@@ -1,0 +1,56 @@
+{%- comment -%}
+  Mobile navigation drawer. Uses <dialog> for native focus-trapping and
+  Escape-to-close, progressively enhanced by assets/global.js.
+  @param {object} menu - a linklist object
+{%- endcomment -%}
+
+<dialog id="MobileMenu" class="mobile-menu" aria-label="{{ 'accessibility.menu' | t }}">
+  <div class="mobile-menu__header">
+    <span class="mobile-menu__title">{{ 'accessibility.menu' | t }}</span>
+    <button type="button" class="touch-target" data-mobile-menu-close>
+      <span class="visually-hidden">{{ 'accessibility.close_menu' | t }}</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  {%- if menu -%}
+    <ul class="mobile-menu__list">
+      {%- for link in menu.links -%}
+        <li>
+          <a href="{{ link.url }}">{{ link.title }}</a>
+          {%- if link.links.size > 0 -%}
+            <ul class="mobile-menu__sublist">
+              {%- for child in link.links -%}
+                <li><a href="{{ child.url }}">{{ child.title }}</a></li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  <a href="{{ routes.account_url }}" class="mobile-menu__account">{{ 'accessibility.account' | t }}</a>
+</dialog>
+
+{% style %}
+  .mobile-menu {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(85vw, 360px);
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    border: none;
+    padding: var(--space-md);
+    background: rgb(var(--color-bg));
+    color: rgb(var(--color-text));
+  }
+  .mobile-menu::backdrop { background: rgba(0,0,0,0.4); }
+  .mobile-menu__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md); }
+  .mobile-menu__title { font-weight: 700; }
+  .mobile-menu__list > li { border-bottom: 1px solid rgb(var(--color-border)); }
+  .mobile-menu__list a { display: block; padding: var(--space-sm) 0; text-decoration: none; font-size: 1.05rem; min-height: 44px; }
+  .mobile-menu__sublist a { padding-inline-start: var(--space-sm); font-size: 0.95rem; opacity: 0.8; }
+  .mobile-menu__account { display: block; margin-top: var(--space-md); text-decoration: underline; }
+{% endstyle %}

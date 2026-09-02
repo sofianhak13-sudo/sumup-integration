@@ -1,0 +1,15 @@
+<section class="section cart-page">
+  <div class="container" style="max-width: 720px;">
+    <h1 class="cart-page__title">{{ 'cart.title' | t }}</h1>
+    <div data-cart-page-body>
+      {%- render 'cart-items', context: 'page' -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "t:names.cart_page",
+  "blocks": [{ "type": "cross_sell" }]
+}
+{% endschema %}

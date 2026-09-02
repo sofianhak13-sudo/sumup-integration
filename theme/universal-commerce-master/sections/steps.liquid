@@ -1,0 +1,35 @@
+<div class="section steps-section">
+  <div class="container">
+    {%- if section.settings.heading != blank -%}<h2 class="steps-section__heading">{{ section.settings.heading }}</h2>{%- endif -%}
+    <div class="steps-section__row">
+      {% content_for 'blocks' %}
+    </div>
+  </div>
+</div>
+
+{% style %}
+  .steps-section__heading { text-align: center; margin-bottom: var(--space-lg); }
+  .steps-section__row { display: grid; gap: var(--space-lg); grid-template-columns: 1fr; }
+  @media screen and (min-width: 750px) { .steps-section__row { grid-auto-flow: column; grid-auto-columns: 1fr; } }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.steps",
+  "class": "section-steps",
+  "blocks": [{ "type": "step_item" }],
+  "settings": [
+    { "type": "text", "id": "heading", "label": "t:content.heading", "default": "How it works" }
+  ],
+  "presets": [
+    {
+      "name": "t:names.steps",
+      "blocks": [
+        { "type": "step_item", "settings": { "number": "1", "title": "Order" } },
+        { "type": "step_item", "settings": { "number": "2", "title": "Ship" } },
+        { "type": "step_item", "settings": { "number": "3", "title": "Enjoy" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

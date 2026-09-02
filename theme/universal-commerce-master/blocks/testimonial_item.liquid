@@ -1,0 +1,38 @@
+<div class="card testimonial-item" {{ block.shopify_attributes }}>
+  <div class="card__body">
+    {%- if block.settings.rating > 0 -%}
+      <div class="testimonial-item__rating" aria-label="{{ 'accessibility.star_rating' | t: rating: block.settings.rating }}">
+        {%- for i in (1..5) -%}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="{% if i <= block.settings.rating %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 2l2.9 6.6 7.1.7-5.4 4.7 1.6 7-6.2-3.7L5.8 21l1.6-7-5.4-4.7 7.1-.7L12 2z"/></svg>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+    {%- if block.settings.quote != blank -%}<p class="testimonial-item__quote">&ldquo;{{ block.settings.quote }}&rdquo;</p>{%- endif -%}
+    <p class="testimonial-item__author">
+      {{ block.settings.author }}
+      {%- if block.settings.verified -%}
+        <span class="testimonial-item__verified">&middot; {{ 'sections.testimonial.verified' | t }}</span>
+      {%- endif -%}
+    </p>
+  </div>
+</div>
+
+{% style %}
+  .testimonial-item__rating { display: flex; gap: 2px; color: #f5b301; margin-bottom: var(--space-2xs); }
+  .testimonial-item__quote { font-style: italic; margin-bottom: var(--space-sm); }
+  .testimonial-item__author { font-weight: 600; font-size: 0.875rem; margin: 0; }
+  .testimonial-item__verified { font-weight: 400; color: rgb(var(--color-text-muted)); }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "t:names.testimonials",
+  "tag": null,
+  "settings": [
+    { "type": "range", "id": "rating", "label": "t:content.rating", "min": 0, "max": 5, "step": 1, "default": 5 },
+    { "type": "textarea", "id": "quote", "label": "t:content.quote", "default": "An excellent product and a smooth experience from start to finish." },
+    { "type": "text", "id": "author", "label": "t:content.author", "default": "Happy customer" },
+    { "type": "checkbox", "id": "verified", "label": "t:content.verified", "default": true }
+  ]
+}
+{% endschema %}
