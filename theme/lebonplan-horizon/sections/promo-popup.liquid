@@ -1,9 +1,9 @@
-{%- doc -%}
+{% comment %}
   Promotional Popup — modal déclenchable par délai, scroll ou intention de
   sortie (desktop). Contenu 100% composable avec les blocks natifs Horizon
   (image, text, button, email-signup...) déposés dans la zone "blocks".
   Nouveau composant Horizon Premium Multistore v1.1.
-{%- enddoc -%}
+{% endcomment %}
 
 <dialog
   id="PromoPopup-{{ section.id }}"
@@ -17,7 +17,7 @@
   aria-labelledby="PromoPopupTitle-{{ section.id }}"
 >
   <div class="promo-popup__inner spacing-style" style="{% render 'spacing-style', settings: section.settings %}">
-    <button type="button" class="promo-popup__close" data-promo-popup-close aria-label="Fermer">
+    <button type="button" class="promo-popup__close" data-promo-popup-close aria-label="{{ 'premium_sections.promo_popup.close' | t }}">
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
     <div id="PromoPopupTitle-{{ section.id }}" class="promo-popup__content">
@@ -125,8 +125,13 @@
 
   .promo-popup__close {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 4px;
+    right: 4px;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
     cursor: pointer;

@@ -45,6 +45,24 @@
             "border_radius": 0
           },
           "blocks": {}
+        },
+        "sumup_cart_lbp": {
+          "type": "sumup-cart-payment",
+          "name": "SumUp — Paiement panier",
+          "settings": {
+            "app_proxy_endpoint": "/apps/sumup-pay/cart",
+            "button_text": "🚀 Obtenir mon accès",
+            "loading_text": "Chargement...",
+            "email_placeholder": "Votre adresse e-mail",
+            "warning_text": "⚠️ Utilisez une adresse e-mail valide pour recevoir votre accès",
+            "accent_color": "#00a8ff",
+            "button_background": "#050607",
+            "button_text_color": "#ffffff",
+            "field_background": "#0b0d12",
+            "field_text_color": "#ffffff",
+            "button_radius": 34,
+            "field_radius": 18
+          }
         }
       },
       "settings": {
@@ -53,7 +71,9 @@
         "padding-block-start": 24,
         "padding-block-end": 0
       },
-      "block_order": []
+      "block_order": [
+        "sumup_cart_lbp"
+      ]
     },
     "product_list_NNFgcy": {
       "type": "product-list",
@@ -221,7 +241,7 @@
       },
       "name": "Featured collection",
       "settings": {
-        "collection": "all",
+        "collection": "frontpage",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 4,

@@ -34,7 +34,7 @@
       {%- if block.settings.reached_message != blank -%}
         {{ block.settings.reached_message }}
       {%- else -%}
-        🎉 {{ 'sections.cart.free_shipping_reached' | t: default: 'Livraison gratuite débloquée !' }}
+        {{ 'premium_sections.cart.free_shipping_reached' | t }}
       {%- endif -%}
     {%- else -%}
       {%- assign remaining_amount = remaining_cents | money -%}

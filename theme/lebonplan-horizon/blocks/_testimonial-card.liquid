@@ -36,7 +36,7 @@
       <span class="testimonial-card__name">
         {{ block.settings.name }}
         {%- if block.settings.verified -%}
-          <span class="testimonial-card__verified" title="Achat vérifié" aria-label="Achat vérifié">
+          <span class="testimonial-card__verified" title="{{ 'premium_sections.testimonial.verified_purchase' | t }}" aria-label="{{ 'premium_sections.testimonial.verified_purchase' | t }}">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 9 4.6-.3 8-4 8-9V5l-8-3Z"/></svg>
           </span>
         {%- endif -%}

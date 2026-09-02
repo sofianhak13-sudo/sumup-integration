@@ -343,5 +343,26 @@
       "default_title": "預設標題",
       "sticky_add_to_cart": "快速加入購物車列"
     }
+  },
+  "premium_sections": {
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "promo_popup": {
+      "close": "Close"
+    },
+    "testimonial": {
+      "verified_purchase": "Verified purchase"
+    },
+    "comparison_table": {
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "cart": {
+      "free_shipping_reached": "🎉 Free shipping unlocked!"
+    }
   }
 }

@@ -126,7 +126,7 @@
                     "max_width": "normal",
                     "alignment": "left",
                     "type_preset": "h3",
-                    "font": "var(--font-primary--family)",
+                    "font": "var(--font-body--family)",
                     "font_size": "1rem",
                     "line_height": "normal",
                     "letter_spacing": "normal",
@@ -285,7 +285,7 @@
                 "max_width": "normal",
                 "alignment": "left",
                 "type_preset": "rte",
-                "font": "var(--font-primary--family)",
+                "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
                 "letter_spacing": "normal",
@@ -301,6 +301,61 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "product_inventory_main": {
+              "type": "product-inventory",
+              "settings": {
+                "inventory_threshold": 10,
+                "show_inventory_quantity": true
+              }
+            },
+            "accordion_faq_main": {
+              "type": "accordion",
+              "name": "FAQ",
+              "blocks": {
+                "row_1": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Shipping & delivery"
+                  },
+                  "blocks": {
+                    "text_1": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<p>Add your shipping and delivery information here.</p>"
+                      }
+                    }
+                  },
+                  "block_order": [
+                    "text_1"
+                  ]
+                },
+                "row_2": {
+                  "type": "_accordion-row",
+                  "settings": {
+                    "heading": "Returns"
+                  },
+                  "blocks": {
+                    "text_2": {
+                      "type": "text",
+                      "settings": {
+                        "text": "<p>Add your return policy here.</p>"
+                      }
+                    }
+                  },
+                  "block_order": [
+                    "text_2"
+                  ]
+                }
+              },
+              "block_order": [
+                "row_1",
+                "row_2"
+              ],
+              "settings": {
+                "icon": "plus",
+                "dividers": true
+              }
             }
           },
           "block_order": [
@@ -308,7 +363,9 @@
             "divider_VJhene",
             "variant_picker_R3rGDr",
             "buy_buttons_eYQEYi",
-            "text_aEtTtq"
+            "product_inventory_main",
+            "text_aEtTtq",
+            "accordion_faq_main"
           ]
         }
       },
@@ -339,7 +396,7 @@
             "max_width": "normal",
             "alignment": "left",
             "type_preset": "h4",
-            "font": "var(--font-primary--family)",
+            "font": "var(--font-body--family)",
             "font_size": "1rem",
             "line_height": "normal",
             "letter_spacing": "normal",

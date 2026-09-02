@@ -343,5 +343,26 @@
       "success_moderated": "Το σχόλιο δημοσιεύτηκε, εν αναμονή τροποποίησης",
       "success": "Το σχόλιο δημοσιεύτηκε"
     }
+  },
+  "premium_sections": {
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "promo_popup": {
+      "close": "Close"
+    },
+    "testimonial": {
+      "verified_purchase": "Verified purchase"
+    },
+    "comparison_table": {
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "cart": {
+      "free_shipping_reached": "🎉 Free shipping unlocked!"
+    }
   }
 }

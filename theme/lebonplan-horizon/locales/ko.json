@@ -343,5 +343,26 @@
       "success_moderated": "댓글이 게시되었습니다. 조정 대기 중입니다",
       "success": "댓글 게시됨"
     }
+  },
+  "premium_sections": {
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "promo_popup": {
+      "close": "Close"
+    },
+    "testimonial": {
+      "verified_purchase": "Verified purchase"
+    },
+    "comparison_table": {
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "cart": {
+      "free_shipping_reached": "🎉 Free shipping unlocked!"
+    }
   }
 }

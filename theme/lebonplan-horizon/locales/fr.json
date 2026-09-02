@@ -350,5 +350,26 @@
       "success_moderated": "Commentaire publié, en attente de modération",
       "success": "Commentaire publié"
     }
+  },
+  "premium_sections": {
+    "countdown": {
+      "days": "Jours",
+      "hours": "Heures",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "promo_popup": {
+      "close": "Fermer"
+    },
+    "testimonial": {
+      "verified_purchase": "Achat vérifié"
+    },
+    "comparison_table": {
+      "included": "Inclus",
+      "not_included": "Non inclus"
+    },
+    "cart": {
+      "free_shipping_reached": "🎉 Livraison gratuite débloquée !"
+    }
   }
 }

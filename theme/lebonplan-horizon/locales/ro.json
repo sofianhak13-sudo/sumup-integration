@@ -350,5 +350,26 @@
       "default_title": "Titlu implicit",
       "sticky_add_to_cart": "Bara de adăugare rapidă în coș"
     }
+  },
+  "premium_sections": {
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "promo_popup": {
+      "close": "Close"
+    },
+    "testimonial": {
+      "verified_purchase": "Verified purchase"
+    },
+    "comparison_table": {
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "cart": {
+      "free_shipping_reached": "🎉 Free shipping unlocked!"
+    }
   }
 }

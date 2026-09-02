@@ -350,5 +350,26 @@
       "success_moderated": "Komentar je objavljen, čeka moderiranje",
       "success": "Komentar objavljen"
     }
+  },
+  "premium_sections": {
+    "countdown": {
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Min",
+      "seconds": "Sec"
+    },
+    "promo_popup": {
+      "close": "Close"
+    },
+    "testimonial": {
+      "verified_purchase": "Verified purchase"
+    },
+    "comparison_table": {
+      "included": "Included",
+      "not_included": "Not included"
+    },
+    "cart": {
+      "free_shipping_reached": "🎉 Free shipping unlocked!"
+    }
   }
 }

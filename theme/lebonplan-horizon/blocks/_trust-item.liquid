@@ -2,10 +2,6 @@
   Item individuel du Trust Bar : icône + titre + sous-texte optionnel.
 {%- enddoc -%}
 
-{% liquid
-  assign icons = 'shield,bolt,headset,truck,check,gift,lock,refresh,star,globe' | split: ','
-%}
-
 <a
   {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% else %}role="listitem"{% endif %}
   class="trust-item"

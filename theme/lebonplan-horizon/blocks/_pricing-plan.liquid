@@ -27,8 +27,9 @@
   </div>
 
   {%- if block.settings.features != blank -%}
+    {%- assign feature_lines = block.settings.features | newline_to_br | split: '<br />' -%}
     <ul class="pricing-plan__features">
-      {%- for line in block.settings.features | newline_to_br | split: '<br />' -%}
+      {%- for line in feature_lines -%}
         {%- assign trimmed = line | strip -%}
         {%- if trimmed != blank -%}
           <li>
@@ -41,8 +42,9 @@
   {%- endif -%}
 
   {%- if block.settings.unavailable_features != blank -%}
+    {%- assign unavailable_feature_lines = block.settings.unavailable_features | newline_to_br | split: '<br />' -%}
     <ul class="pricing-plan__features pricing-plan__features--unavailable">
-      {%- for line in block.settings.unavailable_features | newline_to_br | split: '<br />' -%}
+      {%- for line in unavailable_feature_lines -%}
         {%- assign trimmed = line | strip -%}
         {%- if trimmed != blank -%}
           <li>

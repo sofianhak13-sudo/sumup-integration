@@ -1,4 +1,4 @@
-{%- doc -%}
+{% comment %}
   Countdown — compte à rebours robuste avec gestion d'expiration.
   Nouveau composant Horizon Premium Multistore v1.1.
 
@@ -7,7 +7,7 @@
   ambiguïté de fuseau horaire : le navigateur du visiteur calcule le
   compte à rebours par rapport à SA propre horloge locale, ce qui est
   le comportement correct et non trompeur.
-{%- enddoc -%}
+{% endcomment %}
 
 <div class="section section--{{ section.settings.section_width }}">
   <div
@@ -26,10 +26,10 @@
       data-expired-message="{{ section.settings.expired_message | escape }}"
     >
       <div class="countdown-timer__grid" data-countdown-grid>
-        <div class="countdown-timer__unit"><span data-days>00</span><small>Jours</small></div>
-        <div class="countdown-timer__unit"><span data-hours>00</span><small>Heures</small></div>
-        <div class="countdown-timer__unit"><span data-minutes>00</span><small>Min</small></div>
-        <div class="countdown-timer__unit"><span data-seconds>00</span><small>Sec</small></div>
+        <div class="countdown-timer__unit"><span data-days>00</span><small>{{ 'premium_sections.countdown.days' | t }}</small></div>
+        <div class="countdown-timer__unit"><span data-hours>00</span><small>{{ 'premium_sections.countdown.hours' | t }}</small></div>
+        <div class="countdown-timer__unit"><span data-minutes>00</span><small>{{ 'premium_sections.countdown.minutes' | t }}</small></div>
+        <div class="countdown-timer__unit"><span data-seconds>00</span><small>{{ 'premium_sections.countdown.seconds' | t }}</small></div>
       </div>
       <p class="countdown-timer__expired-message" data-countdown-expired-message hidden>{{ section.settings.expired_message }}</p>
     </div>

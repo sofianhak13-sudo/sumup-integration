@@ -1,13 +1,13 @@
 {
   "sections": {
-    "hero_jVaWmY": {
+    "hero_main": {
       "type": "hero",
       "blocks": {
-        "text_YLPk4p": {
+        "text_heading": {
           "type": "text",
           "name": "t:names.heading",
           "settings": {
-            "text": "<p>📖 LE BON PLAN — Accès exclusif à vie</p>",
+            "text": "<p>Welcome to your new store</p>",
             "width": "fit-content",
             "max_width": "normal",
             "alignment": "left",
@@ -26,42 +26,26 @@
             "padding-block-end": 0,
             "padding-inline-start": 0,
             "padding-inline-end": 0
-          },
-          "blocks": {}
+          }
         },
-        "button_H9gpTf": {
+        "button_shop": {
           "type": "button",
           "name": "t:names.button",
           "settings": {
-            "label": "🚀 Obtenir mon accès",
-            "link": "shopify://collections/frontpage",
+            "label": "Shop now",
+            "link": "shopify://collections/all",
             "open_in_new_tab": false,
-            "style_class": "button-premium",
-            "custom_button_background": "rgba(0,0,0,0)",
-            "custom_button_text": "{{ settings.color_palette.background }}",
-            "custom_button_border": "{{ settings.color_palette.background }}",
+            "style_class": "button",
             "width": "fit-content",
             "custom_width": 100,
             "width_mobile": "fit-content",
-            "custom_width_mobile": 100,
-            "premium_bg_color": "#07090d",
-            "premium_bg_gradient_color": "#11151c",
-            "premium_text_color": "#ffffff",
-            "premium_border_color": "#00a8ff",
-            "premium_glow_color": "#008cff",
-            "premium_glow_intensity": 26,
-            "premium_border_radius": 30,
-            "premium_border_width": 2,
-            "premium_enable_shine": true,
-            "premium_enable_pulse": true,
-            "premium_pulse_duration": 5
-          },
-          "blocks": {}
+            "custom_width_mobile": 100
+          }
         }
       },
       "block_order": [
-        "text_YLPk4p",
-        "button_H9gpTf"
+        "text_heading",
+        "button_shop"
       ],
       "name": "t:names.hero",
       "settings": {
@@ -83,7 +67,7 @@
         "section_width": "page-width",
         "section_height": "medium",
         "section_height_custom": 50,
-        "background_color": "#0B0B0B",
+        "background_color": "{{ settings.color_palette.background }}",
         "toggle_overlay": true,
         "overlay_color": "#050505b3",
         "overlay_style": "solid",
@@ -91,11 +75,48 @@
         "blurred_reflection": false,
         "reflection_opacity": 75,
         "padding-block-start": 100,
-        "padding-block-end": 72,
-        "image_1": "shopify://shop_images/Boite_premium_Le_Bon_Plan_futuriste.png"
+        "padding-block-end": 72
       }
     },
-    "product_list_fa6P9H": {
+    "trust_bar_main": {
+      "type": "trust-bar",
+      "blocks": {
+        "trust_1": {
+          "type": "_trust-item",
+          "settings": {
+            "icon": "shield",
+            "title": "Secure checkout"
+          }
+        },
+        "trust_2": {
+          "type": "_trust-item",
+          "settings": {
+            "icon": "headset",
+            "title": "Customer support"
+          }
+        },
+        "trust_3": {
+          "type": "_trust-item",
+          "settings": {
+            "icon": "refresh",
+            "title": "Easy returns"
+          }
+        }
+      },
+      "block_order": [
+        "trust_1",
+        "trust_2",
+        "trust_3"
+      ],
+      "name": "Trust Bar",
+      "settings": {
+        "layout": "row",
+        "section_width": "page-width",
+        "padding-block-start": 24,
+        "padding-block-end": 24
+      }
+    },
+    "product_list_main": {
       "type": "product-list",
       "blocks": {
         "static-header": {
@@ -130,11 +151,11 @@
             "padding-inline-end": 0
           },
           "blocks": {
-            "product_list_text_YFtzcL": {
+            "product_list_text": {
               "type": "_product-list-text",
               "name": "t:names.collection_title",
               "settings": {
-                "text": "<h3>{{ closest.collection.title }}</h3>",
+                "text": "<h3>Featured products</h3>",
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
@@ -151,27 +172,25 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              },
-              "blocks": {}
+              }
             },
-            "product_list_button_MWeP9V": {
+            "product_list_button": {
               "type": "_product-list-button",
               "name": "t:names.product_list_button",
               "settings": {
-                "label": "Voir tout",
+                "label": "View all",
                 "open_in_new_tab": false,
                 "style_class": "link",
                 "width": "fit-content",
                 "custom_width": 100,
                 "width_mobile": "fit-content",
                 "custom_width_mobile": 100
-              },
-              "blocks": {}
+              }
             }
           },
           "block_order": [
-            "product_list_text_YFtzcL",
-            "product_list_button_MWeP9V"
+            "product_list_text",
+            "product_list_button"
           ]
         },
         "static-product-card": {
@@ -190,7 +209,7 @@
             "padding-inline-end": 0
           },
           "blocks": {
-            "product_card_gallery_677WP3": {
+            "product_card_gallery": {
               "type": "_product-card-gallery",
               "name": "t:names.product_card_media",
               "settings": {
@@ -203,12 +222,10 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              },
-              "blocks": {}
+              }
             },
-            "product_title_YXxMTj": {
+            "product_title": {
               "type": "product-title",
-              "name": "t:names.product_title",
               "settings": {
                 "width": "100%",
                 "max_width": "normal",
@@ -227,12 +244,10 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              },
-              "blocks": {}
+              }
             },
-            "price_JQzVV4": {
+            "price": {
               "type": "price",
-              "name": "t:names.product_price",
               "settings": {
                 "show_sale_price_first": true,
                 "show_installments": false,
@@ -249,20 +264,20 @@
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              },
-              "blocks": {}
+              }
             }
           },
           "block_order": [
-            "product_card_gallery_677WP3",
-            "product_title_YXxMTj",
-            "price_JQzVV4"
+            "product_card_gallery",
+            "product_title",
+            "price"
           ]
         }
       },
+      "block_order": [],
       "name": "Featured collection",
       "settings": {
-        "collection": "frontpage",
+        "collection": "all",
         "layout_type": "grid",
         "carousel_on_mobile": false,
         "max_products": 8,
@@ -281,94 +296,98 @@
         "padding-block-end": 48
       }
     },
-    "marquee_lbp01": {
-      "type": "marquee",
+    "steps_main": {
+      "type": "steps",
       "blocks": {
-        "text_lbp01": {
-          "type": "text",
+        "step_1": {
+          "type": "_step",
           "settings": {
-            "text": "✔️ Jusqu'à 80% d'économies"
+            "number": "1",
+            "title": "Browse",
+            "text": "Discover products picked for you."
           }
         },
-        "text_lbp02": {
-          "type": "text",
+        "step_2": {
+          "type": "_step",
           "settings": {
-            "text": "✔️ Accès à vie — aucun abonnement"
+            "number": "2",
+            "title": "Order",
+            "text": "Checkout securely in a few clicks."
           }
         },
-        "text_lbp03": {
-          "type": "text",
+        "step_3": {
+          "type": "_step",
           "settings": {
-            "text": "✔️ Liens exclusifs testés par la communauté"
+            "number": "3",
+            "title": "Enjoy",
+            "text": "Your order is on its way."
           }
         }
       },
       "block_order": [
-        "text_lbp01",
-        "text_lbp02",
-        "text_lbp03"
+        "step_1",
+        "step_2",
+        "step_3"
       ],
-      "name": "Bandeau défilant",
+      "name": "How it works",
       "settings": {
-        "movement_direction": "normal",
-        "background_color": "#000000",
-        "padding-block-start": 16,
-        "padding-block-end": 16,
-        "gap_between_elements": 48
+        "heading": "How it works",
+        "layout": "horizontal",
+        "show_progress_line": true,
+        "section_width": "page-width",
+        "padding-block-start": 64,
+        "padding-block-end": 64
       }
     },
-    "blocks_lbp_cta": {
-      "type": "_blocks",
+    "testimonials_main": {
+      "type": "testimonials",
       "blocks": {
-        "button_lbp_cta": {
-          "type": "button",
-          "name": "Bouton Premium Glow",
-          "settings": {
-            "label": "💰 J'ARRÊTE DE PAYER PLEIN TARIF",
-            "link": "shopify://collections/frontpage",
-            "style_class": "button-premium",
-            "premium_bg_color": "#000000",
-            "premium_bg_gradient_color": "#1a1a1a",
-            "premium_text_color": "#ffffff",
-            "premium_border_color": "#008cff",
-            "premium_glow_color": "#008cff",
-            "premium_glow_intensity": 26,
-            "premium_border_radius": 30,
-            "premium_border_width": 2,
-            "premium_enable_shine": true,
-            "premium_enable_pulse": true,
-            "premium_pulse_duration": 5,
-            "width": "custom",
-            "custom_width": 100
-          }
+        "testimonial_1": {
+          "type": "_testimonial-card",
+          "settings": {}
+        },
+        "testimonial_2": {
+          "type": "_testimonial-card",
+          "settings": {}
+        },
+        "testimonial_3": {
+          "type": "_testimonial-card",
+          "settings": {}
         }
       },
       "block_order": [
-        "button_lbp_cta"
+        "testimonial_1",
+        "testimonial_2",
+        "testimonial_3"
       ],
-      "name": "CTA Premium",
+      "name": "Testimonials / Avis / UGC",
       "settings": {
-        "content_direction": "column",
-        "horizontal_alignment": "center"
+        "heading": "What customers say",
+        "layout": "grid",
+        "columns_desktop": 3,
+        "columns_mobile": 1,
+        "section_width": "page-width",
+        "padding-block-start": 64,
+        "padding-block-end": 64
       }
     },
-    "blocks_lbp_faq": {
+    "faq_main": {
       "type": "_blocks",
       "blocks": {
-        "accordion_lbp_faq": {
+        "accordion_faq": {
           "type": "accordion",
           "name": "FAQ",
           "blocks": {
             "row_1": {
               "type": "_accordion-row",
               "settings": {
-                "heading": "📖 Que contient Le Bon Plan ?"
+                "heading": "What is your shipping policy?"
               },
               "blocks": {
                 "text_1": {
                   "type": "text",
                   "settings": {
-                    "text": "<p>Le Bon Plan est bien plus qu'un simple e-book : un guide complet accompagné d'un accès à nos canaux privés, où nous partageons régulièrement des liens soigneusement sélectionnés et des astuces pour acheter au meilleur prix.</p>"
+                    "text": "<p>Replace this with your store's real shipping information.</p>"
                   }
                 }
               },
@@ -379,706 +398,46 @@
             "row_2": {
               "type": "_accordion-row",
               "settings": {
-                "heading": "⭐ Pourquoi choisir Le Bon Plan ?"
+                "heading": "What is your return policy?"
               },
               "blocks": {
                 "text_2": {
                   "type": "text",
                   "settings": {
-                    "text": "<p>✔️ Jusqu'à 80% d'économies<br>✔️ Guide étape par étape<br>✔️ Liens exclusifs testés et validés par la communauté<br>✔️ Accès à vie<br>✔️ Aucun abonnement<br>✔️ Mises à jour régulières</p>"
+                    "text": "<p>Replace this with your store's real return policy.</p>"
                   }
                 }
               },
               "block_order": [
                 "text_2"
               ]
-            },
-            "row_3": {
-              "type": "_accordion-row",
-              "settings": {
-                "heading": "🚀 Après votre achat"
-              },
-              "blocks": {
-                "text_3": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>📩 Réception immédiate du e-book au format PDF<br>🔓 Accès instantané aux canaux privés<br>📱 Commencez à utiliser la méthode dès aujourd'hui</p>"
-                  }
-                }
-              },
-              "block_order": [
-                "text_3"
-              ]
-            },
-            "row_4": {
-              "type": "_accordion-row",
-              "settings": {
-                "heading": "💳 Paiement unique"
-              },
-              "blocks": {
-                "text_4": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Un seul paiement. Aucun abonnement, aucun frais caché. Votre accès est à vie.</p>"
-                  }
-                }
-              },
-              "block_order": [
-                "text_4"
-              ]
             }
           },
           "block_order": [
             "row_1",
-            "row_2",
-            "row_3",
-            "row_4"
+            "row_2"
           ],
           "settings": {
             "icon": "plus",
-            "dividers": true,
-            "divider_color": "#1a1a1a",
-            "background_color": "#0b0b0b",
-            "text_color": "#cccccc"
+            "dividers": true
           }
         }
       },
       "block_order": [
-        "accordion_lbp_faq"
+        "accordion_faq"
       ],
       "name": "FAQ",
       "settings": {
         "content_direction": "column"
       }
-    },
-    "benefits_lbp": {
-      "type": "_blocks",
-      "blocks": {
-        "benefits_heading": {
-          "type": "text",
-          "settings": {
-            "text": "<h2>Pourquoi choisir Le Bon Plan</h2>",
-            "width": "100%",
-            "max_width": "normal",
-            "alignment": "center",
-            "type_preset": "h3",
-            "font": "var(--font-body--family)",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          }
-        },
-        "benefits_cards": {
-          "type": "group",
-          "settings": {
-            "content_direction": "row",
-            "vertical_on_mobile": true,
-            "horizontal_alignment": "space-between",
-            "vertical_alignment": "flex-start",
-            "align_baseline": false,
-            "horizontal_alignment_flex_direction_column": "flex-start",
-            "vertical_alignment_flex_direction_column": "flex-start",
-            "gap": 16,
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "custom_height": 100,
-            "background_media": "none",
-            "background_color": "",
-            "video_position": "cover",
-            "background_image_position": "cover",
-            "toggle_overlay": false,
-            "overlay_color": "#00000026",
-            "overlay_style": "solid",
-            "gradient_direction": "to top",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_radius": 0,
-            "open_in_new_tab": false,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {
-            "benefit_card_1": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "benefit_card_1_icon": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:28px;\">💸</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_1_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Jusqu'à 80% d'économies</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_1_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Des liens exclusifs sélectionnés et testés par la communauté.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "benefit_card_1_icon",
-                "benefit_card_1_title",
-                "benefit_card_1_desc"
-              ]
-            },
-            "benefit_card_2": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "benefit_card_2_icon": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:28px;\">🔑</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_2_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Accès à vie</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_2_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Un seul paiement, aucun abonnement, aucun frais caché.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "benefit_card_2_icon",
-                "benefit_card_2_title",
-                "benefit_card_2_desc"
-              ]
-            },
-            "benefit_card_3": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "benefit_card_3_icon": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:28px;\">📖</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_3_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Guide étape par étape</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_3_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Un e-book complet pour appliquer la méthode dès aujourd'hui.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "benefit_card_3_icon",
-                "benefit_card_3_title",
-                "benefit_card_3_desc"
-              ]
-            },
-            "benefit_card_4": {
-              "type": "group",
-              "settings": {
-                "content_direction": "column",
-                "vertical_on_mobile": true,
-                "horizontal_alignment": "flex-start",
-                "vertical_alignment": "flex-start",
-                "align_baseline": false,
-                "horizontal_alignment_flex_direction_column": "flex-start",
-                "vertical_alignment_flex_direction_column": "flex-start",
-                "gap": 10,
-                "width": "fill",
-                "custom_width": 100,
-                "width_mobile": "fill",
-                "custom_width_mobile": 100,
-                "height": "fit",
-                "custom_height": 100,
-                "background_media": "none",
-                "background_color": "#151515",
-                "video_position": "cover",
-                "background_image_position": "cover",
-                "toggle_overlay": false,
-                "overlay_color": "#00000026",
-                "overlay_style": "solid",
-                "gradient_direction": "to top",
-                "border": "solid",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "#1f2937",
-                "border_radius": 18,
-                "open_in_new_tab": false,
-                "padding-block-start": 28,
-                "padding-block-end": 28,
-                "padding-inline-start": 28,
-                "padding-inline-end": 28
-              },
-              "blocks": {
-                "benefit_card_4_icon": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p style=\"font-size:28px;\">🔄</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_4_title": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<h4>Mises à jour régulières</h4>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "h5",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                },
-                "benefit_card_4_desc": {
-                  "type": "text",
-                  "settings": {
-                    "text": "<p>Le contenu et les canaux privés évoluent avec le temps.</p>",
-                    "width": "100%",
-                    "max_width": "normal",
-                    "alignment": "left",
-                    "type_preset": "paragraph",
-                    "font": "var(--font-body--family)",
-                    "font_size": "1rem",
-                    "line_height": "normal",
-                    "letter_spacing": "normal",
-                    "case": "none",
-                    "wrap": "pretty",
-                    "background": false,
-                    "background_color": "#00000026",
-                    "corner_radius": 0,
-                    "padding-block-start": 0,
-                    "padding-block-end": 0,
-                    "padding-inline-start": 0,
-                    "padding-inline-end": 0
-                  }
-                }
-              },
-              "block_order": [
-                "benefit_card_4_icon",
-                "benefit_card_4_title",
-                "benefit_card_4_desc"
-              ]
-            }
-          },
-          "block_order": [
-            "benefit_card_1",
-            "benefit_card_2",
-            "benefit_card_3",
-            "benefit_card_4"
-          ]
-        }
-      },
-      "block_order": [
-        "benefits_heading",
-        "benefits_cards"
-      ],
-      "name": "Bénéfices",
-      "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "center",
-        "gap": 32,
-        "background_color": "{{ settings.color_palette.background }}",
-        "padding-block-start": 64,
-        "padding-block-end": 64
-      }
-    },
-    "steps_lbp": {
-      "type": "steps",
-      "blocks": {
-        "step_1": {
-          "type": "_step",
-          "settings": {
-            "number": "1",
-            "title": "Choisissez votre offre",
-            "text": "Sélectionnez la version qui vous convient parmi nos e-books."
-          }
-        },
-        "step_2": {
-          "type": "_step",
-          "settings": {
-            "number": "2",
-            "title": "Payez en toute sécurité",
-            "text": "Réglez votre commande via SumUp, notre partenaire de paiement sécurisé."
-          }
-        },
-        "step_3": {
-          "type": "_step",
-          "settings": {
-            "number": "3",
-            "title": "Recevez votre accès",
-            "text": "E-book et accès aux canaux privés livrés immédiatement après paiement."
-          }
-        }
-      },
-      "block_order": [
-        "step_1",
-        "step_2",
-        "step_3"
-      ],
-      "name": "Comment ça marche",
-      "settings": {
-        "heading": "Comment ça marche",
-        "layout": "horizontal",
-        "show_progress_line": true,
-        "section_width": "page-width",
-        "padding-block-start": 64,
-        "padding-block-end": 64
-      }
-    },
-    "trust_bar_lbp": {
-      "type": "trust-bar",
-      "blocks": {
-        "trust_1": {
-          "type": "_trust-item",
-          "settings": {
-            "icon": "shield",
-            "title": "Paiement 100% sécurisé (SumUp)"
-          }
-        },
-        "trust_2": {
-          "type": "_trust-item",
-          "settings": {
-            "icon": "bolt",
-            "title": "Accès immédiat après paiement"
-          }
-        },
-        "trust_3": {
-          "type": "_trust-item",
-          "settings": {
-            "icon": "lock",
-            "title": "Aucun abonnement, paiement unique"
-          }
-        }
-      },
-      "block_order": [
-        "trust_1",
-        "trust_2",
-        "trust_3"
-      ],
-      "name": "Trust Bar",
-      "settings": {
-        "layout": "row",
-        "section_width": "page-width",
-        "padding-block-start": 24,
-        "padding-block-end": 24
-      }
     }
   },
   "order": [
-    "hero_jVaWmY",
-    "trust_bar_lbp",
-    "marquee_lbp01",
-    "benefits_lbp",
-    "product_list_fa6P9H",
-    "steps_lbp",
-    "blocks_lbp_cta",
-    "blocks_lbp_faq"
+    "hero_main",
+    "trust_bar_main",
+    "product_list_main",
+    "steps_main",
+    "testimonials_main",
+    "faq_main"
   ]
 }

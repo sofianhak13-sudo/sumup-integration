@@ -8,7 +8,15 @@
     <span class="timeline-item__date">{{ block.settings.date }}</span>
   {%- endif -%}
   {%- if block.settings.image != blank -%}
-    <img src="{{ block.settings.image | image_url: width: 400 }}" width="200" loading="lazy" alt="" class="timeline-item__image">
+    {%- assign timeline_image_height = 200.0 | divided_by: block.settings.image.aspect_ratio | round -%}
+    <img
+      src="{{ block.settings.image | image_url: width: 400 }}"
+      width="200"
+      height="{{ timeline_image_height }}"
+      loading="lazy"
+      alt=""
+      class="timeline-item__image"
+    >
   {%- endif -%}
   <h3 class="timeline-item__title">{{ block.settings.title }}</h3>
   {%- if block.settings.text != blank -%}

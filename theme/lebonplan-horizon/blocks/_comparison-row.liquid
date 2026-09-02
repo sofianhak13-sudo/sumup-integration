@@ -8,16 +8,14 @@
   {%- for i in (1..5) -%}
     {%- assign value_key = 'column_' | append: i | append: '_value' -%}
     {%- assign value = block.settings[value_key] -%}
-    {%- assign has_column = true -%}
-    {%- if i == 3 and block.settings.column_3_value == blank -%}{%- assign has_column = false -%}{%- endif -%}
     {%- if value != blank or i <= 2 -%}
       {%- assign free_text_key = 'column_' | append: i | append: '_text' -%}
       <td>
         {%- case value -%}
           {%- when 'check' -%}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1fae5c" stroke-width="2.4" aria-label="Inclus"><path d="M4 12l5 5L20 6"/></svg>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#1fae5c" stroke-width="2.4" aria-label="{{ 'premium_sections.comparison_table.included' | t }}"><path d="M4 12l5 5L20 6"/></svg>
           {%- when 'cross' -%}
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9b9b9b" stroke-width="2.4" aria-label="Non inclus"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9b9b9b" stroke-width="2.4" aria-label="{{ 'premium_sections.comparison_table.not_included' | t }}"><path d="M6 6l12 12M18 6L6 18"/></svg>
           {%- when 'text' -%}
             {{ block.settings[free_text_key] }}
           {%- else -%}
