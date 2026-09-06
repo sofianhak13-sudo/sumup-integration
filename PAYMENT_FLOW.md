@@ -1,5 +1,11 @@
 # SumUp cart payment — discount-aware flow
 
+> Deux parcours : **rapide** (ci‑dessous) et **checkout avancé** (contact /
+> adresse / livraison / récapitulatif). Voir **`CHECKOUT_V2.md`**. Le checkout
+> avancé est désactivé par défaut ; ce document décrit le parcours rapide, qui
+> reste inchangé.
+
+
 ## Principle
 
 ```

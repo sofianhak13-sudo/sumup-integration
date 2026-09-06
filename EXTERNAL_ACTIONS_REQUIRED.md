@@ -1,9 +1,30 @@
-# ACTIONS HUMAINES — activer SumUp sur le panier Horizon
+# ACTIONS HUMAINES
 
-Le code est prêt et vérifié (lint / typecheck / build / 21 tests verts).
+Le code est prêt et vérifié (lint / typecheck / build / 63 tests verts).
 Rien n'est déployé. Les étapes ci-dessous demandent **ta session / ton
 navigateur** et **rien n'est actif tant qu'elles ne sont pas faites**
 (« construire ≠ activer »).
+
+## 0. Scopes Storefront + Checkout V2 (nouveau)
+
+1. **Aligner `SCOPES` sur Render** (env du service `sumup-integration`) :
+   `write_app_proxy,write_products,write_orders,unauthenticated_read_product_listings,unauthenticated_write_checkouts`
+2. `shopify app deploy` → valider le diff de scopes → **re‑consent** de l'app
+   dans l'admin Le Bon Plan (écran « mise à jour des autorisations »).
+3. Redéployer Render sur `fix/horizon-sumup-theme-extension` (démarrage =
+   `prisma db push` → crée les colonnes additives Checkout V2).
+4. Le **checkout avancé reste OFF**. Pour le tester : admin *Checkout avancé*
+   → cocher « Activer », choisir un preset, tester jusqu'au Hosted Checkout
+   SumUp **sans payer**, puis décocher pour revenir au parcours rapide.
+5. `shopify app deploy` republie aussi l'extension `sumup-payments` (routage
+   client vers la page checkout). Non bloquant : un filet serveur route déjà
+   correctement sans l'extension à jour.
+
+Détails et plan de test : **`CHECKOUT_V2.md`**, rollback : **`ROLLBACK.md`**.
+
+---
+
+## Historique — activer SumUp sur le panier Horizon
 
 ---
 

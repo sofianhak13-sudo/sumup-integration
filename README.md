@@ -1,4 +1,26 @@
-# Shopify App Template - React Router
+# SumUp × Shopify — `sumup-integration`
+
+App de paiement SumUp pour Shopify (mono‑marchand, Le Bon Plan). React Router
+v7 + Prisma/Postgres, hébergée sur Render, App Proxy `/apps/sumup-pay`,
+extension de thème `sumup-payments`.
+
+**Documentation projet :**
+
+| Fichier | Sujet |
+|---|---|
+| [`PAYMENT_FLOW.md`](PAYMENT_FLOW.md) | parcours **rapide** panier + remises, garde‑fous financiers |
+| [`CHECKOUT_V2.md`](CHECKOUT_V2.md) | parcours **checkout avancé** (contact, adresse, livraison, récap), presets, moteur financier |
+| [`STOREFRONT_HORIZON.md`](STOREFRONT_HORIZON.md) | pourquoi le bouton avait disparu sur Horizon, l'extension de thème |
+| [`HORIZON_AUDIT.md`](HORIZON_AUDIT.md) | audit du thème Horizon (sélecteurs, blocs, app embed) |
+| [`EXTERNAL_ACTIONS_REQUIRED.md`](EXTERNAL_ACTIONS_REQUIRED.md) | étapes humaines : scopes, deploy, re‑consent, tests |
+| [`ROLLBACK.md`](ROLLBACK.md) | retour arrière (toggle → Render → scopes → BDD) |
+
+Parcours par défaut sur le live : **rapide**. Le checkout avancé est construit
+et testable mais désactivé (`advancedCheckoutEnabled = false`).
+
+---
+
+## Shopify App Template - React Router
 
 This is a template for building a [Shopify app](https://shopify.dev/docs/apps/getting-started) using [React Router](https://reactrouter.com/). It was forked from the [Shopify Remix app template](https://github.com/Shopify/shopify-app-template-remix) and converted to React Router.
 

@@ -149,8 +149,6 @@ export const action = async ({ request }) => {
 
   const checkoutReference = `shopify-${productId}-${Date.now()}`;
 
-  console.log("CHECKOUT REFERENCE :", checkoutReference);
-
   const sumupResponse = await fetch(
     "https://api.sumup.com/v0.1/checkouts",
     {
@@ -180,9 +178,6 @@ export const action = async ({ request }) => {
   );
 
   const sumupData = await sumupResponse.json();
-
-  console.log("CHECKOUT SUMUP ID :", sumupData.id);
-  console.log("CHECKOUT SUMUP STATUS :", sumupData.status);
 
   if (!sumupResponse.ok) {
     return new Response(
