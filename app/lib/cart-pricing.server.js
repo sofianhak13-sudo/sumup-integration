@@ -14,6 +14,20 @@ export const money = (value) => {
 export const toCents = (value) => Math.round(money(value) * 100);
 
 /**
+ * Catalog subtotal, in cents: the sum the Shopify order line items will add up
+ * to (each priced at `catalogUnitAmount`). The order's fixed discount is then
+ * `catalogSubtotalCents - amountChargedCents`, which guarantees
+ * order total == amount charged by SumUp.
+ *
+ * @param {Array<{catalogUnitAmount: number|string, quantity: number}>} items
+ */
+export const catalogSubtotalCents = (items) =>
+  (items || []).reduce(
+    (sum, item) => sum + toCents(item.catalogUnitAmount) * Number(item.quantity),
+    0,
+  );
+
+/**
  * Total discount, in cents, applied to a Storefront cart — cart/order-level
  * allocations plus every line-level allocation. Falls back to
  * (subtotal - total) when Shopify returns no explicit allocations.
@@ -87,6 +101,32 @@ export const parseDiscountCodesHint = (raw) => {
       .filter((c) => typeof c === "string" && c.trim())
       .map((c) => c.trim())
       .slice(0, 10);
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Parse the browser's cart-attributes hint (a JSON array of {key,value}).
+ * Passed straight to Shopify's cartCreate so discount functions that key off
+ * cart attributes (affiliate / referral apps) behave as they do at checkout.
+ * @returns {Array<{key: string, value: string}>} at most 25 entries
+ */
+export const parseCartAttributes = (raw) => {
+  if (typeof raw !== "string" || !raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (a) =>
+          a &&
+          typeof a.key === "string" &&
+          a.key.length > 0 &&
+          a.key.length <= 100,
+      )
+      .map((a) => ({ key: a.key, value: String(a.value ?? "").slice(0, 5000) }))
+      .slice(0, 25);
   } catch {
     return [];
   }

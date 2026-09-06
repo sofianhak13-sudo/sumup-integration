@@ -3,10 +3,12 @@ import prisma from "../db.server";
 import {
   money,
   toCents,
+  catalogSubtotalCents,
   discountCentsFromCart,
   totalsDiverge,
   firstRejectedCode,
   parseDiscountCodesHint,
+  parseCartAttributes,
 } from "../lib/cart-pricing.server";
 
 const noStoreHeaders = {
@@ -43,6 +45,7 @@ export const action = async ({ request }) => {
   const cartRaw = formData.get("cart");
   const emailRaw = formData.get("email");
   const discountCodesRaw = formData.get("discountCodes");
+  const cartAttributes = parseCartAttributes(formData.get("cartAttributes"));
   const cartToken =
     typeof formData.get("cartToken") === "string"
       ? formData.get("cartToken")
@@ -189,6 +192,7 @@ export const action = async ({ request }) => {
         input: {
           lines: storefrontLines,
           discountCodes: submittedCodes,
+          attributes: cartAttributes,
           buyerIdentity: { email },
         },
       },
@@ -222,16 +226,36 @@ export const action = async ({ request }) => {
   }
 
   const currency = calcCart.cost?.totalAmount?.currencyCode || "EUR";
-  const totalAmount = money(calcCart.cost?.totalAmount?.amount);
-  const subtotalAmount = money(calcCart.cost?.subtotalAmount?.amount);
-  const totalCents = toCents(totalAmount);
-  const discountCents = discountCentsFromCart(calcCart);
+  const shopifyTotalCents = toCents(calcCart.cost?.totalAmount?.amount);
+  const storefrontSubtotal = money(calcCart.cost?.subtotalAmount?.amount);
+
+  // The Shopify order lines are billed at catalog price; the order's fixed
+  // discount is (catalog subtotal - amount charged). Charging exactly
+  // `catalog - discount` guarantees, by construction:
+  //   order total == SumUp checkout == PAID amount == catalog - discount.
+  const catalogCents = catalogSubtotalCents(verifiedItems);
+  if (shopifyTotalCents - catalogCents > 1) {
+    // Shopify's total is above the catalog sum by more than a rounding cent
+    // (surcharge / market pricing) — can't be modelled as an order discount.
+    console.warn("PANIER INCOHERENT (total > catalogue) :", {
+      catalogCents,
+      shopifyTotalCents,
+    });
+    return blockPage(
+      liquid,
+      "Le montant de votre panier est incohérent. Actualisez votre panier avant de continuer.",
+    );
+  }
+  const totalCents = Math.min(shopifyTotalCents, catalogCents);
+  const discountCents = catalogCents - totalCents;
+  // Kept only for the audit trail — the order uses `discountCents` above.
+  const allocatedDiscountCents = discountCentsFromCart(calcCart);
 
   // Cross-check against what the buyer's cart displayed (indicative only).
-  if (totalsDiverge(totalCents, indicativeTotalCents)) {
+  if (totalsDiverge(shopifyTotalCents, indicativeTotalCents)) {
     console.warn("ECART PANIER AFFICHE vs SERVEUR :", {
       indicativeTotalCents,
-      totalCents,
+      shopifyTotalCents,
       cartToken,
     });
     return blockPage(
@@ -314,7 +338,7 @@ export const action = async ({ request }) => {
       items: verifiedItems,
       amount: totalCents / 100,
       currency,
-      subtotalAmount,
+      subtotalAmount: catalogCents / 100,
       discountAmount: discountCents / 100,
       discountCodes: applicableCodes,
       cartToken,
@@ -322,9 +346,12 @@ export const action = async ({ request }) => {
         source: "storefront-cart",
         cartId: calcCart.id,
         currency,
-        subtotalAmount,
-        totalAmount: totalCents / 100,
+        catalogSubtotal: catalogCents / 100,
+        storefrontSubtotal,
+        shopifyTotal: shopifyTotalCents / 100,
+        amountCharged: totalCents / 100,
         discountAmount: discountCents / 100,
+        allocatedDiscount: allocatedDiscountCents / 100,
         discountCodes: applicableCodes,
         indicativeTotalCents: Number.isFinite(indicativeTotalCents)
           ? indicativeTotalCents

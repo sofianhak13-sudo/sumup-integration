@@ -158,6 +158,7 @@
 
     var cartField = form.querySelector("[data-sumup-cart]");
     var codesField = form.querySelector("[data-sumup-discount-codes]");
+    var attrsField = form.querySelector("[data-sumup-cart-attributes]");
     var totalField = form.querySelector("[data-sumup-cart-total]");
     var tokenField = form.querySelector("[data-sumup-cart-token]");
     var emptyNote = form.querySelector("[data-sumup-cart-empty]");
@@ -189,6 +190,16 @@
       if (cartField) cartField.value = JSON.stringify({ items: items });
       if (codesField)
         codesField.value = JSON.stringify(readDiscountCodes(cart));
+      if (attrsField) {
+        // Pass cart attributes through so Shopify discount functions
+        // (e.g. affiliate/referral apps) apply in the server-side re-price.
+        var attrs = [];
+        var raw = cart.attributes || {};
+        Object.keys(raw).forEach(function (k) {
+          attrs.push({ key: k, value: String(raw[k]) });
+        });
+        attrsField.value = JSON.stringify(attrs);
+      }
       if (totalField)
         totalField.value =
           typeof cart.total_price === "number" ? String(cart.total_price) : "";

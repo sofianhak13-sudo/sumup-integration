@@ -54,11 +54,22 @@ jamais corrigé silencieusement.
 
 ## Montant facturé
 
-`amount = cart.cost.totalAmount` de la Storefront Cart API.
-La TVA n'est plus exposée par la Cart API (dépréciée) : `totalAmount` est le
-total du panier tel que Shopify le calcule pour le contexte panier — identique à
-ce qu'affiche Horizon pour une boutique en prix TTC. Le contrôle croisé (§5)
-garantit qu'aucun écart avec le panier affiché ne part vers SumUp.
+Boutique **Le Bon Plan** : `taxesIncluded = true` (prix TTC), EUR, France,
+produits numériques (`requiresShipping = false`), mono-variante.
+→ `cart.cost.totalAmount` de la Storefront Cart API = **le prix TTC final**
+affiché par Horizon (`/cart.js` `total_price`). La TVA n'est plus exposée par
+la Cart API (dépréciée) et n'a pas à l'être ici.
+
+`amountCharged = min(cart.cost.totalAmount, Σ prix catalogue × qté)` en cents.
+- Sans remise : `= Σ catalogue` (identique au total Horizon).
+- Avec remise : `= cart.cost.totalAmount` (total remisé Shopify).
+- Si `cart.cost.totalAmount` dépasse le catalogue de plus d'1 cent
+  (majoration / prix par marché) → **bloqué**.
+
+`discountAmount = Σ catalogue − amountCharged`. La commande facture les lignes
+au prix catalogue et applique `discountAmount` en remise fixe → le total de la
+commande vaut exactement `amountCharged`. Vérifié via `draftOrderCalculate` :
+`59,80 € − 10,00 € (FIXED_AMOUNT) = 49,80 €`.
 
 ## Commande Shopify (webhook, après `PAID` confirmé auprès de SumUp)
 
@@ -80,21 +91,29 @@ unique. La redirection navigateur depuis SumUp n'est jamais une preuve de paieme
 (source, cost, allocations, items, total indicatif). Migration
 `20260906120000_add_cart_payment_discounts` — additive, non destructive.
 
-## Limites V1 (à valider en test réel)
+## Remises de la boutique (audit)
 
-- **Config TVA de la boutique** : à confirmer que « prix TTC inclus » est actif
-  (cas normal FR). Sinon `totalAmount` pourrait exclure une taxe ajoutée au
-  checkout ; le contrôle croisé bloque en cas d'écart, mais le parcours ne
-  fonctionnerait pas pour cette config → revoir.
-- **Répartition de la remise ligne par ligne** : non faite (remise globale). Le
-  total est exact, l'imputation par ligne est approximative.
+- **Aucun code promo** configuré.
+- **1 réduction automatique** : `DiscountAutomaticApp` « UpPromote discount
+  function » (app d'affiliation). Ne s'applique **pas** inconditionnellement
+  (vérifié : `draftOrderCalculate acceptAutomaticDiscounts:true` → 0 remise) ;
+  elle se déclenche via un attribut de panier affilié. Les attributs du panier
+  sont donc transmis à `cartCreate` (`CartInput.attributes`) pour que la
+  fonction s'applique côté serveur comme au checkout.
+
+## Limites V1
+
+- **Répartition de la remise ligne par ligne** : non faite (remise globale
+  `itemFixedDiscountCode`). Le total est exact ; l'imputation par ligne est
+  approximative.
 - **Réductions automatiques ciblant un client précis** : non prises en compte
-  (acheteur anonyme dans l'App Proxy — `buyerIdentity.email` transmis mais pas
-  d'authentification client).
+  (acheteur anonyme ; `buyerIdentity.email` transmis mais pas d'auth client).
 - **Multi-marché / prix par pays** : `cartCreate` sans `countryCode` utilise le
-  marché principal ; un acheteur sur un autre marché serait bloqué par le
+  marché principal (mono-marché ici) ; un autre marché serait bloqué par le
   contrôle croisé.
 - **Détection des codes côté navigateur** : dépend de `/cart.js` exposant
-  `discount_codes` (thèmes récents / Horizon : OK).
-- **`itemFixedDiscountCode`** : le comportement exact d'`orderCreate` (total
-  final au centime) doit être confirmé par un test webhook réel.
+  `discount_codes` (Horizon OK).
+- **`itemFixedDiscountCode` sur `orderCreate`** : équivalence avec la remise
+  order-level FIXED_AMOUNT testée via `draftOrderCalculate` ; un test webhook
+  réel (offline token) confirmera le total commande au centime en conditions
+  réelles.

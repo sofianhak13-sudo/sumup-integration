@@ -4,10 +4,12 @@ import assert from "node:assert/strict";
 import {
   money,
   toCents,
+  catalogSubtotalCents,
   discountCentsFromCart,
   totalsDiverge,
   firstRejectedCode,
   parseDiscountCodesHint,
+  parseCartAttributes,
 } from "../app/lib/cart-pricing.server.js";
 
 test("money / toCents coerce safely", () => {
@@ -17,6 +19,28 @@ test("money / toCents coerce safely", () => {
   assert.equal(toCents("29.90"), 2990);
   assert.equal(toCents(49.8), 4980);
   assert.equal(toCents("0.1") + toCents("0.2"), 30); // no float drift
+});
+
+test("catalogSubtotalCents: sums unit price * quantity in cents", () => {
+  assert.equal(
+    catalogSubtotalCents([
+      { catalogUnitAmount: "29.90", quantity: 2 },
+      { catalogUnitAmount: 69.9, quantity: 1 },
+    ]),
+    2 * 2990 + 6990,
+  );
+  assert.equal(catalogSubtotalCents([]), 0);
+  assert.equal(catalogSubtotalCents(undefined), 0);
+});
+
+test("order discount = catalog subtotal - amount charged (equality by construction)", () => {
+  const items = [{ catalogUnitAmount: "29.90", quantity: 2 }]; // 5980
+  const catalog = catalogSubtotalCents(items); // 5980
+  const chargedCents = 4980; // Shopify cart.cost.totalAmount after a 10 EUR code
+  const discountCents = catalog - chargedCents;
+  assert.equal(discountCents, 1000);
+  // webhook: order total = catalog - discount == charged
+  assert.equal(catalog - discountCents, chargedCents);
 });
 
 test("discountCentsFromCart: no discount", () => {
@@ -130,5 +154,25 @@ test("parseDiscountCodesHint", () => {
   assert.equal(
     parseDiscountCodesHint(JSON.stringify(Array(20).fill("X"))).length,
     10,
+  );
+});
+
+test("parseCartAttributes", () => {
+  assert.deepEqual(
+    parseCartAttributes('[{"key":"ref","value":"abc"},{"key":"n","value":5}]'),
+    [
+      { key: "ref", value: "abc" },
+      { key: "n", value: "5" },
+    ],
+  );
+  assert.deepEqual(parseCartAttributes('[{"value":"no key"}]'), []);
+  assert.deepEqual(parseCartAttributes("garbage"), []);
+  assert.deepEqual(parseCartAttributes(null), []);
+  assert.deepEqual(parseCartAttributes('{"key":"x"}'), []);
+  assert.equal(
+    parseCartAttributes(
+      JSON.stringify(Array(40).fill({ key: "k", value: "v" })),
+    ).length,
+    25,
   );
 });
