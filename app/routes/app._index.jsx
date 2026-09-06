@@ -1,210 +1,93 @@
-import { useEffect } from "react";
-import { useFetcher, useSearchParams } from "react-router";
+/* eslint-disable react/prop-types -- internal admin view, not a public component API */
+import { useLoaderData } from "react-router";
 import { authenticate } from "../shopify.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
+import { getMerchantSettings } from "../lib/merchant-settings.server";
+import { resolveCheckoutConfig } from "../lib/checkout-config.js";
+import { sumupConfigured, maskApiKey } from "../lib/sumup.server";
 
 export const loader = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
+  const settings = await getMerchantSettings(session.shop);
+  const cfg = resolveCheckoutConfig(settings);
+  return {
+    cartPaymentsEnabled: settings.cartPaymentsEnabled,
+    cartDrawerEnabled: settings.cartDrawerEnabled,
+    hideShopifyCheckout: settings.hideShopifyCheckout,
+    advancedCheckoutEnabled: cfg.advancedCheckoutEnabled,
+    shippingEnabled: cfg.shipping,
+    preset: cfg.preset,
+    sumupConfigured: sumupConfigured(),
+    sumupKeyMasked: maskApiKey(process.env.SUMUP_API_KEY),
+    sumupMerchantName: settings.sumupMerchantName,
+  };
+};
 
-  const url = new URL(request.url);
-  const productId = url.searchParams.get("productId");
-
-  if (!productId) {
-    return { product: null };
-  }
-
-  const gid = productId.startsWith("gid://")
-    ? productId
-    : `gid://shopify/Product/${productId}`;
-
-  const response = await admin.graphql(
-    `#graphql
-      query GetProduct($id: ID!) {
-        product(id: $id) {
-          id
-          title
-          variants(first: 1) {
-            nodes {
-              id
-              price
-            }
-          }
-        }
-      }
-    `,
-    {
-      variables: {
-        id: gid,
-      },
-    },
+function Row({ label, value, tone }) {
+  return (
+    <s-box padding="base" borderWidth="base" borderRadius="base">
+      <s-paragraph>
+        <s-text tone="subdued">{label} : </s-text>
+        <s-text tone={tone}>{value}</s-text>
+      </s-paragraph>
+    </s-box>
   );
-
-  const data = await response.json();
-
-  return {
-    product: data.data.product,
-  };
-};
-
-export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
-const formData = await request.formData();
-const productId = formData.get("productId");
-if (!productId) {
-  return {
-    success: false,
-    message: "Produit Shopify manquant.",
-  };
-}
-const gid = productId.startsWith("gid://")
-  ? productId
-  : `gid://shopify/Product/${productId}`;
-
-const productResponse = await admin.graphql(
-  `#graphql
-    query GetProductForPayment($id: ID!) {
-      product(id: $id) {
-        id
-        title
-        variants(first: 1) {
-          nodes {
-            id
-            price
-          }
-        }
-      }
-    }
-  `,
-  {
-    variables: {
-      id: gid,
-    },
-  },
-);
-
-const productData = await productResponse.json();
-console.log("SHOPIFY PRODUCT RESPONSE:", JSON.stringify(productData, null, 2));
-const product = productData.data?.product;
-const price = product?.variants?.nodes?.[0]?.price;
-
-if (!product || !price) {
-  return {
-    success: false,
-    message: "Impossible de récupérer le prix du produit Shopify.",
-  };
 }
 
-  const apiKey = process.env.SUMUP_API_KEY;
-  const merchantCode = process.env.SUMUP_MERCHANT_CODE;
-
-  if (!apiKey || !merchantCode) {
-    return {
-      success: false,
-      message: "Clé API SumUp ou Merchant Code manquant dans .env",
-    };
-  }
-
-  try {
-    const checkoutReference = `shopify-${Date.now()}`;
-
-    const response = await fetch("https://api.sumup.com/v0.1/checkouts", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        checkout_reference: checkoutReference,
-        amount: Number(price),
-        currency: "EUR",
-        merchant_code: merchantCode,
-        description: "Commande e-book Shopify",
-        hosted_checkout: {
-          enabled: true,
-        },
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        success: false,
-        message: `Erreur SumUp ${response.status}: ${JSON.stringify(data)}`,
-      };
-    }
-
-    if (!data.hosted_checkout_url) {
-      return {
-        success: false,
-        message: "SumUp n'a pas renvoyé d'URL de paiement.",
-      };
-    }
-
-    return {
-      success: true,
-      checkoutId: data.id,
-      checkoutReference: data.checkout_reference,
-      paymentUrl: data.hosted_checkout_url,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: `Erreur : ${error.message}`,
-    };
-  }
-};
-
-export default function Index() {
-  const [searchParams] = useSearchParams();
-const productId = searchParams.get("productId");
-  const fetcher = useFetcher();
-
-  const isLoading =
-    fetcher.state === "submitting" || fetcher.state === "loading";
-
-  const createPayment = () => {
-    fetcher.submit(
-  { productId },
-  { method: "POST" }
-);
-  };
-
-  useEffect(() => {
-    if (fetcher.data?.success && fetcher.data?.paymentUrl) {
-      window.open(fetcher.data.paymentUrl, "_top")
-    }
-  }, [fetcher.data]);
+export default function Dashboard() {
+  const d = useLoaderData();
+  const onOff = (b) => (b ? "Activé" : "Désactivé");
 
   return (
-    <s-page heading="SumUp Integration">
-      <s-section heading="Paiement SumUp">
+    <s-page heading="SumUp — Tableau de bord">
+      <s-section heading="État de l'intégration">
+        <Row
+          label="Compte SumUp"
+          tone={d.sumupConfigured ? "success" : "critical"}
+          value={
+            d.sumupConfigured
+              ? d.sumupMerchantName || `Configuré (${d.sumupKeyMasked || "clé OK"})`
+              : "Non configuré"
+          }
+        />
+        <Row label="Paiement panier" value={onOff(d.cartPaymentsEnabled)} tone={d.cartPaymentsEnabled ? "success" : "subdued"} />
+        <Row label="Bouton tiroir" value={onOff(d.cartDrawerEnabled)} tone={d.cartDrawerEnabled ? "success" : "subdued"} />
+        <Row label="Masquage checkout Shopify" value={onOff(d.hideShopifyCheckout)} tone={d.hideShopifyCheckout ? "warning" : "subdued"} />
+        <Row
+          label="Checkout avancé"
+          value={d.advancedCheckoutEnabled ? `Activé (preset ${d.preset})` : "Désactivé — parcours rapide"}
+          tone={d.advancedCheckoutEnabled ? "success" : "subdued"}
+        />
+        <Row label="Livraison" value={onOff(d.shippingEnabled)} tone={d.shippingEnabled ? "warning" : "subdued"} />
+      </s-section>
+
+      <s-section heading="Configuration">
         <s-paragraph>
-          Créer un paiement sécurisé SumUp de 29,90 €.
+          <s-link href="/app/settings">Paiement panier</s-link> — bouton SumUp sur la
+          page panier et le tiroir.
         </s-paragraph>
+        <s-paragraph>
+          <s-link href="/app/checkout">Checkout avancé</s-link> — page intermédiaire
+          (contact, adresse, livraison, récapitulatif) avant SumUp. Désactivé par défaut.
+        </s-paragraph>
+        <s-paragraph>
+          <s-link href="/app/sumup">Compte SumUp</s-link> — identité du compte marchand.
+        </s-paragraph>
+        <s-paragraph>
+          <s-link href="/app/diagnostics">Diagnostic</s-link> — teste Shopify, SumUp,
+          Storefront et la configuration.
+        </s-paragraph>
+      </s-section>
 
-        <s-button
-          onClick={createPayment}
-          {...(isLoading ? { loading: true } : {})}
-        >
-          Payer
-        </s-button>
-
-        {fetcher.data?.message && (
-          <s-box
-            padding="base"
-            borderWidth="base"
-            borderRadius="base"
-          >
-            <s-paragraph>{fetcher.data.message}</s-paragraph>
-          </s-box>
-        )}
+      <s-section slot="aside" heading="Parcours actif">
+        <s-paragraph>
+          {d.advancedCheckoutEnabled
+            ? "Panier / produit → page checkout de l'app → SumUp → commande Shopify."
+            : "Panier / produit → e-mail → SumUp → commande Shopify."}
+        </s-paragraph>
       </s-section>
     </s-page>
   );
 }
 
-export const headers = (headersArgs) => {
-  return boundary.headers(headersArgs);
-};
+export const headers = (headersArgs) => boundary.headers(headersArgs);

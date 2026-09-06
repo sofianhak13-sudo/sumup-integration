@@ -16,9 +16,11 @@ export default function App() {
   return (
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
-        <s-link href="/app">Home</s-link>
-        <s-link href="/app/settings">Réglages SumUp</s-link>
-        <s-link href="/app/additional">Additional page</s-link>
+        <s-link href="/app">Tableau de bord</s-link>
+        <s-link href="/app/settings">Paiement panier</s-link>
+        <s-link href="/app/checkout">Checkout avancé</s-link>
+        <s-link href="/app/sumup">Compte SumUp</s-link>
+        <s-link href="/app/diagnostics">Diagnostic</s-link>
       </s-app-nav>
       <Outlet />
     </AppProvider>
