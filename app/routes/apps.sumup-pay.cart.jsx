@@ -10,6 +10,7 @@ import {
   parseDiscountCodesHint,
   parseCartAttributes,
 } from "../lib/cart-pricing.server";
+import { getMerchantSettings } from "../lib/merchant-settings.server";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -39,6 +40,14 @@ export const action = async ({ request }) => {
       status: 401,
       headers: noStoreHeaders,
     });
+  }
+
+  const settings = await getMerchantSettings(session.shop);
+  if (!settings.cartPaymentsEnabled) {
+    return blockPage(
+      liquid,
+      "Le paiement SumUp du panier est actuellement indisponible.",
+    );
   }
 
   const formData = await request.formData();
