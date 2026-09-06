@@ -84,6 +84,8 @@ module.exports = {
         ".graphqlrc.{js,ts}",
         "shopify.server.{js,ts}",
         "**/*.server.{js,ts}",
+        // React Router route modules: loader/action run on the server (Node).
+        "app/routes/**/*.{js,jsx,ts,tsx}",
       ],
       env: {
         node: true,

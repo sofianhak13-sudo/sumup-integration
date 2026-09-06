@@ -1,0 +1,12 @@
+# Theme app extension — adds the SumUp payment buttons to the Horizon (or any
+# Online Store 2.0) storefront from the theme editor, with no theme-code edits.
+# The blocks only collect an e-mail + the selected variant/quantity and POST
+# them to the `/apps/sumup-pay` app proxy, which verifies price & currency
+# server-side before redirecting to a hosted SumUp checkout.
+api_version = "2025-07"
+
+[[extensions]]
+type = "theme"
+name = "SumUp Payments"
+handle = "sumup-payments"
+uid = "525bde47-6ba8-489b-acb3-a4ab110e03da"

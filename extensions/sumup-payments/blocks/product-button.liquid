@@ -1,0 +1,91 @@
+{%- comment -%}
+  SumUp — product payment button (Horizon / any Online Store 2.0 theme).
+
+  Renders a small form that POSTs the product id, the *currently selected*
+  variant id, the quantity and a confirmation e-mail to the `/apps/sumup-pay`
+  app proxy. The proxy re-reads the real price and currency from Shopify, so
+  nothing the browser sends can change the amount that is charged.
+
+  No card data is handled here. No dependency on any specific theme: the
+  variant id and quantity are read from the theme's own add-to-cart form at
+  submit time (see sumup-pay.js).
+{%- endcomment -%}
+
+{%- assign sumup_variant = product.selected_or_first_available_variant -%}
+
+<div
+  class="sumup-pay-block"
+  {{ block.shopify_attributes }}
+  style="--sumup-accent: {{ block.settings.accent_color }}; --sumup-radius: {{ block.settings.corner_radius }}px;"
+  data-sumup-block="product"
+  data-default-variant="{{ sumup_variant.id }}"
+>
+  {%- if block.settings.heading != blank -%}
+    <p class="sumup-pay-block__heading">{{ block.settings.heading }}</p>
+  {%- endif -%}
+
+  {%- if sumup_variant == nil -%}
+    <p class="sumup-pay-block__note">
+      {{ block.settings.unavailable_text | default: 'Article indisponible pour le moment.' }}
+    </p>
+  {%- else -%}
+    <form
+      class="sumup-pay-block__form"
+      method="post"
+      action="/apps/sumup-pay"
+      data-sumup-form="product"
+      novalidate
+    >
+      <input type="hidden" name="productId" value="{{ product.id }}">
+      <input type="hidden" name="variantId" value="{{ sumup_variant.id }}" data-sumup-variant>
+      <input type="hidden" name="quantity" value="1" data-sumup-quantity>
+
+      <label class="sumup-pay-block__label" for="sumup-email-{{ block.id }}">
+        {{ block.settings.email_label | default: 'E-mail pour la confirmation' }}
+      </label>
+      <input
+        class="sumup-pay-block__input"
+        id="sumup-email-{{ block.id }}"
+        type="email"
+        name="email"
+        required
+        autocomplete="email"
+        inputmode="email"
+        placeholder="vous@exemple.com"
+        {% if customer %}value="{{ customer.email }}"{% endif %}
+        data-sumup-email
+      >
+
+      <p class="sumup-pay-block__error" data-sumup-error hidden></p>
+
+      <button class="sumup-pay-block__button" type="submit" data-sumup-submit>
+        <span data-sumup-label>{{ block.settings.button_label | default: 'Payer avec SumUp' }}</span>
+        <span class="sumup-pay-block__spinner" data-sumup-spinner hidden aria-hidden="true"></span>
+      </button>
+
+      {%- if block.settings.show_trust -%}
+        <p class="sumup-pay-block__trust">🔒 {{ block.settings.trust_text | default: 'Paiement sécurisé par SumUp' }}</p>
+      {%- endif -%}
+    </form>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "SumUp — Bouton produit",
+  "target": "section",
+  "enabled_on": { "templates": ["product"] },
+  "stylesheet": "sumup-pay.css",
+  "javascript": "sumup-pay.js",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Paiement express" },
+    { "type": "text", "id": "button_label", "label": "Texte du bouton", "default": "Payer avec SumUp" },
+    { "type": "text", "id": "email_label", "label": "Libellé e-mail", "default": "E-mail pour la confirmation" },
+    { "type": "text", "id": "unavailable_text", "label": "Texte si indisponible", "default": "Article indisponible pour le moment." },
+    { "type": "checkbox", "id": "show_trust", "label": "Afficher la mention de sécurité", "default": true },
+    { "type": "text", "id": "trust_text", "label": "Mention de sécurité", "default": "Paiement sécurisé par SumUp" },
+    { "type": "color", "id": "accent_color", "label": "Couleur du bouton", "default": "#1a1a1a" },
+    { "type": "range", "id": "corner_radius", "label": "Arrondi des coins", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 10 }
+  ]
+}
+{% endschema %}

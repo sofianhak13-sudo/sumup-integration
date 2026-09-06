@@ -31,6 +31,11 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
 
   const productId = formData.get("productId");
+  const requestedVariantId = formData.get("variantId");
+  const quantity = Math.max(
+    1,
+    Math.min(99, Number.parseInt(formData.get("quantity"), 10) || 1),
+  );
   const emailRaw = formData.get("email");
   const email = typeof emailRaw === "string" ? emailRaw.trim() : "";
 
@@ -58,12 +63,16 @@ export const action = async ({ request }) => {
         product(id: $id) {
           id
           title
-          variants(first: 1) {
+          variants(first: 100) {
             nodes {
               id
               price
+              availableForSale
             }
           }
+        }
+        shop {
+          currencyCode
         }
       }
     `,
@@ -76,10 +85,27 @@ export const action = async ({ request }) => {
 
   const productData = await productResponse.json();
   const product = productData.data?.product;
-  const variant = product?.variants?.nodes?.[0];
-  const price = variant?.price;
+  const variantNodes = product?.variants?.nodes ?? [];
 
-  if (!product || !price) {
+  // The browser only *suggests* a variant. The server stays the source of
+  // truth: we look the id up in the product's own variant list and fall back
+  // to the first available one, so a tampered/stale id can never set a price.
+  const requestedGid =
+    typeof requestedVariantId === "string" && requestedVariantId
+      ? requestedVariantId.startsWith("gid://")
+        ? requestedVariantId
+        : `gid://shopify/ProductVariant/${requestedVariantId}`
+      : null;
+
+  const variant =
+    (requestedGid && variantNodes.find((node) => node.id === requestedGid)) ||
+    variantNodes.find((node) => node.availableForSale) ||
+    variantNodes[0] ||
+    null;
+
+  const unitPrice = Number(variant?.price);
+
+  if (!product || !variant || !Number.isFinite(unitPrice) || unitPrice <= 0) {
     return new Response(
       "Impossible de récupérer le prix du produit Shopify.",
       {
@@ -88,6 +114,9 @@ export const action = async ({ request }) => {
       },
     );
   }
+
+  const currency = productData.data?.shop?.currencyCode || "EUR";
+  const amount = Math.round(unitPrice * 100 * quantity) / 100;
 
   const apiKey = process.env.SUMUP_API_KEY;
   const merchantCode = process.env.SUMUP_MERCHANT_CODE;
@@ -114,10 +143,11 @@ export const action = async ({ request }) => {
       },
       body: JSON.stringify({
         checkout_reference: checkoutReference,
-        amount: Number(price),
-        currency: "EUR",
+        amount,
+        currency,
         merchant_code: merchantCode,
-        description: product.title,
+        description:
+          quantity > 1 ? `${product.title} × ${quantity}` : product.title,
         return_url:
           "https://sumup-integration-dwm1.onrender.com/api/sumup-webhook",
         redirect_url: `https://lebonplan-ebook.com/apps/sumup-pay/return?reference=${encodeURIComponent(
@@ -162,8 +192,9 @@ export const action = async ({ request }) => {
       shop: session.shop,
       productId: product.id,
       variantId: variant.id,
-      amount: Number(price),
-      currency: "EUR",
+      quantity,
+      amount,
+      currency,
       status: sumupData.status || "PENDING",
       customerEmail: email,
     },

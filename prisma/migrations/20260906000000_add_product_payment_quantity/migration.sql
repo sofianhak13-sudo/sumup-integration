@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "SumUpPayment" ADD COLUMN "quantity" INTEGER NOT NULL DEFAULT 1;

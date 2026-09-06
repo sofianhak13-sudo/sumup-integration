@@ -128,7 +128,7 @@ const orderResponse = await admin.graphql(
   lineItems: [
     {
       variantId: payment.variantId,
-      quantity: 1,
+      quantity: payment.quantity ?? 1,
     },
   ],
   transactions: [

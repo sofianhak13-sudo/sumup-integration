@@ -37,6 +37,7 @@ model SumUpPayment {
   shop              String
   productId         String
   variantId         String
+  quantity          Int      @default(1)
   amount            Float
   currency          String
   status            String   @default("PENDING")

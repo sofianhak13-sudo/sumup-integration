@@ -1,0 +1,82 @@
+{%- comment -%}
+  SumUp — cart payment button (Horizon / any Online Store 2.0 theme).
+
+  Reads the live cart from /cart.js at submit time and POSTs the line items
+  (variant id + quantity only) plus a confirmation e-mail to the
+  `/apps/sumup-pay/cart` app proxy. The proxy re-prices every line against
+  Shopify, so the browser can never dictate the amount charged.
+
+  Works on the cart page and, when added there, inside the cart drawer -
+  the cart is always re-fetched fresh, never trusted from the DOM.
+{%- endcomment -%}
+
+<div
+  class="sumup-pay-block"
+  {{ block.shopify_attributes }}
+  style="--sumup-accent: {{ block.settings.accent_color }}; --sumup-radius: {{ block.settings.corner_radius }}px;"
+  data-sumup-block="cart"
+>
+  {%- if block.settings.heading != blank -%}
+    <p class="sumup-pay-block__heading">{{ block.settings.heading }}</p>
+  {%- endif -%}
+
+  <form
+    class="sumup-pay-block__form"
+    method="post"
+    action="/apps/sumup-pay/cart"
+    data-sumup-form="cart"
+    novalidate
+  >
+    <input type="hidden" name="cart" value="" data-sumup-cart>
+
+    <label class="sumup-pay-block__label" for="sumup-cart-email-{{ block.id }}">
+      {{ block.settings.email_label | default: 'E-mail pour la confirmation' }}
+    </label>
+    <input
+      class="sumup-pay-block__input"
+      id="sumup-cart-email-{{ block.id }}"
+      type="email"
+      name="email"
+      required
+      autocomplete="email"
+      inputmode="email"
+      placeholder="vous@exemple.com"
+      {% if customer %}value="{{ customer.email }}"{% endif %}
+      data-sumup-email
+    >
+
+    <p class="sumup-pay-block__error" data-sumup-error hidden></p>
+    <p class="sumup-pay-block__note" data-sumup-cart-empty hidden>
+      {{ block.settings.empty_text | default: 'Votre panier est vide.' }}
+    </p>
+
+    <button class="sumup-pay-block__button" type="submit" data-sumup-submit>
+      <span data-sumup-label>{{ block.settings.button_label | default: 'Payer le panier avec SumUp' }}</span>
+      <span class="sumup-pay-block__spinner" data-sumup-spinner hidden aria-hidden="true"></span>
+    </button>
+
+    {%- if block.settings.show_trust -%}
+      <p class="sumup-pay-block__trust">🔒 {{ block.settings.trust_text | default: 'Paiement sécurisé par SumUp' }}</p>
+    {%- endif -%}
+  </form>
+</div>
+
+{% schema %}
+{
+  "name": "SumUp — Panier",
+  "target": "section",
+  "enabled_on": { "templates": ["cart"] },
+  "stylesheet": "sumup-pay.css",
+  "javascript": "sumup-pay.js",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titre", "default": "Paiement express" },
+    { "type": "text", "id": "button_label", "label": "Texte du bouton", "default": "Payer le panier avec SumUp" },
+    { "type": "text", "id": "email_label", "label": "Libellé e-mail", "default": "E-mail pour la confirmation" },
+    { "type": "text", "id": "empty_text", "label": "Texte si panier vide", "default": "Votre panier est vide." },
+    { "type": "checkbox", "id": "show_trust", "label": "Afficher la mention de sécurité", "default": true },
+    { "type": "text", "id": "trust_text", "label": "Mention de sécurité", "default": "Paiement sécurisé par SumUp" },
+    { "type": "color", "id": "accent_color", "label": "Couleur du bouton", "default": "#1a1a1a" },
+    { "type": "range", "id": "corner_radius", "label": "Arrondi des coins", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 10 }
+  ]
+}
+{% endschema %}
