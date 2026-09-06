@@ -1,0 +1,53 @@
+{%- comment -%}
+  SumUp — Storefront (app embed, target: body).
+
+  Two jobs, both gated by the master switches in the app admin
+  (Réglages SumUp), fetched at runtime from /apps/sumup-pay/config:
+
+  1. Inject the SumUp payment button into the Horizon cart drawer
+     (which does not accept app blocks) when "Bouton SumUp dans le tiroir"
+     is on. Survives Section Rendering API re-renders of the drawer.
+  2. Hide the native Shopify checkout button on the cart / drawer when
+     "Masquer le bouton Passer à la caisse" is on — via a class on <html>
+     that is only added once a SumUp CTA is actually present (fail-safe).
+
+  No theme code is edited. Deactivating this app embed removes all effects.
+{%- endcomment -%}
+
+<script type="application/json" data-sumup-embed-config>
+  {
+    "cartUrl": {{ routes.cart_url | default: '/cart' | json }},
+    "customerEmail": {{ customer.email | json }},
+    "labels": {
+      "button": {{ block.settings.button_label | default: 'Payer avec SumUp' | json }},
+      "email": {{ block.settings.email_label | default: 'E-mail' | json }},
+      "trust": {{ block.settings.show_trust | json }},
+      "trustText": {{ block.settings.trust_text | default: 'Paiement sécurisé par SumUp' | json }}
+    },
+    "style": {
+      "accent": {{ block.settings.accent_color | default: '#1a1a1a' | json }},
+      "onAccent": {{ block.settings.button_text_color | default: '#ffffff' | json }}
+    }
+  }
+</script>
+
+{% schema %}
+{
+  "name": "SumUp — Storefront",
+  "target": "body",
+  "stylesheet": "sumup-storefront.css",
+  "javascript": "sumup-storefront.js",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Active le bouton SumUp dans le tiroir de panier et le masquage optionnel du bouton de paiement Shopify. Les interrupteurs marche/arrêt sont dans l'app : Réglages SumUp."
+    },
+    { "type": "text", "id": "button_label", "label": "Texte du bouton (tiroir)", "default": "Payer avec SumUp" },
+    { "type": "text", "id": "email_label", "label": "Libellé e-mail", "default": "E-mail" },
+    { "type": "checkbox", "id": "show_trust", "label": "Afficher la mention de sécurité", "default": true },
+    { "type": "text", "id": "trust_text", "label": "Mention de sécurité", "default": "Paiement sécurisé par SumUp" },
+    { "type": "color", "id": "accent_color", "label": "Couleur du bouton", "default": "#1a1a1a" },
+    { "type": "color", "id": "button_text_color", "label": "Couleur du texte du bouton", "default": "#ffffff" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,81 @@
+/* SumUp storefront app embed — cart drawer CTA + optional native-checkout hiding.
+   Scoped: only .sumup-drawer* and the guarded <html> class. */
+
+/* Fail-safe: only ever hides when JS has confirmed a SumUp CTA is present. */
+html.sumup-hide-native-checkout #checkout,
+html.sumup-hide-native-checkout .cart__checkout-button {
+  display: none !important;
+}
+
+.sumup-drawer {
+  --sumup-accent: #1a1a1a;
+  --sumup-on-accent: #ffffff;
+  margin: 0 0 10px;
+  font-family: inherit;
+}
+
+.sumup-drawer * {
+  box-sizing: border-box;
+}
+
+.sumup-drawer__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.sumup-drawer__input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px; /* no iOS zoom */
+  font-family: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #c9c9c9;
+  border-radius: 8px;
+  line-height: 1.3;
+}
+
+.sumup-drawer__button {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sumup-on-accent);
+  background: var(--sumup-accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.sumup-drawer__button:hover {
+  opacity: 0.92;
+}
+
+.sumup-drawer__button:disabled,
+.sumup-drawer__button[aria-busy="true"] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.sumup-drawer__error {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #b3261e;
+}
+
+.sumup-drawer__trust {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+}
