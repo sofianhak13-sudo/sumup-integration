@@ -151,6 +151,46 @@ export const action = async ({ request }) => {
       quantity: Number(item.quantity),
     }));
 
+    // Reflect the Shopify-validated discount on the order so that
+    // order total == SumUp amount == transaction amount, to the cent.
+    // V1: a single order-wide fixed-amount discount (see PAYMENT_FLOW.md).
+    const discountAmount = Number(payment.discountAmount) || 0;
+    const orderInput = {
+      email: customerEmail,
+      currency: payment.currency,
+      lineItems,
+      transactions: [
+        {
+          kind: "SALE",
+          status: "SUCCESS",
+          gateway: "SumUp",
+          amountSet: {
+            shopMoney: {
+              amount: Number(payment.amount),
+              currencyCode: payment.currency,
+            },
+          },
+        },
+      ],
+    };
+
+    if (discountAmount > 0) {
+      const codes = Array.isArray(payment.discountCodes)
+        ? payment.discountCodes.filter(Boolean)
+        : [];
+      orderInput.discountCode = {
+        itemFixedDiscountCode: {
+          code: codes.length ? codes.join(" + ") : "Remise",
+          amountSet: {
+            shopMoney: {
+              amount: discountAmount,
+              currencyCode: payment.currency,
+            },
+          },
+        },
+      };
+    }
+
     const orderResponse = await admin.graphql(
       `#graphql
       mutation orderCreate(
@@ -163,6 +203,8 @@ export const action = async ({ request }) => {
             name
             displayFinancialStatus
             statusPageUrl
+            currentTotalPriceSet { shopMoney { amount currencyCode } }
+            totalDiscountsSet { shopMoney { amount currencyCode } }
           }
           userErrors {
             field
@@ -172,24 +214,7 @@ export const action = async ({ request }) => {
       }`,
       {
         variables: {
-          order: {
-            email: customerEmail,
-            currency: payment.currency,
-            lineItems,
-            transactions: [
-              {
-                kind: "SALE",
-                status: "SUCCESS",
-                gateway: "SumUp",
-                amountSet: {
-                  shopMoney: {
-                    amount: Number(payment.amount),
-                    currencyCode: payment.currency,
-                  },
-                },
-              },
-            ],
-          },
+          order: orderInput,
           options: {
             sendReceipt: true,
           },

@@ -57,6 +57,11 @@ model SumUpCartPayment {
   items             Json
   amount            Float
   currency          String
+  subtotalAmount    Float?
+  discountAmount    Float    @default(0)
+  discountCodes     String[] @default([])
+  cartToken         String?
+  snapshot          Json?
   status            String   @default("PENDING")
   orderId           String?
   statusPageUrl     String?

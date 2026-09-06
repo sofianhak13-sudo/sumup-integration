@@ -28,6 +28,9 @@
     novalidate
   >
     <input type="hidden" name="cart" value="" data-sumup-cart>
+    <input type="hidden" name="discountCodes" value="" data-sumup-discount-codes>
+    <input type="hidden" name="cartTotal" value="" data-sumup-cart-total>
+    <input type="hidden" name="cartToken" value="" data-sumup-cart-token>
 
     <label class="sumup-pay-block__label" for="sumup-cart-email-{{ block.id }}">
       {{ block.settings.email_label | default: 'E-mail pour la confirmation' }}

@@ -157,16 +157,42 @@
     if (!form) return;
 
     var cartField = form.querySelector("[data-sumup-cart]");
+    var codesField = form.querySelector("[data-sumup-discount-codes]");
+    var totalField = form.querySelector("[data-sumup-cart-total]");
+    var tokenField = form.querySelector("[data-sumup-cart-token]");
     var emptyNote = form.querySelector("[data-sumup-cart-empty]");
     var submitBtn = form.querySelector("[data-sumup-submit]");
 
+    function readDiscountCodes(cart) {
+      // The server re-validates every code with Shopify; this is only a hint.
+      var codes = [];
+      if (Array.isArray(cart.discount_codes)) {
+        cart.discount_codes.forEach(function (d) {
+          if (d && d.code && d.applicable !== false) codes.push(d.code);
+        });
+      }
+      if (!codes.length && Array.isArray(cart.cart_level_discount_applications)) {
+        cart.cart_level_discount_applications.forEach(function (a) {
+          if (a && a.type === "discount_code" && a.title) codes.push(a.title);
+        });
+      }
+      return codes;
+    }
+
     function applyCart(cart) {
-      var items = (cart && Array.isArray(cart.items) ? cart.items : []).map(
-        function (item) {
-          return { variant_id: item.variant_id, quantity: item.quantity };
-        },
-      );
+      cart = cart || {};
+      var items = (Array.isArray(cart.items) ? cart.items : []).map(function (
+        item,
+      ) {
+        return { variant_id: item.variant_id, quantity: item.quantity };
+      });
       if (cartField) cartField.value = JSON.stringify({ items: items });
+      if (codesField)
+        codesField.value = JSON.stringify(readDiscountCodes(cart));
+      if (totalField)
+        totalField.value =
+          typeof cart.total_price === "number" ? String(cart.total_price) : "";
+      if (tokenField) tokenField.value = cart.token || "";
       var empty = items.length === 0;
       if (emptyNote) emptyNote.hidden = !empty;
       if (submitBtn) submitBtn.disabled = empty;
