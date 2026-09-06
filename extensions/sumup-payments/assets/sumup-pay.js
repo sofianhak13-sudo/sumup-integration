@@ -70,16 +70,28 @@
   function setLoading(form, loading) {
     var btn = form.querySelector("[data-sumup-submit]");
     var spinner = form.querySelector("[data-sumup-spinner]");
+    var label = form.querySelector("[data-sumup-label]");
     if (btn) {
       btn.disabled = loading;
       btn.setAttribute("aria-busy", loading ? "true" : "false");
+      var loadingLabel = btn.getAttribute("data-loading-label");
+      if (label && loadingLabel) {
+        if (loading) {
+          if (!label.dataset.sumupIdle) label.dataset.sumupIdle = label.textContent;
+          label.textContent = loadingLabel;
+        } else if (label.dataset.sumupIdle) {
+          label.textContent = label.dataset.sumupIdle;
+        }
+      }
     }
     if (spinner) spinner.hidden = !loading;
   }
 
   function validEmail(form) {
     var field = form.querySelector("[data-sumup-email]");
-    var value = field ? field.value.trim() : "";
+    // A hidden e-mail field (customer already known) with a valid value is fine;
+    // the server re-validates regardless.
+    var value = field ? String(field.value || "").trim() : "";
     return EMAIL_RE.test(value);
   }
 

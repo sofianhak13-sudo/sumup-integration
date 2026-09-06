@@ -3,17 +3,50 @@
 
 .sumup-pay-block {
   --sumup-accent: #1a1a1a;
+  --sumup-on-accent: #ffffff;
   --sumup-radius: 10px;
   --sumup-border: #c9c9c9;
   --sumup-muted: #6b7280;
   --sumup-error: #b3261e;
+  --sumup-text: inherit;
   margin: 16px 0;
   font-family: inherit;
-  color: inherit;
+  color: var(--sumup-text);
 }
 
 .sumup-pay-block * {
   box-sizing: border-box;
+}
+
+/* full-width primary CTA */
+.sumup-pay-block--full .sumup-pay-block__form {
+  max-width: none;
+}
+.sumup-pay-block--full .sumup-pay-block__button {
+  width: 100%;
+}
+
+/* alignment */
+.sumup-pay-block--align-center {
+  text-align: center;
+}
+.sumup-pay-block--align-center .sumup-pay-block__form {
+  align-items: stretch;
+}
+.sumup-pay-block--align-end {
+  text-align: right;
+}
+
+/* button size */
+.sumup-pay-block--size-small .sumup-pay-block__button {
+  min-height: 40px;
+  font-size: 15px;
+  padding: 10px 16px;
+}
+.sumup-pay-block--size-large .sumup-pay-block__button {
+  min-height: 56px;
+  font-size: 17px;
+  padding: 16px 20px;
 }
 
 .sumup-pay-block__heading {
@@ -63,7 +96,7 @@
   font-family: inherit;
   font-size: 16px;
   font-weight: 600;
-  color: #fff;
+  color: var(--sumup-on-accent);
   background: var(--sumup-accent);
   border: none;
   border-radius: var(--sumup-radius);
@@ -84,8 +117,8 @@
 .sumup-pay-block__spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-top-color: #fff;
+  border: 2px solid color-mix(in srgb, var(--sumup-on-accent) 40%, transparent);
+  border-top-color: var(--sumup-on-accent);
   border-radius: 50%;
   animation: sumup-spin 0.7s linear infinite;
 }
@@ -112,6 +145,12 @@
 .sumup-pay-block__note {
   margin: 0;
   font-size: 0.875rem;
+  color: var(--sumup-muted);
+}
+
+.sumup-pay-block__subtext {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
   color: var(--sumup-muted);
 }
 
