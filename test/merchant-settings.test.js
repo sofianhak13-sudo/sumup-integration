@@ -75,6 +75,25 @@ test("withDefaults: row overrides defaults, ignores extra keys", () => {
   assert.equal(merged.updatedAt, undefined);
 });
 
+test("admin checkout save payload persists preset + field config + appearance", () => {
+  // Shape produced by app/routes/app.checkout.jsx `save()`.
+  const picked = pickSettings({
+    advancedCheckoutEnabled: true,
+    shippingEnabled: false,
+    checkoutPreset: "ecommerce",
+    checkoutFieldConfig: {
+      fields: { email: "", firstName: "required", lastName: "", phone: "optional", company: "" },
+      shippingAddress: "",
+      billingAddress: "",
+    },
+    checkoutAppearance: { title: "Ma commande", ctaLabel: "Payer" },
+  });
+  assert.equal(picked.checkoutPreset, "ecommerce");
+  assert.equal(picked.advancedCheckoutEnabled, true);
+  assert.equal(picked.checkoutFieldConfig.fields.firstName, "required");
+  assert.equal(picked.checkoutAppearance.title, "Ma commande");
+});
+
 test("publicStorefrontConfig: never leaks SumUp identity", () => {
   const pub = publicStorefrontConfig({
     cartPaymentsEnabled: true,

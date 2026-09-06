@@ -318,7 +318,7 @@ window.__sumupCheckoutBoot = function (CFG) {
     return fetch(CFG.actionPath, {
       method:"POST", credentials:"same-origin",
       headers:{ "Content-Type":"application/x-www-form-urlencoded", "Accept":"application/json" },
-      body: body.toString(), redirect:"manual",
+      body: body.toString(),
     });
   }
 
@@ -382,10 +382,8 @@ window.__sumupCheckoutBoot = function (CFG) {
     cta.disabled = true;
     var prev = cta.textContent; cta.textContent = "Redirection…";
     post("pay").then(function(r){
-      var loc = r.headers.get("Location");
-      if((r.status===303||r.status===302) && loc){ location.assign(loc); return; }
-      return r.json().then(function(j){
-        if(j && j.redirect){ location.assign(j.redirect); return; }
+      return r.json().catch(function(){ return null; }).then(function(j){
+        if(j && j.ok && j.redirect){ location.assign(j.redirect); return; }
         cta.disabled = false; cta.textContent = prev;
         showErr((j && j.message) || "Le paiement est momentanément indisponible. Veuillez réessayer.");
       });

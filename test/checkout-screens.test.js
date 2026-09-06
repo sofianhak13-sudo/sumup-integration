@@ -43,6 +43,18 @@ test("page has no bare form action attribute (JS drives submission)", () => {
   assert.ok(!/<form[^>]*\saction=/.test(html));
 });
 
+test("pay flow uses a JSON redirect, never a manual/opaque fetch redirect", () => {
+  const html = page({ checkoutPreset: "ecommerce", shippingEnabled: true });
+  // The opaque-redirect bug fix: no manual redirect handling anywhere.
+  assert.ok(!html.includes('redirect:"manual"'));
+  assert.ok(!html.includes("redirect: \"manual\""));
+  assert.ok(!html.includes("status===303"));
+  assert.ok(!html.includes("status===302"));
+  // The client acts on { ok:true, redirect } from the server.
+  assert.ok(html.includes("j.ok && j.redirect"));
+  assert.ok(html.includes("location.assign(j.redirect)"));
+});
+
 test("deliveryAddressInput: normalizes, drops empties, enforces country code", () => {
   assert.equal(deliveryAddressInput(null), null);
   const a = deliveryAddressInput({

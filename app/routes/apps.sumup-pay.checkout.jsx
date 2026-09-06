@@ -294,8 +294,8 @@ export const action = async ({ request }) => {
     return json({ ok: false, message: "SumUp n'a pas renvoyé d'URL de paiement." }, 502);
   }
 
-  return new Response(null, {
-    status: 303,
-    headers: { ...noStore, Location: sumup.data.hosted_checkout_url },
-  });
+  // The checkout page calls this with fetch(); a bare 303 becomes an
+  // unreadable opaque-redirect response. Hand the URL back as JSON — the
+  // client does `location.assign(j.redirect)`.
+  return json({ ok: true, redirect: sumup.data.hosted_checkout_url });
 };

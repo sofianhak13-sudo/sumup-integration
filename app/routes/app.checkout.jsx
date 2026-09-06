@@ -18,15 +18,27 @@ export const loader = async ({ request }) => {
     settings.checkoutFieldConfig && typeof settings.checkoutFieldConfig === "object"
       ? settings.checkoutFieldConfig
       : {};
+  const appearance = { ...DEFAULT_APPEARANCE, ...(settings.checkoutAppearance || {}) };
   return {
-    advancedCheckoutEnabled: settings.advancedCheckoutEnabled,
-    shippingEnabled: settings.shippingEnabled,
-    checkoutPreset: settings.checkoutPreset || "digital",
-    fieldOverrides: overrides.fields || {},
-    shippingAddressOverride: overrides.shippingAddress || "",
-    billingAddressOverride: overrides.billingAddress || "",
+    values: {
+      advancedCheckoutEnabled: Boolean(settings.advancedCheckoutEnabled),
+      shippingEnabled: Boolean(settings.shippingEnabled),
+      checkoutPreset: settings.checkoutPreset || "digital",
+      field_email: "",
+      field_firstName: overrides.fields?.firstName || "",
+      field_lastName: overrides.fields?.lastName || "",
+      field_phone: overrides.fields?.phone || "",
+      field_company: overrides.fields?.company || "",
+      shippingAddress: overrides.shippingAddress || "",
+      billingAddress: overrides.billingAddress || "",
+      ap_title: appearance.title || "",
+      ap_subtitle: appearance.subtitle || "",
+      ap_cta: appearance.ctaLabel || "",
+      ap_trust: appearance.trustText || "",
+      ap_accent: appearance.accent || "#1a1a1a",
+      ap_showtrust: Boolean(appearance.showTrust),
+    },
     effective: cfg,
-    appearance: { ...DEFAULT_APPEARANCE, ...(settings.checkoutAppearance || {}) },
   };
 };
 
@@ -75,18 +87,25 @@ const BILLING = [
   { v: "required", l: "Distincte, obligatoire" },
 ];
 const FIELD_LABELS = {
-  email: "E-mail (toujours obligatoire)",
   firstName: "Prénom",
   lastName: "Nom",
   phone: "Téléphone",
   company: "Entreprise",
 };
 
-function Select({ name, defaultValue, options, label }) {
+// Controlled native form elements. Kept in React state so `save()` never
+// depends on the DOM / shadow-DOM boundaries (same reason app.settings.jsx
+// builds its FormData from state). Defined at module scope so typing does not
+// remount them.
+function Select({ name, options, label, value, onChange }) {
   return (
     <s-box padding="tight">
       <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>{label}</label>
-      <select name={name} defaultValue={defaultValue} style={{ padding: "6px 8px", minWidth: 240 }}>
+      <select
+        value={value}
+        onChange={(e) => onChange(name, e.currentTarget.value)}
+        style={{ padding: "6px 8px", minWidth: 240 }}
+      >
         {options.map((o) => (
           <option key={o.v} value={o.v}>{o.l}</option>
         ))}
@@ -95,14 +114,13 @@ function Select({ name, defaultValue, options, label }) {
   );
 }
 
-function Text({ name, defaultValue, label, placeholder }) {
+function Text({ name, label, value, onChange }) {
   return (
     <s-box padding="tight">
       <label style={{ display: "block", fontSize: 13, marginBottom: 4 }}>{label}</label>
       <input
-        name={name}
-        defaultValue={defaultValue}
-        placeholder={placeholder || ""}
+        value={value}
+        onChange={(e) => onChange(name, e.currentTarget.value)}
         style={{ padding: "6px 8px", width: "100%", maxWidth: 420 }}
       />
     </s-box>
@@ -113,8 +131,7 @@ export default function CheckoutSettings() {
   const d = useLoaderData();
   const fetcher = useFetcher();
   const saving = fetcher.state !== "idle";
-  const [advanced, setAdvanced] = useState(d.advancedCheckoutEnabled);
-  const [shipping, setShipping] = useState(d.shippingEnabled);
+  const [values, setValues] = useState(d.values);
 
   useEffect(() => {
     if (fetcher.data?.saved && typeof shopify !== "undefined") {
@@ -122,113 +139,125 @@ export default function CheckoutSettings() {
     }
   }, [fetcher.data]);
 
-  const submit = (e) => {
-    e.preventDefault();
-    fetcher.submit(new FormData(e.currentTarget), { method: "POST" });
+  const set = (key, v) => setValues((s) => ({ ...s, [key]: v }));
+
+  const save = () => {
+    const fd = new FormData();
+    for (const [key, v] of Object.entries(values)) {
+      if (typeof v === "boolean") {
+        if (v) fd.set(key, "on");
+      } else {
+        fd.set(key, v);
+      }
+    }
+    fetcher.submit(fd, { method: "POST" });
   };
 
   return (
     <s-page heading="Checkout avancé">
-      <form onSubmit={submit}>
-        <s-section heading="Activation">
-          <s-box padding="base" borderWidth="base" borderRadius="base">
-            <s-checkbox
-              name="advancedCheckoutEnabled"
-              checked={advanced ? true : undefined}
-              onChange={(e) => setAdvanced(e.currentTarget.checked)}
-            >
-              Activer le checkout avancé
-            </s-checkbox>
-            <s-paragraph>
-              <s-text tone="subdued">
-                Désactivé : le parcours rapide actuel (panier → e-mail → SumUp) est
-                conservé à l&apos;identique. Activé : panier / produit → page checkout de
-                l&apos;app → SumUp.
-              </s-text>
-            </s-paragraph>
-          </s-box>
-        </s-section>
-
-        <s-section heading="Preset">
-          <Select
-            name="checkoutPreset"
-            label="Modèle de départ"
-            defaultValue={d.checkoutPreset}
-            options={Object.entries(PRESETS).map(([v, p]) => ({ v, l: p.label }))}
-          />
+      <s-section heading="Activation">
+        <s-box padding="base" borderWidth="base" borderRadius="base">
+          <s-checkbox
+            checked={values.advancedCheckoutEnabled ? true : undefined}
+            onChange={(e) => set("advancedCheckoutEnabled", e.currentTarget.checked)}
+          >
+            Activer le checkout avancé
+          </s-checkbox>
           <s-paragraph>
             <s-text tone="subdued">
-              Numérique : e-mail seul. E-commerce : nom + adresse + livraison.
-              Personnalisé : réglez chaque champ ci-dessous.
+              Désactivé : le parcours rapide actuel (panier → e-mail → SumUp) est
+              conservé à l&apos;identique. Activé : panier / produit → page checkout de
+              l&apos;app → SumUp.
             </s-text>
           </s-paragraph>
-        </s-section>
+        </s-box>
+      </s-section>
 
-        <s-section heading="Données client">
-          {Object.keys(FIELD_LABELS).map((key) => (
-            <Select
-              key={key}
-              name={`field_${key}`}
-              label={FIELD_LABELS[key]}
-              defaultValue={key === "email" ? "" : d.fieldOverrides[key] || ""}
-              options={LEVELS}
-            />
-          ))}
-        </s-section>
+      <s-section heading="Preset">
+        <Select
+          name="checkoutPreset"
+          label="Modèle de départ"
+          value={values.checkoutPreset}
+          onChange={set}
+          options={Object.entries(PRESETS).map(([v, p]) => ({ v, l: p.label }))}
+        />
+        <s-paragraph>
+          <s-text tone="subdued">
+            Numérique : e-mail seul. E-commerce : nom + adresse + livraison.
+            Personnalisé : réglez chaque champ ci-dessous.
+          </s-text>
+        </s-paragraph>
+      </s-section>
 
-        <s-section heading="Adresses">
+      <s-section heading="Données client">
+        {Object.keys(FIELD_LABELS).map((key) => (
           <Select
-            name="shippingAddress"
-            label="Adresse de livraison"
-            defaultValue={d.shippingAddressOverride}
+            key={key}
+            name={`field_${key}`}
+            label={FIELD_LABELS[key]}
+            value={values[`field_${key}`]}
+            onChange={set}
             options={LEVELS}
           />
-          <Select
-            name="billingAddress"
-            label="Adresse de facturation"
-            defaultValue={d.billingAddressOverride}
-            options={BILLING}
-          />
-        </s-section>
+        ))}
+      </s-section>
 
-        <s-section heading="Livraison">
-          <s-box padding="base" borderWidth="base" borderRadius="base">
-            <s-checkbox
-              name="shippingEnabled"
-              checked={shipping ? true : undefined}
-              onChange={(e) => setShipping(e.currentTarget.checked)}
-            >
-              Activer le calcul de livraison Shopify
-            </s-checkbox>
-            <s-paragraph>
-              <s-text tone="subdued">
-                Utilise les tarifs de livraison réels de la boutique (Storefront Cart
-                API). Nécessite une adresse de livraison. À valider en conditions réelles
-                — voir CHECKOUT_V2.md.
-              </s-text>
-            </s-paragraph>
-          </s-box>
-        </s-section>
+      <s-section heading="Adresses">
+        <Select
+          name="shippingAddress"
+          label="Adresse de livraison"
+          value={values.shippingAddress}
+          onChange={set}
+          options={LEVELS}
+        />
+        <Select
+          name="billingAddress"
+          label="Adresse de facturation"
+          value={values.billingAddress}
+          onChange={set}
+          options={BILLING}
+        />
+      </s-section>
 
-        <s-section heading="Apparence de la page">
-          <Text name="ap_title" label="Titre" defaultValue={d.appearance.title} />
-          <Text name="ap_subtitle" label="Sous-titre" defaultValue={d.appearance.subtitle} />
-          <Text name="ap_cta" label="Texte du bouton" defaultValue={d.appearance.ctaLabel} />
-          <Text name="ap_trust" label="Texte de réassurance" defaultValue={d.appearance.trustText} />
-          <Text name="ap_accent" label="Couleur d'accent (hex)" defaultValue={d.appearance.accent} />
-          <s-box padding="tight">
-            <s-checkbox name="ap_showtrust" checked={d.appearance.showTrust ? true : undefined}>
-              Afficher la mention de réassurance
-            </s-checkbox>
-          </s-box>
-        </s-section>
+      <s-section heading="Livraison">
+        <s-box padding="base" borderWidth="base" borderRadius="base">
+          <s-checkbox
+            checked={values.shippingEnabled ? true : undefined}
+            onChange={(e) => set("shippingEnabled", e.currentTarget.checked)}
+          >
+            Activer le calcul de livraison Shopify
+          </s-checkbox>
+          <s-paragraph>
+            <s-text tone="subdued">
+              Utilise les tarifs de livraison réels de la boutique (Storefront Cart
+              API). Nécessite une adresse de livraison. À valider en conditions réelles
+              — voir CHECKOUT_V2.md.
+            </s-text>
+          </s-paragraph>
+        </s-box>
+      </s-section>
 
-        <s-section>
-          <s-button variant="primary" type="submit" {...(saving ? { loading: true } : {})}>
-            Enregistrer
-          </s-button>
-        </s-section>
-      </form>
+      <s-section heading="Apparence de la page">
+        <Text name="ap_title" label="Titre" value={values.ap_title} onChange={set} />
+        <Text name="ap_subtitle" label="Sous-titre" value={values.ap_subtitle} onChange={set} />
+        <Text name="ap_cta" label="Texte du bouton" value={values.ap_cta} onChange={set} />
+        <Text name="ap_trust" label="Texte de réassurance" value={values.ap_trust} onChange={set} />
+        <Text name="ap_accent" label="Couleur d'accent (hex)" value={values.ap_accent} onChange={set} />
+        <s-box padding="tight">
+          <s-checkbox
+            checked={values.ap_showtrust ? true : undefined}
+            onChange={(e) => set("ap_showtrust", e.currentTarget.checked)}
+          >
+            Afficher la mention de réassurance
+          </s-checkbox>
+        </s-box>
+      </s-section>
+
+      <s-section>
+        <s-button variant="primary" onClick={save} {...(saving ? { loading: true } : {})}>
+          Enregistrer
+        </s-button>
+      </s-section>
 
       <s-section slot="aside" heading="Configuration effective">
         <s-paragraph><s-text tone="subdued">Ce que le serveur applique aujourd&apos;hui :</s-text></s-paragraph>
