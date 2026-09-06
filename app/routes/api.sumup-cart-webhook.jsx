@@ -1,5 +1,6 @@
 import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
+import { buildOrderInput } from "../lib/order-input.js";
 
 export const action = async ({ request }) => {
   try {
@@ -146,50 +147,34 @@ export const action = async ({ request }) => {
 
     const { admin } = await unauthenticated.admin(payment.shop);
 
-    const lineItems = items.map((item) => ({
-      variantId: item.variantId,
-      quantity: Number(item.quantity),
-    }));
+    // Reflect the Shopify-validated discount + shipping + buyer identity on
+    // the order so that order total == SumUp amount == transaction amount, to
+    // the cent. Fast rows carry only email + lines + discount; advanced-
+    // checkout rows also carry name / phone / addresses / shipping method.
+    // See PAYMENT_FLOW.md and CHECKOUT_V2.md.
+    const discountCodes = Array.isArray(payment.discountCodes)
+      ? payment.discountCodes.filter(Boolean)
+      : [];
 
-    // Reflect the Shopify-validated discount on the order so that
-    // order total == SumUp amount == transaction amount, to the cent.
-    // V1: a single order-wide fixed-amount discount (see PAYMENT_FLOW.md).
-    const discountAmount = Number(payment.discountAmount) || 0;
-    const orderInput = {
+    const { order: orderInput, options } = buildOrderInput({
       email: customerEmail,
+      phone: payment.phone || undefined,
+      firstName: payment.firstName || undefined,
+      lastName: payment.lastName || undefined,
       currency: payment.currency,
-      lineItems,
-      transactions: [
-        {
-          kind: "SALE",
-          status: "SUCCESS",
-          gateway: "SumUp",
-          amountSet: {
-            shopMoney: {
-              amount: Number(payment.amount),
-              currencyCode: payment.currency,
-            },
-          },
-        },
-      ],
-    };
-
-    if (discountAmount > 0) {
-      const codes = Array.isArray(payment.discountCodes)
-        ? payment.discountCodes.filter(Boolean)
-        : [];
-      orderInput.discountCode = {
-        itemFixedDiscountCode: {
-          code: codes.length ? codes.join(" + ") : "Remise",
-          amountSet: {
-            shopMoney: {
-              amount: discountAmount,
-              currencyCode: payment.currency,
-            },
-          },
-        },
-      };
-    }
+      lineItems: items.map((item) => ({
+        variantId: item.variantId,
+        quantity: Number(item.quantity),
+      })),
+      amountChargedCents: Math.round(Number(payment.amount) * 100),
+      orderDiscountCents: Math.round((Number(payment.discountAmount) || 0) * 100),
+      shippingCents: Math.round((Number(payment.shippingAmount) || 0) * 100),
+      shippingMethod: payment.shippingMethod || null,
+      shippingAddress: payment.shippingAddress || null,
+      billingAddress: payment.billingAddress || null,
+      discountCodes,
+      // taxesIncluded left unset -> Shopify uses the shop's own setting.
+    });
 
     const orderResponse = await admin.graphql(
       `#graphql
@@ -213,12 +198,7 @@ export const action = async ({ request }) => {
         }
       }`,
       {
-        variables: {
-          order: orderInput,
-          options: {
-            sendReceipt: true,
-          },
-        },
+        variables: { order: orderInput, options },
       },
     );
 
