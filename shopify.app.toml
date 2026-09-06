@@ -7,7 +7,7 @@ name = "Sumup integration"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_app_proxy,write_products,write_orders"
+scopes = "write_app_proxy,write_products,write_orders,unauthenticated_read_product_listings,unauthenticated_write_checkouts"
 optional_scopes = [ ]
 use_legacy_install_flow = false
 
