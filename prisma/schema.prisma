@@ -54,8 +54,34 @@ model MerchantSettings {
   cartPaymentsEnabled Boolean  @default(true)
   cartDrawerEnabled   Boolean  @default(false)
   hideShopifyCheckout Boolean  @default(false)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+
+  // --- Checkout V2 (additive; every column has a safe default so existing
+  //     rows keep the current "fast" behaviour with no back-fill) ---
+  advancedCheckoutEnabled Boolean @default(false)
+  shippingEnabled         Boolean @default(false)
+  // "digital" | "ecommerce" | "custom"
+  checkoutPreset          String  @default("digital")
+  // Per-field requirement overrides ("disabled" | "optional" | "required")
+  // and section toggles. Merged over the preset; see app/lib/checkout-config.js.
+  checkoutFieldConfig     Json?
+  // Checkout page appearance (logo, title, subtitle, width, radius, trust,
+  // CTA label, legal links). See app/lib/checkout-config.js DEFAULT_APPEARANCE.
+  checkoutAppearance      Json?
+  // Global button presentation overrides (the theme editor still owns the
+  // per-placement look; this is the app-wide baseline).
+  buttonAppearance        Json?
+
+  // --- SumUp merchant identity (populated by "Vérifier le compte SumUp";
+  //     never stores the secret itself) ---
+  sumupMerchantName     String?
+  sumupMerchantEmail    String?
+  sumupApiKeyLast4      String?
+  // "unknown" | "ok" | "error"
+  sumupAccountStatus    String    @default("unknown")
+  sumupAccountCheckedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model SumUpCartPayment {
@@ -75,6 +101,27 @@ model SumUpCartPayment {
   orderId           String?
   statusPageUrl     String?
   processing        Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+
+  // --- Checkout V2 buyer / delivery data (additive; all nullable or
+  //     defaulted so "fast" rows are unaffected) ---
+  // "fast" | "advanced"
+  checkoutMode     String  @default("fast")
+  firstName        String?
+  lastName         String?
+  phone            String?
+  company          String?
+  // { firstName,lastName,company,address1,address2,zip,city,province,
+  //   provinceCode,country,countryCode,phone }
+  shippingAddress  Json?
+  billingAddress   Json?
+  // { handle, title, amount, currencyCode } chosen at the checkout step
+  shippingMethod   Json?
+  shippingAmount   Float   @default(0)
+  taxAmount        Float   @default(0)
+  // Full advanced-checkout audit snapshot (distinct from `snapshot`, which
+  // stays the Storefront pricing snapshot).
+  checkoutSnapshot Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
