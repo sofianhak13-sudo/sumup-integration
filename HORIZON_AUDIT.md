@@ -64,18 +64,32 @@ Audité via l'API Admin `theme.files` le 2026-09-06.
 - Produits Le Bon Plan : mono-variante (`Default Title`), numériques →
   pas de sélecteur de variante, quantité par défaut 1.
 
-## Conclusions pour l'intégration SumUp (phase suivante)
+## Intégration livrée (branche `fix/horizon-sumup-theme-extension`)
 
-1. **Page panier** : bloc app `sumup-payments/cart-button` — OK tel quel
-   (`enabled_on templates ["cart"]`). Le rendre CTA principal pleine largeur.
-2. **Cart drawer** : nouvel **app embed** (`blocks/sumup-storefront.liquid`,
-   `target: body`) qui, quand `settings.cart_type == 'drawer'` :
-   - injecte le CTA SumUp dans `.cart-drawer__summary` (au-dessus de `#checkout`),
-   - se ré-accroche après chaque rendu Section Rendering API du tiroir,
-   - re-lit `/cart.js` frais avant submit.
-3. **Masquage des CTA concurrents** (réglages / app embed configurables) :
-   - accéléré : réglage natif `show_accelerated_checkout_buttons` (doc manuelle),
-   - `#checkout` : CSS ciblé de l'app embed, activable/désactivable en réglage,
-   - produit : sous-bloc `accelerated-checkout` (doc manuelle).
-4. **Ne pas** casser : `#cart-form`, `<cart-discount-component>`,
-   `<cart-drawer-component>`, l'ouverture/fermeture du tiroir, le champ note.
+1. **Page panier** — bloc app `sumup-payments/cart-button`
+   (`enabled_on templates ["cart"]`), ajouté dans la section `main-cart` via
+   l'éditeur. Options : pleine largeur, alignement, taille, couleurs, texte de
+   chargement, e-mail optionnel.
+2. **Cart drawer** — **app embed** `sumup-payments/sumup-storefront`
+   (`target: body`, `assets/sumup-storefront.{js,css}`) :
+   - injecte le CTA SumUp dans `.cart-drawer__summary`, au-dessus de
+     `.cart__ctas` (donc au-dessus de `#checkout`) ;
+   - `MutationObserver` sur `#cart-drawer` (rAF-debounce) → ré-injection après
+     chaque rendu Section Rendering API, sans doublon, un seul listener
+     `submit` délégué ;
+   - re-lit `/cart.js` à l'injection, sur `cart:*`, et **encore juste avant
+     submit** ;
+   - piloté par `/apps/sumup-pay/config` (réglages admin).
+3. **Masquage des CTA concurrents** :
+   - accéléré : **réglage natif** `settings.show_accelerated_checkout_buttons`
+     (documenté, non intercepté) ;
+   - `#checkout` / `.cart__checkout-button` : classe `html.sumup-hide-native-checkout`
+     ajoutée par l'app embed **uniquement si un CTA SumUp est présent**
+     (fail-safe), pilotée par le réglage admin *Masquer le bouton…* ;
+   - produit : sous-bloc `accelerated-checkout` (documenté).
+4. **Interrupteurs** — `MerchantSettings` (admin *Réglages SumUp*) :
+   `cartPaymentsEnabled`, `cartDrawerEnabled`, `hideShopifyCheckout`.
+   Défauts : ON / OFF / OFF (« construire ≠ activer »).
+5. **Non cassé** : `#cart-form`, `<cart-discount-component>`,
+   `<cart-drawer-component>`, ouverture/fermeture du tiroir, champ note,
+   parcours produit.

@@ -1,95 +1,91 @@
-# ACTION HUMAINE REQUISE — remettre SumUp sur Horizon
+# ACTIONS HUMAINES — activer SumUp sur le panier Horizon
 
-Le code est prêt et vérifié (build / lint / typecheck verts). Trois étapes
-demandent **ta session / ton navigateur** et ne peuvent pas être faites depuis
-le code.
-
----
-
-## 1. Déployer l'app (extension de thème + route produit mise à jour)
-
-**Objectif :** publier la nouvelle *theme app extension* `sumup-payments` et la
-route `/apps/sumup-pay` mise à jour.
-
-**Pourquoi Claude ne peut pas le faire :** `shopify app deploy` exige une
-authentification interactive au Partner account, et le push Render est déclenché
-par ton workflow habituel (Git → Render).
-
-**Étapes exactes :**
-1. `cd sumup-integration`
-2. `npm run deploy` (= `shopify app deploy`) — accepte la création de
-   l'extension `sumup-payments` et la nouvelle version de l'app.
-3. Pousse la branche sur `origin/main` pour que Render redéploie le serveur
-   (la commande de démarrage `npm run setup` exécute `prisma db push` et crée
-   automatiquement la colonne `SumUpPayment.quantity`).
-
-**Valeurs à NE PAS modifier :** `client_id`, `application_url`, le bloc
-`[app_proxy]` de `shopify.app.toml`, les variables d'env SumUp sur Render.
-
-**Résultat attendu :** dans l'admin Shopify → *Paramètres → Applications*, la
-version de « Sumup integration » est à jour ; l'éditeur de thème propose un
-bloc d'app « SumUp — Bouton produit » / « SumUp — Panier ».
-
-**À me renvoyer :** la sortie de `npm run deploy` (URL de la version) + confirmation
-que Render a fini le redéploiement.
+Le code est prêt et vérifié (lint / typecheck / build / 21 tests verts).
+Rien n'est déployé. Les étapes ci-dessous demandent **ta session / ton
+navigateur** et **rien n'est actif tant qu'elles ne sont pas faites**
+(« construire ≠ activer »).
 
 ---
 
-## 2. Ajouter les blocs dans le thème Horizon
+## 1. Déployer l'app (extension de thème + serveur)
 
-**Objectif :** faire réapparaître le bouton SumUp sur la fiche produit (et sur
-le panier si le paiement panier est voulu).
+**Pourquoi Claude ne peut pas :** `shopify app deploy` exige une auth Partner
+interactive ; le redéploiement serveur passe par ton workflow Git → Render.
 
-**Pourquoi Claude ne peut pas le faire :** l'éditeur de thème Shopify nécessite
-ta session admin ; aucune API n'ajoute un bloc d'app à un thème à ma place de
-façon fiable.
+**Étapes :**
+1. `cd sumup-integration` puis `git checkout fix/horizon-sumup-theme-extension`.
+2. `npm run deploy` — accepte la nouvelle version de l'app + l'extension
+   `sumup-payments` (blocs *SumUp — Panier*, *SumUp — Bouton produit* et
+   app embed *SumUp — Storefront*). **Vérifie qu'aucune ligne `Delete` n'apparaît.**
+3. Redéploie le serveur (push de la branche vers l'environnement Render
+   habituel). Le démarrage (`npm run setup` = `prisma db push`) crée les
+   colonnes / tables additives : `SumUpPayment.quantity`,
+   `SumUpCartPayment.*` (discount…), `MerchantSettings`.
 
-**Étapes exactes :**
-1. Admin Shopify → *Boutique en ligne → Thèmes → Horizon → Personnaliser*.
-2. En haut, choisir le modèle **Produit**.
-3. Dans la colonne de gauche, sous la section d'infos produit :
-   *Ajouter un bloc → Applications → SumUp — Bouton produit*.
-4. Le glisser juste sous/à côté de « Ajouter au panier » / « Acheter
-   maintenant ». Régler le libellé / la couleur si besoin.
-5. Choisir le modèle **Panier**, répéter avec *SumUp — Panier* (le placer
-   sous le récapitulatif / bouton *Commander*).
-6. **Cart drawer :** ouvrir la section du tiroir de panier ; si
-   *Ajouter un bloc → Applications* propose *SumUp — Panier*, l'ajouter aussi.
-   Si Horizon ne l'autorise pas dans le tiroir, laisser seulement la page
-   panier (voir « Limites » dans le rapport).
-7. **Enregistrer.**
+**À NE PAS modifier :** `client_id`, `application_url`, `[app_proxy]` de
+`shopify.app.toml`, variables d'env SumUp, scopes.
 
-**Valeurs à saisir :** aucune valeur sensible. Les libellés/couleurs sont
-cosmétiques.
-
-**Résultat attendu :** sur une fiche produit publique, le bloc SumUp
-(champ e-mail + bouton) s'affiche près des boutons d'achat ; sur `/cart`, le
-bloc panier s'affiche.
-
-**À me renvoyer :** une capture de la fiche produit + du panier avec le bloc
-visible (desktop et mobile si possible).
+**Résultat attendu :** version de l'app à jour ; l'éditeur de thème propose
+les 2 blocs + l'app embed.
 
 ---
 
-## 3. (Optionnel) Reconnecter le MCP Shopify pour l'audit live
+## 2. Régler les interrupteurs dans l'app (admin)
 
-**Objectif :** me permettre d'inspecter la boutique et le thème Horizon en
-direct (produits mono/multi-variantes, structure du cart drawer) et de valider
-le parcours sans paiement réel.
+**Où :** admin Shopify → *Applications → Sumup integration → Réglages SumUp*.
 
-**Pourquoi Claude ne peut pas le faire :** le jeton MCP « claude.ai Shopify » a
-expiré ; la ré-autorisation passe par ton compte.
+| Réglage | Recommandation de départ |
+|---|---|
+| Paiement du panier avec SumUp | **ON** |
+| Bouton SumUp dans le tiroir de panier | ON si tu veux le tiroir |
+| Masquer le bouton « Passer à la caisse » de Shopify | **OFF** au début, ON quand tout est validé |
 
-**Étapes exactes :** relancer l'autorisation du connecteur Shopify dans Claude,
-puis me le signaler.
-
-**À me renvoyer :** « MCP reconnecté » — je reprends l'audit live et la
-checklist de tests §11/§12.
+Enregistre. (Défauts si tu ne touches à rien : paiement panier ON, tiroir OFF,
+masquage OFF.)
 
 ---
 
-## Test de paiement
+## 3. Éditeur de thème Horizon
 
-⚠️ **Ne pas déclencher de paiement LIVE** sans accord explicite. Pour valider
-le tunnel, utiliser une carte de test SumUp / le mode sandbox, ou s'arrêter à
-la page de checkout hébergée SumUp (preuve que la redirection fonctionne).
+**Où :** *Boutique en ligne → Thèmes → Horizon → Personnaliser*.
+
+### a) Page panier
+Modèle **Panier** → section du panier → *Ajouter un bloc → Applications →
+SumUp — Panier*. Le placer au-dessus du bouton « Passer à la caisse ».
+Régler texte / couleur / pleine largeur.
+
+### b) Cart drawer (tiroir)
+Le tiroir n'accepte pas les blocs d'app → on passe par l'**app embed** :
+*Paramètres du thème (⚙️) → App embeds → activer « SumUp — Storefront »*.
+Le bouton SumUp apparaîtra dans le tiroir dès que le réglage admin
+« Bouton SumUp dans le tiroir » est ON. Rien à placer manuellement.
+
+### c) Fiche produit
+Déjà en place — ne pas y toucher (le bloc *SumUp — Bouton produit* existe).
+
+### d) Boutons de paiement accéléré (Shop Pay, PayPal, GPay…)
+Réglage **natif** Horizon : *Paramètres du thème → Panier → décocher
+« Afficher les boutons de paiement accéléré »* si tu veux les retirer du
+panier. (Non géré par notre app — c'est le mécanisme officiel.)
+
+### e) Bouton « Acheter maintenant » sur la fiche produit
+Bloc *Boutons d'achat* → sous-bloc *Paiement accéléré* → le masquer/retirer
+si tu veux forcer le passage par le panier.
+
+**Enregistrer.** M'envoyer des captures : fiche produit, page panier, tiroir
+(desktop + mobile).
+
+---
+
+## 4. Tests storefront (sans paiement)
+
+Après 1–3, prévenir Claude : je repasse la checklist §12 (panier, tiroir,
+masquage, remises) sur la preview. **Aucun paiement live.**
+
+---
+
+## 5. Test de paiement final
+
+⚠️ **Ne déclenche aucun paiement LIVE sans accord explicite.** Pour valider le
+tunnel : carte de test / sandbox SumUp, ou s'arrêter à la page de checkout
+hébergée SumUp (preuve que la redirection fonctionne).
