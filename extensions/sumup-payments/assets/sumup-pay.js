@@ -15,6 +15,20 @@
   "use strict";
 
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  var CHECKOUT_PATH = "/apps/sumup-pay/checkout";
+
+  // Master config (advancedCheckoutEnabled, …) — fetched once, best effort.
+  // If it never resolves the blocks keep their current fast behaviour.
+  var appConfig = null;
+  var appConfigPromise = null;
+  function loadAppConfig() {
+    if (appConfigPromise) return appConfigPromise;
+    appConfigPromise = fetch("/apps/sumup-pay/config", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (c) { appConfig = c || {}; return appConfig; })
+      .catch(function () { appConfig = {}; return appConfig; });
+    return appConfigPromise;
+  }
 
   function section(el) {
     return el.closest(".shopify-section") || document;
@@ -143,6 +157,22 @@
       sync();
       showError(form, "");
 
+      // Advanced checkout on → go to the checkout page with the selected
+      // variant; contact / address / payment are handled there.
+      if (appConfig && appConfig.advancedCheckoutEnabled) {
+        event.preventDefault();
+        if (!variantField || !variantField.value) {
+          showError(form, "Veuillez sélectionner une option du produit.");
+          return;
+        }
+        setLoading(form, true);
+        var q = readQuantity(block);
+        window.location.assign(
+          CHECKOUT_PATH + "?add=" + encodeURIComponent(variantField.value) + "&qty=" + q,
+        );
+        return;
+      }
+
       if (!validEmail(form)) {
         event.preventDefault();
         showError(form, "Merci d'indiquer une adresse e-mail valide.");
@@ -251,6 +281,13 @@
       event.preventDefault();
       showError(form, "");
 
+      // Advanced checkout on → the checkout page collects contact/address.
+      if (appConfig && appConfig.advancedCheckoutEnabled) {
+        setLoading(form, true);
+        window.location.assign(CHECKOUT_PATH);
+        return;
+      }
+
       if (!validEmail(form)) {
         showError(form, "Merci d'indiquer une adresse e-mail valide.");
         return;
@@ -273,12 +310,15 @@
   /* --- boot -------------------------------------------------------- */
 
   function init(root) {
-    (root || document)
-      .querySelectorAll('[data-sumup-block="product"]')
-      .forEach(initProduct);
-    (root || document)
-      .querySelectorAll('[data-sumup-block="cart"]')
-      .forEach(initCart);
+    var scope = root || document;
+    if (
+      scope.querySelector('[data-sumup-block="product"]') ||
+      scope.querySelector('[data-sumup-block="cart"]')
+    ) {
+      loadAppConfig();
+    }
+    scope.querySelectorAll('[data-sumup-block="product"]').forEach(initProduct);
+    scope.querySelectorAll('[data-sumup-block="cart"]').forEach(initCart);
   }
 
   if (document.readyState === "loading") {

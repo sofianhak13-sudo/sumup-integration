@@ -381,7 +381,25 @@ window.__sumupCheckoutBoot = function (CFG) {
     });
   });
 
-  // --- boot: load the cart, then a first quote ---
+  // --- boot: (optionally add a product), load the cart, then a first quote ---
+  function maybeAdd(){
+    try {
+      var q = new URLSearchParams(location.search);
+      var add = q.get("add");
+      if(!add) return Promise.resolve();
+      var qty = Math.max(1, parseInt(q.get("qty")||"1", 10) || 1);
+      return fetch(CFG.cartUrl.replace(/\\/$/,"")+"/add.js", {
+        method:"POST", credentials:"same-origin",
+        headers:{ "Content-Type":"application/json", Accept:"application/json" },
+        body: JSON.stringify({ items:[{ id: Number(add) || add, quantity: qty }] }),
+      }).then(function(){
+        // Drop the params so a reload doesn't re-add.
+        history.replaceState(null, "", location.pathname);
+      }).catch(function(){});
+    } catch(e){ return Promise.resolve(); }
+  }
+
+  maybeAdd().then(function(){
   fetch(CFG.cartUrl.replace(/\\/$/,"")+".js", { headers:{ Accept:"application/json" } })
     .then(function(r){ return r.json(); })
     .then(function(c){
@@ -394,5 +412,6 @@ window.__sumupCheckoutBoot = function (CFG) {
       refreshQuote();
     })
     .catch(function(){ document.getElementById("co-items").innerHTML = '<p class="muted">Impossible de charger le panier.</p>'; });
+  });
 };`;
 }

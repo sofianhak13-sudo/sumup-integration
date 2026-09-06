@@ -1,5 +1,6 @@
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { getMerchantSettings } from "../lib/merchant-settings.server";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -36,6 +37,24 @@ export const action = async ({ request }) => {
     1,
     Math.min(99, Number.parseInt(formData.get("quantity"), 10) || 1),
   );
+
+  // Advanced checkout on → hand off to the checkout page. The variant is
+  // passed along so the page adds it to the cart before rendering.
+  const settings = session ? await getMerchantSettings(session.shop) : null;
+  if (settings?.advancedCheckoutEnabled) {
+    const params = new URLSearchParams();
+    if (typeof requestedVariantId === "string" && requestedVariantId) {
+      params.set("add", requestedVariantId);
+    }
+    params.set("qty", String(quantity));
+    return new Response(null, {
+      status: 303,
+      headers: {
+        ...noStoreHeaders,
+        Location: `/apps/sumup-pay/checkout?${params.toString()}`,
+      },
+    });
+  }
   const emailRaw = formData.get("email");
   const email = typeof emailRaw === "string" ? emailRaw.trim() : "";
 

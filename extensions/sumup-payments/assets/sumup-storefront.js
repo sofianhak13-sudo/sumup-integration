@@ -223,6 +223,13 @@
     event.preventDefault();
     if (form.dataset.sumupBusy) return;
 
+    // Advanced checkout on → hand off to the dedicated checkout page
+    // (contact / address / delivery collected there, not in the drawer).
+    if (settings && settings.advancedCheckoutEnabled) {
+      window.location.assign("/apps/sumup-pay/checkout");
+      return;
+    }
+
     var errBox = form.querySelector("[data-sumup-error]");
     var showErr = function (m) {
       if (errBox) {

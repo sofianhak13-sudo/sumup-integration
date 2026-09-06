@@ -50,6 +50,16 @@ export const action = async ({ request }) => {
     );
   }
 
+  // Advanced checkout on → this fast POST is superseded by the checkout page.
+  // Server-side safety net: works even if the theme extension hasn't been
+  // redeployed with the client-side routing yet.
+  if (settings.advancedCheckoutEnabled) {
+    return new Response(null, {
+      status: 303,
+      headers: { ...noStoreHeaders, Location: "/apps/sumup-pay/checkout" },
+    });
+  }
+
   const formData = await request.formData();
   const cartRaw = formData.get("cart");
   const emailRaw = formData.get("email");
