@@ -10,6 +10,16 @@
 
 import { CONTACT_FIELDS } from "./checkout-config.js";
 
+// A pragmatic country list (ISO-3166-1 alpha-2). Extend as needed from the
+// admin later; the server validates against a 2-letter code regardless.
+const COUNTRIES = [
+  ["FR", "France"], ["BE", "Belgique"], ["CH", "Suisse"], ["LU", "Luxembourg"],
+  ["DE", "Allemagne"], ["ES", "Espagne"], ["IT", "Italie"], ["PT", "Portugal"],
+  ["NL", "Pays-Bas"], ["GB", "Royaume-Uni"], ["IE", "Irlande"], ["AT", "Autriche"],
+  ["DK", "Danemark"], ["SE", "Suède"], ["FI", "Finlande"], ["PL", "Pologne"],
+  ["CZ", "Tchéquie"], ["US", "États-Unis"], ["CA", "Canada"], ["AU", "Australie"],
+];
+
 const esc = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -78,8 +88,10 @@ function addressFields(prefix, level) {
     <div class="grid2">
       ${F("province", 'autocomplete="address-level1"')}
       <label class="f"><span>${esc(FIELD_LABELS.country)}</span>
-        <input name="${prefix}.country" autocomplete="country-name" placeholder="France">
-        <input type="hidden" name="${prefix}.countryCode" value="">
+        <select name="${prefix}.countryCode" autocomplete="country">
+          <option value="">— Choisir —</option>
+          ${COUNTRIES.map(([code, name]) => `<option value="${code}">${esc(name)}</option>`).join("")}
+        </select>
       </label>
     </div>
     <p class="hint" data-addr-note="${prefix}"${opt ? "" : ' hidden'}>${opt ? "Laissez vide si vous ne souhaitez pas la renseigner." : ""}</p>
@@ -120,8 +132,8 @@ export function checkoutPage({ config, cartUrl = "/cart", actionPath, customerEm
     #sumup-checkout h2{font-size:15px;margin:0 0 12px}
     #sumup-checkout .f{display:block;margin:0 0 10px}
     #sumup-checkout .f span{display:block;font-size:13px;color:#444;margin:0 0 4px}
-    #sumup-checkout .f input{width:100%;padding:11px 12px;border:1px solid #b5b5b5;border-radius:8px;font-size:16px;background:#fff}
-    #sumup-checkout .f input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+    #sumup-checkout .f input,#sumup-checkout .f select{width:100%;padding:11px 12px;border:1px solid #b5b5b5;border-radius:8px;font-size:16px;background:#fff}
+    #sumup-checkout .f input:focus,#sumup-checkout .f select:focus{outline:2px solid var(--accent);border-color:var(--accent)}
     #sumup-checkout .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
     @media (max-width:420px){#sumup-checkout .grid2{grid-template-columns:1fr}}
     #sumup-checkout .hint{font-size:12px;color:#757575;margin:4px 0 0}
@@ -282,11 +294,11 @@ window.__sumupCheckoutBoot = function (CFG) {
   }
   function validateAddr(prefix, level, values){
     var keys=["firstName","lastName","address1","zip","city"];
-    var filled = keys.concat(["address2","province","country"]).some(function(k){ return (values[prefix+"."+k]||"").trim(); });
+    var filled = keys.concat(["address2","province","countryCode"]).some(function(k){ return (values[prefix+"."+k]||"").trim(); });
     if(level==="optional" && !filled) return true;
     var ok=true;
     keys.forEach(function(k){ if(!(values[prefix+"."+k]||"").trim()){ fieldErr(prefix+"."+k,"Ce champ est obligatoire."); ok=false; } });
-    if(!(values[prefix+".country"]||"").trim()){ fieldErr(prefix+".country","Pays obligatoire."); ok=false; }
+    if(!(values[prefix+".countryCode"]||"").trim()){ fieldErr(prefix+".countryCode","Pays obligatoire."); ok=false; }
     return ok;
   }
 
@@ -321,7 +333,7 @@ window.__sumupCheckoutBoot = function (CFG) {
   function refreshShipping(){
     if(!CFG.shipping) return Promise.resolve();
     var v = collect();
-    if(!(v["shipping.zip"]||"").trim() || !(v["shipping.country"]||"").trim()) return Promise.resolve();
+    if(!(v["shipping.zip"]||"").trim() || !(v["shipping.countryCode"]||"").trim()) return Promise.resolve();
     var box = document.getElementById("co-ship");
     box.innerHTML = '<p class="muted">Calcul des modes de livraison…</p>';
     var seq = ++shipReqSeq;
@@ -354,10 +366,12 @@ window.__sumupCheckoutBoot = function (CFG) {
     billingSame.addEventListener("change", function(){ billingBox.hidden = billingSame.checked; });
   }
   var shipDebounce;
-  form.addEventListener("input", function(e){
+  function onShipEdit(e){
     var n = e.target && e.target.name || "";
-    if(n.indexOf("shipping.")===0){ clearTimeout(shipDebounce); shipDebounce = setTimeout(refreshShipping, 700); }
-  });
+    if(n.indexOf("shipping.")===0){ clearTimeout(shipDebounce); shipDebounce = setTimeout(refreshShipping, 600); }
+  }
+  form.addEventListener("input", onShipEdit);
+  form.addEventListener("change", onShipEdit);
 
   form.addEventListener("submit", function(e){
     e.preventDefault();

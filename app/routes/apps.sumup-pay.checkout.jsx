@@ -99,9 +99,8 @@ export const action = async ({ request }) => {
     zip: form.get(`${prefix}.zip`),
     city: form.get(`${prefix}.city`),
     province: form.get(`${prefix}.province`),
-    provinceCode: form.get(`${prefix}.provinceCode`),
-    country: form.get(`${prefix}.country`),
-    countryCode: form.get(`${prefix}.countryCode`) || form.get(`${prefix}.country`),
+    provinceCode: form.get(`${prefix}.province`),
+    countryCode: form.get(`${prefix}.countryCode`),
   });
 
   const shippingRes = validateAddress(readAddr("shipping"), config.shippingAddress, "shipping");
