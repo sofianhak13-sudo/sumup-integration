@@ -117,6 +117,7 @@
 .sumup-pay-block__spinner {
   width: 16px;
   height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4); /* fallback for old browsers */
   border: 2px solid color-mix(in srgb, var(--sumup-on-accent) 40%, transparent);
   border-top-color: var(--sumup-on-accent);
   border-radius: 50%;
