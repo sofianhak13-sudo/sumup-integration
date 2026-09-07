@@ -156,7 +156,10 @@ const orderErrors = orderData.data?.orderCreate?.userErrors || [];
 const order = orderData.data?.orderCreate?.order;
 
 if (orderErrors.length > 0 || !order?.id) {
-  console.error("ERREUR CREATION COMMANDE SHOPIFY :", orderErrors);
+  console.error("ERREUR CREATION COMMANDE SHOPIFY :", {
+    userErrors: orderErrors,
+    graphQLErrors: orderData.errors,
+  });
 await prisma.sumUpPayment.update({
   where: {
     checkoutId: checkout.id,

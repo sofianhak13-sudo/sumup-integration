@@ -211,10 +211,10 @@ export const action = async ({ request }) => {
       orderData.data?.orderCreate?.order;
 
     if (orderErrors.length > 0 || !order?.id) {
-      console.error(
-        "ERREUR CREATION COMMANDE SHOPIFY PANIER :",
-        orderErrors,
-      );
+      console.error("ERREUR CREATION COMMANDE SHOPIFY PANIER :", {
+        userErrors: orderErrors,
+        graphQLErrors: orderData.errors,
+      });
 
       await prisma.sumUpCartPayment.update({
         where: {

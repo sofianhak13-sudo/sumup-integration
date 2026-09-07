@@ -84,16 +84,22 @@ export function buildOrderInput({
   const ph = str(phone);
   if (ph) order.phone = ph;
 
-  // `OrderCreateCustomerInput` upserts a customer (Shopify de-dupes on email).
-  // Only attach it when we actually collected identifying data.
+  // Customer: `order.email` alone already creates/links a customer (this is
+  // the fast flow's proven behaviour). Only attach an explicit
+  // `OrderCreateCustomerInput` when the advanced checkout collected a name or
+  // phone — and it must be wrapped in `toUpsert`
+  // (OrderCreateUpsertCustomerAttributesInput); a flat { email, firstName }
+  // is rejected by the schema before userErrors.
   const fn = str(firstName);
   const ln = str(lastName);
-  const customer = {};
-  if (str(email)) customer.email = str(email);
-  if (fn) customer.firstName = fn;
-  if (ln) customer.lastName = ln;
-  if (ph) customer.phone = ph;
-  if (Object.keys(customer).length) order.customer = customer;
+  if (fn || ln || ph) {
+    const toUpsert = {};
+    if (str(email)) toUpsert.email = str(email);
+    if (fn) toUpsert.firstName = fn;
+    if (ln) toUpsert.lastName = ln;
+    if (ph) toUpsert.phone = ph;
+    order.customer = { toUpsert };
+  }
 
   const ship = toMailingAddress(shippingAddress);
   if (ship) order.shippingAddress = ship;
