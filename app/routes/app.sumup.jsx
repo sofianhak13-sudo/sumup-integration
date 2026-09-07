@@ -76,11 +76,13 @@ export default function SumUpAccount() {
           </s-paragraph>
         </s-box>
 
-        <fetcher.Form method="post">
-          <s-button variant="primary" type="submit" {...(checking ? { loading: true } : {})}>
-            Vérifier le compte SumUp
-          </s-button>
-        </fetcher.Form>
+        <s-button
+          variant="primary"
+          onClick={() => fetcher.submit(new FormData(), { method: "POST" })}
+          {...(checking ? { loading: true } : {})}
+        >
+          Vérifier le compte SumUp
+        </s-button>
 
         {res ? (
           <s-box padding="base" borderWidth="base" borderRadius="base">
