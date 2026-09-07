@@ -117,5 +117,14 @@ export async function runDiagnostics({ admin, storefront, shop }) {
         ? "Actif — le CTA natif est masqué quand un bouton SumUp est présent"
         : "Inactif (CTA Shopify visible)",
     },
+    {
+      key: "notifications",
+      label: "Confirmations de commande",
+      status: "ok",
+      detail:
+        "Envoyées par Shopify (options.sendReceipt) avec le template natif. " +
+        "Gérez le contenu dans Paramètres → Notifications → « Confirmation de commande ». " +
+        "Aucun e-mail n'est envoyé par l'app ni par SumUp.",
+    },
   ];
 }

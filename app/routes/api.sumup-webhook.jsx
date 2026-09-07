@@ -1,199 +1,154 @@
 import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
+import { buildOrderInput } from "../lib/order-input.js";
+import { createShopifyOrder, findOrderByReference } from "../lib/sumup-order.server";
+
+const LP = "[SUMUP_WEBHOOK]";
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const noStore = { "Cache-Control": "no-store" };
+
+/**
+ * SumUp `return_url` callback for the product fast flow. Same idempotency
+ * model as api.sumup-cart-webhook.jsx (orderId guard + processing lock
+ * released in `finally` + sumup-ref order tag). Shopify's native
+ * confirmation email fires via options.sendReceipt = true.
+ */
 export const action = async ({ request }) => {
   try {
-    const event = await request.json();
+    const event = await request.json().catch(() => null);
 
-    // Ignorer proprement les événements inconnus
-    if (
-      event?.event_type !== "CHECKOUT_STATUS_CHANGED" ||
-      !event?.id
-    ) {
-      return new Response(null, { status: 204 });
+    if (event?.event_type !== "CHECKOUT_STATUS_CHANGED" || !event?.id) {
+      return new Response(null, { status: 204, headers: noStore });
     }
 
     const apiKey = process.env.SUMUP_API_KEY;
-
     if (!apiKey) {
-      console.error("SUMUP_API_KEY manquante");
-      return new Response(null, { status: 500 });
+      console.error(`${LP} SUMUP_API_KEY manquante`);
+      return new Response(null, { status: 500, headers: noStore });
     }
 
-    // Vérification directe auprès de SumUp
     const checkoutResponse = await fetch(
       `https://api.sumup.com/v0.1/checkouts/${encodeURIComponent(event.id)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: "application/json",
-        },
-      }
+      { headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" } },
     );
-
     if (!checkoutResponse.ok) {
-      console.error(
-        "Impossible de vérifier le checkout SumUp :",
-        checkoutResponse.status
-      );
-
-      return new Response(null, { status: 500 });
+      console.error(`${LP} vérification checkout SumUp échouée :`, checkoutResponse.status);
+      return new Response(null, { status: 500, headers: noStore });
     }
-
     const checkout = await checkoutResponse.json();
+
     const payment = await prisma.sumUpPayment.findUnique({
-  where: {
-    checkoutId: checkout.id,
-  },
-});
-
-if (!payment) {
-  console.error("PAIEMENT INTROUVABLE EN BASE :", checkout.id);
-  return new Response(null, { status: 204 });
-}
-const customerEmail =
-  typeof payment.customerEmail === "string"
-    ? payment.customerEmail.trim()
-    : "";
-
-if (!customerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-  console.error("EMAIL CLIENT INVALIDE EN BASE :", checkout.id);
-  return new Response(null, { status: 204 });
-}
-await prisma.sumUpPayment.update({
-  where: {
-    checkoutId: checkout.id,
-  },
-  data: {
-    status: checkout.status,
-  },
-});
-
-if (checkout.status !== "PAID") {
-  console.log("PAIEMENT NON FINAL :", checkout.status);
-  return new Response(null, { status: 204 });
-}
-if (payment.orderId) {
-  console.log("COMMANDE SHOPIFY DEJA CREEE :", payment.orderId);
-  return new Response(null, { status: 204 });
-}
-if (
-  checkout.checkout_reference !== payment.checkoutReference ||
-  Math.abs(Number(checkout.amount) - Number(payment.amount)) > 0.001 ||
-  checkout.currency !== payment.currency
-) {
-  console.error("DONNEES PAIEMENT SUMUP INCOHERENTES");
-  return new Response(null, { status: 204 });
-}
-const lock = await prisma.sumUpPayment.updateMany({
-  where: {
-    checkoutId: checkout.id,
-    processing: false,
-    orderId: null,
-  },
-  data: {
-    processing: true,
-  },
-});
-
-if (lock.count === 0) {
-  console.log("PAIEMENT DEJA EN COURS OU COMMANDE DEJA CREEE");
-  return new Response(null, { status: 204 });
-}
-const { admin } = await unauthenticated.admin(payment.shop);
-
-const orderResponse = await admin.graphql(
-  `#graphql
-  mutation orderCreate(
-  $order: OrderCreateOrderInput!
-  $options: OrderCreateOptionsInput
-) {
-  orderCreate(order: $order, options: $options) {
-      order {
-        id
-        name
-        displayFinancialStatus
-        statusPageUrl
-      }
-      userErrors {
-        field
-        message
-      }
+      where: { checkoutId: checkout.id },
+    });
+    if (!payment) {
+      console.error(`${LP} paiement introuvable en base :`, checkout.id);
+      return new Response(null, { status: 204, headers: noStore });
     }
-  }`,
-  {
-    variables: {
-      order: {
-        email: payment.customerEmail,
-  currency: payment.currency,
-  lineItems: [
-    {
-      variantId: payment.variantId,
-      quantity: payment.quantity ?? 1,
-    },
-  ],
-  transactions: [
-    {
-      kind: "SALE",
-      status: "SUCCESS",
-      gateway: "SumUp",
-      amountSet: {
-        shopMoney: {
-          amount: Number(payment.amount),
-          currencyCode: payment.currency,
-        },
-      },
-    },
-  ],
-},
-options: {
-      sendReceipt: true,
-    },
-    },
-  },
-);
-const orderData = await orderResponse.json();
-const orderErrors = orderData.data?.orderCreate?.userErrors || [];
-const order = orderData.data?.orderCreate?.order;
 
-if (orderErrors.length > 0 || !order?.id) {
-  console.error("ERREUR CREATION COMMANDE SHOPIFY :", {
-    userErrors: orderErrors,
-    graphQLErrors: orderData.errors,
-  });
-await prisma.sumUpPayment.update({
-  where: {
-    checkoutId: checkout.id,
-  },
-  data: {
-    processing: false,
-  },
-});
-  return new Response(null, { status: 500 });
-}
+    const customerEmail =
+      typeof payment.customerEmail === "string" ? payment.customerEmail.trim() : "";
+    if (!customerEmail || !EMAIL_RE.test(customerEmail)) {
+      console.error(`${LP} e-mail client invalide :`, checkout.id);
+      return new Response(null, { status: 204, headers: noStore });
+    }
 
-await prisma.sumUpPayment.update({
-  where: {
-    checkoutId: checkout.id,
-  },
-  data: {
-    orderId: order.id,
-    statusPageUrl: order.statusPageUrl,
-    processing: false,
-  },
-});
-
-console.log("COMMANDE SHOPIFY CREEE :", order.id, order.name);
-    console.log("PAIEMENT SUMUP VERIFIE :", {
-      id: checkout.id,
-      reference: checkout.checkout_reference,
-      status: checkout.status,
-      amount: checkout.amount,
-      currency: checkout.currency,
+    await prisma.sumUpPayment.update({
+      where: { checkoutId: checkout.id },
+      data: { status: checkout.status },
     });
 
-    return new Response(null, { status: 204 });
+    if (checkout.status !== "PAID") {
+      console.log(`${LP} paiement non final :`, checkout.status);
+      return new Response(null, { status: 204, headers: noStore });
+    }
+
+    if (payment.orderId) {
+      console.log(`${LP} commande déjà créée :`, payment.orderId);
+      return new Response(null, { status: 204, headers: noStore });
+    }
+
+    if (
+      checkout.checkout_reference !== payment.checkoutReference ||
+      Math.abs(Number(checkout.amount) - Number(payment.amount)) > 0.001 ||
+      checkout.currency !== payment.currency
+    ) {
+      console.error(`${LP} données paiement SumUp incohérentes`);
+      return new Response(null, { status: 204, headers: noStore });
+    }
+
+    const lock = await prisma.sumUpPayment.updateMany({
+      where: { checkoutId: checkout.id, processing: false, orderId: null },
+      data: { processing: true },
+    });
+    if (lock.count === 0) {
+      console.log(`${LP} déjà en cours ou déjà finalisé`);
+      return new Response(null, { status: 204, headers: noStore });
+    }
+
+    let orderWritten = false;
+    try {
+      const { admin } = await unauthenticated.admin(payment.shop);
+
+      const existing = await findOrderByReference(admin, payment.checkoutReference);
+      if (existing?.id) {
+        await prisma.sumUpPayment.update({
+          where: { checkoutId: checkout.id },
+          data: { orderId: existing.id, statusPageUrl: existing.statusPageUrl, processing: false },
+        });
+        orderWritten = true;
+        console.log(`${LP}[ORDER_FINALIZED] commande adoptée :`, existing.id, existing.name);
+        return new Response(null, { status: 204, headers: noStore });
+      }
+
+      const { order: orderInput, options } = buildOrderInput({
+        email: customerEmail,
+        currency: payment.currency,
+        lineItems: [{ variantId: payment.variantId, quantity: payment.quantity ?? 1 }],
+        amountChargedCents: Math.round(Number(payment.amount) * 100),
+        reference: payment.checkoutReference,
+      });
+
+      const result = await createShopifyOrder(admin, orderInput, options);
+      if (!result.ok) {
+        console.error(`${LP}[SHOPIFY_ORDER_CREATE] échec :`, {
+          userErrors: result.userErrors,
+          graphQLErrors: result.graphQLErrors,
+        });
+        return new Response(null, { status: 500, headers: noStore });
+      }
+
+      await prisma.sumUpPayment.update({
+        where: { checkoutId: checkout.id },
+        data: {
+          orderId: result.order.id,
+          statusPageUrl: result.order.statusPageUrl,
+          processing: false,
+        },
+      });
+      orderWritten = true;
+
+      console.log(`${LP}[ORDER_FINALIZED]`, {
+        order: result.order.name,
+        orderId: result.order.id,
+        confirmation: result.order.confirmationNumber,
+        financialStatus: result.order.displayFinancialStatus,
+        amount: checkout.amount,
+        currency: checkout.currency,
+      });
+
+      return new Response(null, { status: 204, headers: noStore });
+    } finally {
+      if (!orderWritten) {
+        await prisma.sumUpPayment
+          .updateMany({
+            where: { checkoutId: checkout.id, orderId: null },
+            data: { processing: false },
+          })
+          .catch((e) => console.error(`${LP} libération du verrou échouée :`, e?.message || e));
+      }
+    }
   } catch (error) {
-    console.error("ERREUR WEBHOOK SUMUP :", error);
-    return new Response(null, { status: 500 });
+    console.error(`${LP} exception :`, error?.message || error);
+    return new Response(null, { status: 500, headers: noStore });
   }
 };

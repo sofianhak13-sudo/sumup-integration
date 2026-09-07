@@ -1,12 +1,51 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildOrderInput, toMailingAddress } from "../app/lib/order-input.js";
+import { buildOrderInput, toMailingAddress, referenceTag } from "../app/lib/order-input.js";
 
 const baseLines = [{ variantId: "gid://shopify/ProductVariant/1", quantity: 2 }];
 
-// No `order.customer` key may ever be a flat { email, firstName, ... } — the
-// schema only accepts { toUpsert: {...} } or { toAssociate: {...} }.
+/* -------------------------------------------------------------------------- */
+/* Schema guardrails — key sets from the real Admin API 2026-07 schema.       */
+/* The previous prod bug (flat order.customer) passed the tests because the   */
+/* tests validated the wrong shape. These lock the shapes down.               */
+/* -------------------------------------------------------------------------- */
+
+const ORDER_INPUT_KEYS = new Set([
+  "billingAddress", "buyerAcceptsMarketing", "closedAt", "companyLocationId",
+  "currency", "customAttributes", "customer", "discountCode", "email",
+  "financialStatus", "fulfillment", "fulfillmentStatus", "lineItems",
+  "metafields", "name", "note", "phone", "poNumber", "presentmentCurrency",
+  "processedAt", "referringSite", "shippingAddress", "shippingLines",
+  "sourceIdentifier", "sourceName", "sourceUrl", "tags", "taxesIncluded",
+  "taxLines", "test", "transactions", "userId",
+]);
+const CUSTOMER_KEYS = new Set(["toAssociate", "toUpsert"]);
+const CUSTOMER_UPSERT_KEYS = new Set([
+  "addresses", "email", "firstName", "id", "lastName", "multipassIdentifier",
+  "note", "phone", "tags", "taxExempt",
+]);
+const OPTIONS_KEYS = new Set(["inventoryBehaviour", "sendReceipt", "sendFulfillmentReceipt"]);
+
+function assertSchemaSafe(order, options) {
+  for (const k of Object.keys(order)) {
+    assert.ok(ORDER_INPUT_KEYS.has(k), `order.${k} is not an OrderCreateOrderInput field`);
+  }
+  if (order.customer) {
+    for (const k of Object.keys(order.customer)) {
+      assert.ok(CUSTOMER_KEYS.has(k), `order.customer.${k} invalid (expected toAssociate/toUpsert)`);
+    }
+    if (order.customer.toUpsert) {
+      for (const k of Object.keys(order.customer.toUpsert)) {
+        assert.ok(CUSTOMER_UPSERT_KEYS.has(k), `order.customer.toUpsert.${k} not a valid field`);
+      }
+    }
+  }
+  for (const k of Object.keys(options || {})) {
+    assert.ok(OPTIONS_KEYS.has(k), `options.${k} is not an OrderCreateOptionsInput field`);
+  }
+}
+
 function assertCustomerShape(order) {
   if (!("customer" in order)) return;
   const keys = Object.keys(order.customer);
@@ -21,6 +60,7 @@ test("fast flow (email only): order.email set, no order.customer block", () => {
     amountChargedCents: 5980,
     taxesIncluded: true,
   });
+  assertSchemaSafe(order, options);
   assert.equal(order.email, "a@b.co");
   assert.equal(order.taxesIncluded, true);
   assert.equal(order.transactions[0].amountSet.shopMoney.amount, "59.80");
@@ -29,7 +69,28 @@ test("fast flow (email only): order.email set, no order.customer block", () => {
   assert.ok(!order.shippingLines);
   assert.ok(!order.discountCode);
   assert.ok(!("customer" in order), "email-only must not send order.customer");
-  assert.deepEqual(options, { sendReceipt: true });
+  // Native Shopify order-confirmation email — no custom mail anywhere.
+  assert.equal(options.sendReceipt, true);
+});
+
+test("reference => idempotency tag + note; no reference => neither", () => {
+  const withRef = buildOrderInput({
+    email: "a@b.co",
+    currency: "EUR",
+    lineItems: baseLines,
+    amountChargedCents: 100,
+    reference: "co-1788741695447",
+  }).order;
+  assertSchemaSafe(withRef, {});
+  assert.deepEqual(withRef.tags, ["SumUp", "sumup-ref-co-1788741695447"]);
+  assert.equal(withRef.tags[1], referenceTag("co-1788741695447"));
+  assert.ok(withRef.note.includes("co-1788741695447"));
+
+  const noRef = buildOrderInput({
+    email: "a@b.co", currency: "EUR", lineItems: baseLines, amountChargedCents: 100,
+  }).order;
+  assert.ok(!("tags" in noRef));
+  assert.ok(!("note" in noRef));
 });
 
 test("advanced flow (email + name): customer.toUpsert with only present fields", () => {
@@ -87,6 +148,7 @@ test("advanced flow: discount + shipping + addresses + customer together", () =>
     taxesIncluded: true,
   });
 
+  assertSchemaSafe(order, {});
   assertCustomerShape(order);
   assert.equal(order.customer.toUpsert.firstName, "Jean");
   assert.equal(order.customer.toUpsert.phone, "+33612345678");

@@ -144,19 +144,66 @@ DROP, les lignes existantes restent valides. Déploiement via `prisma db push`.
 
 ## 7. Commande Shopify après PAID
 
-`api.sumup-cart-webhook.jsx` → `buildOrderInput()` (`app/lib/order-input.js`) :
+`api.sumup-cart-webhook.jsx` (cart / V2) et `api.sumup-webhook.jsx` (produit)
+partagent `buildOrderInput()` (`app/lib/order-input.js`) + les helpers
+`app/lib/sumup-order.server.js` :
 
-- `email`, `phone`, `customer { firstName, lastName, phone }` ;
+- `order.email` (saisi client) + `order.customer = { toUpsert: {...} }`
+  **uniquement** si un nom/téléphone a été collecté
+  (`OrderCreateCustomerInput` n'accepte que `toUpsert` / `toAssociate`) ;
 - `lineItems` au **prix catalogue** ;
 - `discountCode.itemFixedDiscountCode` = remise globale (= `discountAmount`) ;
 - `shippingLines[0]` = mode + `priceSet` (= `shippingAmount`) ;
 - `shippingAddress`, `billingAddress` (repli sur la livraison si « identique ») ;
-- `transactions[0]` SALE = montant encaissé.
+- `transactions[0]` SALE `gateway:"SumUp"` = montant encaissé → commande **PAID** ;
+- `order.tags = ["SumUp", "sumup-ref-<reference>"]`, `order.note` = réf.
 
-Inchangé : vérification `PAID` directe SumUp, contrôle référence + montant +
-devise, verrou `processing`, idempotence (`orderId`), commande unique.
+Vérifié en prod (commande #11046) : `displayFinancialStatus: PAID`,
+`confirmationNumber` généré, transaction SumUp visible, client créé.
 
-## 8. Reprise / robustesse
+## 8. Notifications — 100 % natives Shopify
+
+| Élément | Mécanisme |
+|---|---|
+| Confirmation de commande client | `orderCreate` `options.sendReceipt = true` → moteur natif Shopify + template Shopify |
+| E-mail marchand « nouvelle commande » | natif Shopify |
+| Confirmation d'expédition | native Shopify, au moment d'un `fulfillment` réel (aucun `fulfillmentStatus` forcé par l'app) |
+| Contenu / langue / logo des e-mails | Admin → **Paramètres → Notifications** |
+
+**Aucun** SendGrid / Resend / Nodemailer / SMTP / template dupliqué. L'app ne
+poste jamais d'e-mail : elle demande à Shopify de l'envoyer.
+
+La timeline affiche « **Sumup integration** a envoyé un e-mail de confirmation
+de commande à … » : c'est l'**attribution de l'action** à l'app qui a créé la
+commande (via son token). Le **système d'envoi** et le **template** restent
+Shopify. « Vous avez envoyé… » = renvoi manuel depuis l'Admin, même moteur.
+
+Pas de double e-mail : le rejeu d'un webhook déjà finalisé s'arrête sur
+`if (payment.orderId) return 204` — aucune 2ᵉ commande, donc aucune 2ᵉ
+confirmation automatique.
+
+## 9. Idempotence (3 couches)
+
+1. **`payment.orderId`** renseigné → jamais de nouvelle commande.
+2. **Verrou atomique `processing`** (`updateMany where processing:false,
+   orderId:null`) → au plus une création concurrente. **Libéré dans un
+   `finally`** sur tout chemin d'échec → plus besoin de remettre `processing`
+   à la main en prod.
+3. **Tag `sumup-ref-<reference>`** : si une création a réussi mais que
+   l'écriture DB de `orderId` a échoué, la tentative suivante retrouve la
+   commande par `tag:'sumup-ref-…'` (`findOrderByReference`) et l'**adopte**
+   au lieu d'en créer une seconde.
+
+Logs préfixés : `[SUMUP_WEBHOOK]` / `[SUMUP_CART_WEBHOOK]`,
+`[SHOPIFY_ORDER_CREATE]`, `[ORDER_FINALIZED]`. Les erreurs GraphQL top-level
+**et** `userErrors` sont journalisées (plus jamais un `[]` masquant l'erreur).
+
+Récupérer un paiement PAID bloqué (après correctif) : rejouer **une fois**
+`POST <render>/api/sumup-cart-webhook`
+body `{"event_type":"CHECKOUT_STATUS_CHANGED","id":"<checkoutId>"}`.
+Ne jamais créer la commande à la main.
+
+## 10. Reprise / robustesse
 
 - Refresh / retour navigateur : la page recharge `/cart.js` + un `quote`
   serveur ; le total affiché n'est jamais obsolète (recalcul serveur au
@@ -164,12 +211,14 @@ devise, verrou `processing`, idempotence (`orderId`), commande unique.
 - Double clic : CTA désactivé au submit ; le webhook a le verrou `processing`
   + `orderId`.
 - Panier modifié : divergence > 1 c → blocage.
-- Checkout SumUp expiré / déjà payé / déjà traité : géré par
-  `/apps/sumup-pay/cart/return` (polling `SumUpCartPayment.statusPageUrl`).
+- Page de retour (`return-screens.server.js`) : polling **borné** (40 essais
+  × 2 s), puis message terminal clair avec la référence — **jamais** de
+  « Finalisation… » infini. Succès → vide le panier + redirige vers la page
+  de statut Shopify.
 - `?add=<variantId>&qty=` (produit → checkout) : ajout via `/cart/add.js` puis
   `history.replaceState` pour qu'un reload ne ré‑ajoute pas.
 
-## 9. Sécurité (rappel)
+## 11. Sécurité (rappel)
 
 Secrets serveur uniquement · prix navigateur jamais fiable · validation
 serveur · webhook PAID · idempotence · aucune donnée bancaire · aucun secret
@@ -177,7 +226,7 @@ en logs / en réponse API · clé SumUp masquée (4 derniers caractères) ·
 protection double‑clic · `publicStorefrontConfig` = whitelist stricte pour
 `/apps/sumup-pay/config` (ne fuite jamais l'identité SumUp).
 
-## 10. Admin V2
+## 12. Admin V2
 
 | Page | Rôle |
 |---|---|

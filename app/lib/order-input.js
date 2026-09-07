@@ -43,6 +43,10 @@ export function toMailingAddress(a) {
 /**
  * @returns {{ order: object, options: object }}
  */
+/** The tag that ties a Shopify order back to its SumUp checkout reference —
+ *  the cross-process idempotency key (survives a DB write failure). */
+export const referenceTag = (reference) => `sumup-ref-${reference}`;
+
 export function buildOrderInput({
   email,
   phone,
@@ -57,6 +61,7 @@ export function buildOrderInput({
   shippingAddress = null,
   billingAddress = null,
   discountCodes = [],
+  reference,
   taxesIncluded,
   sendReceipt = true,
 }) {
@@ -78,6 +83,12 @@ export function buildOrderInput({
       },
     ],
   };
+
+  const ref = str(reference);
+  if (ref) {
+    order.tags = ["SumUp", referenceTag(ref)];
+    order.note = `Paiement SumUp — réf. ${ref}`;
+  }
 
   if (typeof taxesIncluded === "boolean") order.taxesIncluded = taxesIncluded;
 

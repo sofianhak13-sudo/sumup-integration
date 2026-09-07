@@ -91,6 +91,15 @@ Inchangé : vérification `PAID` directe auprès de SumUp, corrélation `checkou
 contrôle montant + devise, verrou `processing`, idempotence (`orderId`), commande
 unique. La redirection navigateur depuis SumUp n'est jamais une preuve de paiement.
 
+**Notifications** : la confirmation de commande client part du **moteur natif
+Shopify** (`orderCreate` `options.sendReceipt: true` + template Shopify,
+administrable dans *Paramètres → Notifications*). Aucun e-mail n'est envoyé par
+l'app ni par SumUp. Détails + idempotence 3 couches : `CHECKOUT_V2.md` §8‑9.
+Les deux webhooks (`api.sumup-webhook.jsx` produit, `api.sumup-cart-webhook.jsx`
+panier/V2) partagent `buildOrderInput` + `app/lib/sumup-order.server.js` :
+verrou libéré en `finally`, tag `sumup-ref-<reference>` anti‑doublon, logs
+préfixés `[SUMUP_WEBHOOK]` / `[SHOPIFY_ORDER_CREATE]` / `[ORDER_FINALIZED]`.
+
 ## Persistance (`SumUpCartPayment`, champs additifs)
 
 `subtotalAmount`, `discountAmount`, `discountCodes[]`, `cartToken`, `snapshot`
