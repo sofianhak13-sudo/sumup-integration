@@ -193,10 +193,24 @@ confirmation automatique.
    l'écriture DB de `orderId` a échoué, la tentative suivante retrouve la
    commande par `tag:'sumup-ref-…'` (`findOrderByReference`) et l'**adopte**
    au lieu d'en créer une seconde.
+4. **Repli sans tags** (`createShopifyOrder`) : si `orderCreate` échoue avec
+   un `userError` visant `tags` (Shopify rejette occasionnellement une valeur
+   `tags` par ailleurs valide — "Tags is invalid", non expliqué même par le
+   support Shopify), on retente **une fois**, mêmes montant/lignes/email/
+   note, sans `tags`. Les tags sont purement informatifs ; ils ne doivent
+   jamais bloquer une vente déjà encaissée. `sanitizeOrderTags()` nettoie
+   aussi la valeur en amont (virgules, longueur, doublons, vide → `[]`).
 
 Logs préfixés : `[SUMUP_WEBHOOK]` / `[SUMUP_CART_WEBHOOK]`,
-`[SHOPIFY_ORDER_CREATE]`, `[ORDER_FINALIZED]`. Les erreurs GraphQL top-level
-**et** `userErrors` sont journalisées (plus jamais un `[]` masquant l'erreur).
+`[SUMUP_CHECKOUT_CREATED]`, `[SUMUP_PAYMENT_PAID]`,
+`[SHOPIFY_ORDER_CREATE_START]`, `[SHOPIFY_ORDER_CREATE]` /
+`[SHOPIFY_ORDER_CREATE_FAILED]`, `[SHOPIFY_ORDER_CREATE_TAGS_FALLBACK]`,
+`[SHOPIFY_ORDER_CREATED]` / `[SHOPIFY_ORDER_ALREADY_EXISTS]` /
+`[ORDER_FINALIZED]`. Les erreurs GraphQL top-level **et** `userErrors` sont
+journalisées via `formatUserErrors()` — des chaînes `"field.path: message"`
+plutôt que les objets bruts (`console.error` tronque un `field` imbriqué en
+`[Array]` au-delà de sa profondeur d'inspection par défaut ; reproduit et
+verrouillé par un test).
 
 Récupérer un paiement PAID bloqué (après correctif) : rejouer **une fois**
 `POST <render>/api/sumup-cart-webhook`
