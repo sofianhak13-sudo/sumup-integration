@@ -47,6 +47,41 @@ export function toMailingAddress(a) {
  *  the cross-process idempotency key (survives a DB write failure). */
 export const referenceTag = (reference) => `sumup-ref-${reference}`;
 
+// Shopify's documented per-tag character limit. Tags are purely informational
+// here (search/filter + the reconciliation tag above) — they must NEVER be
+// able to block the creation of an already-charged order.
+const MAX_TAG_LENGTH = 255;
+const MAX_TAGS = 10; // generous ceiling; this app only ever proposes 2
+
+/**
+ * Turn a list of candidate tag strings into a deterministic, Shopify-safe
+ * list: strips commas (the legacy comma-joined tag separator — a comma
+ * *inside* one tag corrupts that representation), collapses whitespace,
+ * trims, length-caps, drops blanks, de-duplicates (case-insensitive) and
+ * count-caps. Never throws. An input that yields nothing usable simply
+ * returns `[]` — the caller then omits `tags` entirely rather than risk
+ * failing a paid order over a cosmetic field.
+ */
+export function sanitizeOrderTags(rawTags) {
+  const seen = new Set();
+  const out = [];
+  for (const raw of Array.isArray(rawTags) ? rawTags : []) {
+    if (typeof raw !== "string") continue;
+    const cleaned = raw
+      .replace(/,/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, MAX_TAG_LENGTH);
+    if (!cleaned) continue;
+    const key = cleaned.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(cleaned);
+    if (out.length >= MAX_TAGS) break;
+  }
+  return out;
+}
+
 export function buildOrderInput({
   email,
   phone,
@@ -86,7 +121,8 @@ export function buildOrderInput({
 
   const ref = str(reference);
   if (ref) {
-    order.tags = ["SumUp", referenceTag(ref)];
+    const tags = sanitizeOrderTags(["SumUp", referenceTag(ref)]);
+    if (tags.length) order.tags = tags;
     order.note = `Paiement SumUp — réf. ${ref}`;
   }
 

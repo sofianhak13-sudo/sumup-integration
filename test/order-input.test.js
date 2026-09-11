@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { buildOrderInput, toMailingAddress, referenceTag } from "../app/lib/order-input.js";
+import { buildOrderInput, toMailingAddress, referenceTag, sanitizeOrderTags } from "../app/lib/order-input.js";
 
 const baseLines = [{ variantId: "gid://shopify/ProductVariant/1", quantity: 2 }];
 
@@ -209,4 +209,52 @@ test("toMailingAddress: drops empties, needs a 2-letter country", () => {
   const a = toMailingAddress({ address1: "x", city: "Paris", countryCode: "FRA", province: "IDF" });
   assert.equal(a.countryCode, undefined); // "FRA" rejected
   assert.equal(a.provinceCode, "IDF");
+});
+
+/* -------------------------------------------------------------------------- */
+/* sanitizeOrderTags — tags must NEVER be able to block a paid order.         */
+/* -------------------------------------------------------------------------- */
+
+test("sanitizeOrderTags: drops blanks/non-strings, trims, keeps order", () => {
+  assert.deepEqual(sanitizeOrderTags(["SumUp", "", null, undefined, "  ref-1  ", 42]), ["SumUp", "ref-1"]);
+});
+
+test("sanitizeOrderTags: strips commas (legacy tag separator) instead of failing", () => {
+  assert.deepEqual(sanitizeOrderTags(["a,b,c"]), ["a b c"]);
+});
+
+test("sanitizeOrderTags: de-duplicates case-insensitively", () => {
+  assert.deepEqual(sanitizeOrderTags(["SumUp", "sumup", "SUMUP"]), ["SumUp"]);
+});
+
+test("sanitizeOrderTags: caps a single tag at 255 chars", () => {
+  const long = "x".repeat(400);
+  const [tag] = sanitizeOrderTags([long]);
+  assert.equal(tag.length, 255);
+});
+
+test("sanitizeOrderTags: caps the total tag count", () => {
+  const many = Array.from({ length: 30 }, (_, i) => `tag-${i}`);
+  assert.equal(sanitizeOrderTags(many).length, 10);
+});
+
+test("sanitizeOrderTags: all-invalid input -> empty array (never throws)", () => {
+  assert.deepEqual(sanitizeOrderTags([null, "", "   ", undefined]), []);
+  assert.deepEqual(sanitizeOrderTags(null), []);
+  assert.deepEqual(sanitizeOrderTags(undefined), []);
+});
+
+test("buildOrderInput: an unusable reference-derived tag set omits `tags` (never blocks the order)", () => {
+  const { order } = buildOrderInput({
+    email: "a@b.co",
+    currency: "EUR",
+    lineItems: baseLines,
+    amountChargedCents: 100,
+    // A reference that is only commas/whitespace once cleaned still produces
+    // a non-empty "SumUp" tag from the fixed prefix, so this documents the
+    // realistic worst case rather than an impossible one.
+    reference: ",,,",
+  });
+  assert.deepEqual(order.tags, ["SumUp", referenceTag(",,,").replace(/,/g, " ").replace(/\s+/g, " ").trim()]);
+  assert.ok(order.note.includes(",,,"));
 });

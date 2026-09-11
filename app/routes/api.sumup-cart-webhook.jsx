@@ -1,7 +1,7 @@
 import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
 import { buildOrderInput } from "../lib/order-input.js";
-import { createShopifyOrder, findOrderByReference } from "../lib/sumup-order.server";
+import { createShopifyOrder, findOrderByReference, formatUserErrors } from "../lib/sumup-order.server";
 
 const LP = "[SUMUP_CART_WEBHOOK]";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -66,6 +66,7 @@ export const action = async ({ request }) => {
       console.log(`${LP} paiement non final :`, checkout.status);
       return new Response(null, { status: 204, headers: noStore });
     }
+    console.log(`${LP}[SUMUP_PAYMENT_PAID]`, { checkoutId: checkout.id, reference: payment.checkoutReference });
 
     if (payment.orderId) {
       console.log(`${LP} commande déjà créée :`, payment.orderId);
@@ -124,7 +125,7 @@ export const action = async ({ request }) => {
           data: { orderId: existing.id, statusPageUrl: existing.statusPageUrl, processing: false },
         });
         orderWritten = true;
-        console.log(`${LP}[ORDER_FINALIZED] commande adoptée :`, existing.id, existing.name);
+        console.log(`${LP}[SHOPIFY_ORDER_ALREADY_EXISTS][ORDER_FINALIZED] commande adoptée :`, existing.id, existing.name);
         return new Response(null, { status: 204, headers: noStore });
       }
 
@@ -132,6 +133,7 @@ export const action = async ({ request }) => {
         ? payment.discountCodes.filter(Boolean)
         : [];
 
+      console.log(`${LP}[SHOPIFY_ORDER_CREATE_START]`, { reference: payment.checkoutReference });
       const { order: orderInput, options } = buildOrderInput({
         email: customerEmail,
         phone: payment.phone || undefined,
@@ -152,9 +154,9 @@ export const action = async ({ request }) => {
 
       const result = await createShopifyOrder(admin, orderInput, options);
       if (!result.ok) {
-        console.error(`${LP}[SHOPIFY_ORDER_CREATE] échec :`, {
-          userErrors: result.userErrors,
-          graphQLErrors: result.graphQLErrors,
+        console.error(`${LP}[SHOPIFY_ORDER_CREATE][SHOPIFY_ORDER_CREATE_FAILED] échec :`, {
+          userErrors: formatUserErrors(result.userErrors),
+          graphQLErrors: (result.graphQLErrors || []).map((e) => e?.message || String(e)),
         });
         return new Response(null, { status: 500, headers: noStore });
       }
@@ -169,7 +171,7 @@ export const action = async ({ request }) => {
       });
       orderWritten = true;
 
-      console.log(`${LP}[ORDER_FINALIZED]`, {
+      console.log(`${LP}[SHOPIFY_ORDER_CREATED][ORDER_FINALIZED][PAYMENT_FINALISED]`, {
         order: result.order.name,
         orderId: result.order.id,
         confirmation: result.order.confirmationNumber,

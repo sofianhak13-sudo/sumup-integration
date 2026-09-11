@@ -214,6 +214,13 @@ export const action = async ({ request }) => {
     },
   });
 
+  console.log("[SUMUP_CHECKOUT_CREATED]", {
+    checkoutId: sumupData.id,
+    reference: checkoutReference,
+    amount,
+    currency,
+  });
+
   return new Response(null, {
     status: 303,
     headers: {

@@ -290,6 +290,13 @@ export const action = async ({ request }) => {
     },
   });
 
+  console.log("[SUMUP_CHECKOUT_CREATED]", {
+    checkoutId: sumup.data.id,
+    reference,
+    amount: reconcile.amountChargedCents / 100,
+    currency,
+  });
+
   if (!sumup.data.hosted_checkout_url) {
     return json({ ok: false, message: "SumUp n'a pas renvoyé d'URL de paiement." }, 502);
   }
