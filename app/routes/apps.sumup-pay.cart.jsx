@@ -1,5 +1,6 @@
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { getSumUpCredentials, sumupFetch } from "../sumup.server";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -141,8 +142,7 @@ export const action = async ({ request }) => {
 
   const checkoutReference = `cart-${Date.now()}`;
 
-  const apiKey = process.env.SUMUP_API_KEY;
-  const merchantCode = process.env.SUMUP_MERCHANT_CODE;
+  const { apiKey, merchantCode } = getSumUpCredentials();
 
   if (!apiKey || !merchantCode) {
     return new Response("Configuration SumUp manquante.", {
@@ -158,16 +158,12 @@ export const action = async ({ request }) => {
     });
   }
 
-  const sumupResponse = await fetch(
-    "https://api.sumup.com/v0.1/checkouts",
-    {
+  let sumupResponse;
+
+  try {
+    sumupResponse = await sumupFetch("/checkouts", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
+      body: {
         checkout_reference: checkoutReference,
         amount: totalCents / 100,
         currency,
@@ -182,9 +178,15 @@ export const action = async ({ request }) => {
         hosted_checkout: {
           enabled: true,
         },
-      }),
-    },
-  );
+      },
+    });
+  } catch (fetchError) {
+    console.error("Impossible de contacter SumUp :", fetchError);
+    return new Response("Impossible de contacter SumUp.", {
+      status: 500,
+      headers: noStoreHeaders,
+    });
+  }
 
   const sumupData = await sumupResponse.json();
 

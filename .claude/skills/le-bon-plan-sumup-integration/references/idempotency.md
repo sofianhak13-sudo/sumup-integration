@@ -82,5 +82,22 @@ Answer: complete for the case this app is actually exposed to (duplicate
 webhook delivery for one checkout), via the atomic `updateMany`
 compare-and-swap. Not complete for client-side double-submission before a
 checkout exists, and not backed by a SumUp-side idempotency key at
-checkout-creation time. Flag, don't silently patch, per the
-documentation-only scope of this audit.
+checkout-creation time. These limits were re-confirmed, not fixed, during
+Phase 2C's security/mapping pass — the mission scoped that phase to
+webhook authentication and product/tier mapping specifically, and the
+mechanism above already works for the exposure that matters (duplicate/
+concurrent webhook delivery), so it was left as-is per the "don't rewrite
+working idempotency" instruction.
+
+## Phase 2C non-regression proof
+
+`app/test/routes/api.sumup-webhook.test.js` and
+`app/test/routes/api.sumup-cart-webhook.test.js` each assert, with the
+lock mocked to simulate both outcomes: a payment that already has
+`orderId` set short-circuits before calling `orderCreate` (early-exit
+case), and a `updateMany` result of `{ count: 0 }` (lock already held —
+the duplicate/concurrent-webhook case) also prevents `orderCreate` from
+being called. Both webhook hardening changes made in Phase 2C (the
+merchant-code check, the `sumupFetch` timeout) sit *before* this lock in
+the request flow and do not alter it — the tests confirm the lock
+behavior is unchanged.

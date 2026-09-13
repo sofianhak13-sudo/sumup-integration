@@ -1,5 +1,6 @@
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { getSumUpCredentials, sumupFetch } from "../sumup.server";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -31,6 +32,7 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
 
   const productId = formData.get("productId");
+  const requestedVariantId = formData.get("variantId");
   const emailRaw = formData.get("email");
   const email = typeof emailRaw === "string" ? emailRaw.trim() : "";
 
@@ -58,7 +60,7 @@ export const action = async ({ request }) => {
         product(id: $id) {
           id
           title
-          variants(first: 1) {
+          variants(first: 100) {
             nodes {
               id
               price
@@ -76,7 +78,34 @@ export const action = async ({ request }) => {
 
   const productData = await productResponse.json();
   const product = productData.data?.product;
-  const variant = product?.variants?.nodes?.[0];
+  const variants = product?.variants?.nodes || [];
+
+  // La plupart des produits n'ont qu'une seule variante ; si le storefront
+  // précise une variante (ex : un produit à plusieurs offres/niveaux), on
+  // l'utilise et on vérifie qu'elle appartient bien à ce produit — on ne
+  // se rabat sur la première variante que si aucune n'est demandée.
+  let variant;
+
+  if (typeof requestedVariantId === "string" && requestedVariantId.trim()) {
+    const requestedGid = requestedVariantId.startsWith("gid://")
+      ? requestedVariantId
+      : `gid://shopify/ProductVariant/${requestedVariantId}`;
+
+    variant = variants.find((node) => node.id === requestedGid);
+
+    if (!variant) {
+      return new Response(
+        "Variante Shopify invalide pour ce produit.",
+        {
+          status: 400,
+          headers: noStoreHeaders,
+        },
+      );
+    }
+  } else {
+    variant = variants[0];
+  }
+
   const price = variant?.price;
 
   if (!product || !price) {
@@ -89,8 +118,7 @@ export const action = async ({ request }) => {
     );
   }
 
-  const apiKey = process.env.SUMUP_API_KEY;
-  const merchantCode = process.env.SUMUP_MERCHANT_CODE;
+  const { apiKey, merchantCode } = getSumUpCredentials();
 
   if (!apiKey || !merchantCode) {
     return new Response("Configuration SumUp manquante.", {
@@ -103,16 +131,12 @@ export const action = async ({ request }) => {
 
   console.log("CHECKOUT REFERENCE :", checkoutReference);
 
-  const sumupResponse = await fetch(
-    "https://api.sumup.com/v0.1/checkouts",
-    {
+  let sumupResponse;
+
+  try {
+    sumupResponse = await sumupFetch("/checkouts", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
+      body: {
         checkout_reference: checkoutReference,
         amount: Number(price),
         currency: "EUR",
@@ -126,9 +150,15 @@ export const action = async ({ request }) => {
         hosted_checkout: {
           enabled: true,
         },
-      }),
-    },
-  );
+      },
+    });
+  } catch (fetchError) {
+    console.error("Impossible de contacter SumUp :", fetchError);
+    return new Response("Impossible de contacter SumUp.", {
+      status: 500,
+      headers: noStoreHeaders,
+    });
+  }
 
   const sumupData = await sumupResponse.json();
 

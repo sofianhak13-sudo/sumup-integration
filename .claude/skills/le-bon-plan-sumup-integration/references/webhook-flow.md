@@ -17,10 +17,11 @@ Method: `action` only (POST). No `loader` — these are not readable via GET.
    "CHECKOUT_STATUS_CHANGED"` or `!event.id`, ignore with `204`.
    **The webhook body's own `status` field, if any, is never trusted or
    read** — only `event.id` is used, purely as a lookup key.
-2. Re-fetches the checkout directly from SumUp:
-   `GET https://api.sumup.com/v0.1/checkouts/:id` with
-   `Authorization: Bearer <SUMUP_API_KEY>`. Non-OK response → `500` (no
-   order created).
+2. Re-fetches the checkout directly from SumUp via `sumupFetch()`
+   (`app/sumup.server.js`): `GET https://api.sumup.com/v0.1/checkouts/:id`
+   with `Authorization: Bearer <SUMUP_API_KEY>` and a 10s request timeout.
+   Non-OK response, or the request throwing (network error/timeout) →
+   `500` (no order created either way).
 3. Looks up the matching `SumUpPayment`/`SumUpCartPayment` row by
    `checkoutId: checkout.id`. Not found → log + `204` (no error, no retry
    signal to SumUp — see `security.md`/`testing.md` for the implication).
@@ -33,8 +34,11 @@ Method: `action` only (POST). No `loader` — these are not readable via GET.
 7. If `payment.orderId` is already set → log + `204` (order already
    exists; see `idempotency.md`).
 8. Cross-checks `checkout.checkout_reference`, `checkout.amount` (within
-   `0.001`), and `checkout.currency` against the values stored in the DB
-   at checkout-creation time. Any mismatch → log + `204`, no order.
+   `0.001`), `checkout.currency`, and (since Phase 2C)
+   `checkout.merchant_code` against, respectively, the values stored in
+   the DB at checkout-creation time and the current `SUMUP_MERCHANT_CODE`
+   env var (`checkoutMatchesMerchant()` in `app/sumup.server.js`). Any
+   mismatch → log + `204`, no order.
 9. Cart flow only: validates every stored `item.variantId` starts with
    `gid://shopify/ProductVariant/` and has a positive integer quantity;
    empty/invalid items list → log + `204`.
@@ -56,19 +60,21 @@ Any uncaught exception anywhere in the handler is caught by a top-level
 
 - **VERIFIED IN CODE:** the webhook payload itself is never trusted for
   payment status — status always comes from a live re-fetch to SumUp's
-  API using the ID from the payload.
-- **VERIFIED IN CODE:** amount and currency ARE cross-checked between the
-  live SumUp checkout and the DB record created at checkout time, before
-  any order is created.
+  API using only the checkout ID taken from the payload.
+- **VERIFIED IN CODE:** reference, amount, currency, and (since Phase 2C)
+  merchant code are all cross-checked between the live SumUp checkout and
+  the DB record created at checkout time, before any order is created.
 - **VERIFIED IN CODE:** there is **no signature/HMAC verification of the
-  incoming POST body itself** (no header check, no raw-body preservation
-  for a signature, no secret comparison anywhere in either webhook route
-  or in `app/shopify.server.js`). Anyone who can reach the endpoint and
-  knows (or guesses) a `checkout.id` can trigger a re-check. See
-  `security.md` for the practical impact (limited, because of the
-  re-fetch + reference/amount/currency/idempotency checks above) and why
-  this is flagged as a finding rather than fixed in this documentation-only
-  pass.
+  incoming POST body itself** — and per SumUp's own developer
+  documentation, none is offered for this webhook (Checkout product,
+  `CHECKOUT_STATUS_CHANGED`): see `security.md` for the citation and the
+  reasoning for not inventing one. The re-fetch-and-compare chain above is
+  SumUp's own documented substitute, not a workaround.
+- Full trust chain as actually implemented:
+  `untrusted POST → event.id only → sumupFetch() (authenticated re-fetch,
+  timeout-guarded) → status === PAID → reference/amount/currency/merchant
+  match DB → orderId not already set → compare-and-swap lock acquired →
+  orderCreate`.
 
 ## Customer return routes — pure UX, do not create orders
 
