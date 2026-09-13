@@ -6,6 +6,7 @@ import {
   apiKeyLast4,
   buildCheckoutBody,
   parseMerchantProfile,
+  checkoutMatchesMerchant,
 } from "../app/lib/sumup.js";
 
 test("maskApiKey: never reveals more than the last 4", () => {
@@ -53,4 +54,22 @@ test("parseMerchantProfile: pulls identity, tolerates gaps", () => {
     merchantEmail: null,
     country: null,
   });
+});
+
+test("checkoutMatchesMerchant: matches when merchant_code equals the expected value", () => {
+  assert.equal(checkoutMatchesMerchant({ merchant_code: "MFN4SZZG" }, "MFN4SZZG"), true);
+});
+
+test("checkoutMatchesMerchant: rejects a mismatched merchant_code", () => {
+  assert.equal(checkoutMatchesMerchant({ merchant_code: "SOMEONE_ELSE" }, "MFN4SZZG"), false);
+});
+
+test("checkoutMatchesMerchant: rejects when the expected merchant code is missing/empty", () => {
+  assert.equal(checkoutMatchesMerchant({ merchant_code: "MFN4SZZG" }, ""), false);
+  assert.equal(checkoutMatchesMerchant({ merchant_code: "MFN4SZZG" }, undefined), false);
+});
+
+test("checkoutMatchesMerchant: rejects a null/undefined checkout", () => {
+  assert.equal(checkoutMatchesMerchant(null, "MFN4SZZG"), false);
+  assert.equal(checkoutMatchesMerchant(undefined, "MFN4SZZG"), false);
 });

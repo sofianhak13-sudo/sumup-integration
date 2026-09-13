@@ -75,4 +75,34 @@ export async function verifyCartVariants(admin, items) {
   return { ok: true, currencyCode, verifiedItems, storefrontLines };
 }
 
+/**
+ * Pick which variant the "fast" single-product flow (apps.sumup-pay.jsx)
+ * should sell, given the product's own variants and an optional caller-
+ * requested variant id.
+ *
+ * If a variant id is explicitly requested, it MUST be one of this
+ * product's own variants — an id that's unknown, or that belongs to a
+ * different product, is rejected rather than silently substituted. Without
+ * an explicit request, defaults to the first variant available for sale
+ * (or the product's first variant), preserving prior behaviour.
+ *
+ * @param {Array<{id: string, [key: string]: any}>} variantNodes
+ * @param {string|null|undefined} requestedVariantId
+ * @returns {{ ok: true, variant: object } | { ok: false, reason: "unknown_variant" | "no_variants" }}
+ */
+export function selectRequestedVariant(variantNodes, requestedVariantId) {
+  const nodes = Array.isArray(variantNodes) ? variantNodes : [];
+
+  if (typeof requestedVariantId === "string" && requestedVariantId) {
+    const requestedGid = toVariantGid(requestedVariantId);
+    const variant = nodes.find((node) => node.id === requestedGid);
+    if (!variant) return { ok: false, reason: "unknown_variant" };
+    return { ok: true, variant };
+  }
+
+  const variant = nodes.find((node) => node.availableForSale) || nodes[0] || null;
+  if (!variant) return { ok: false, reason: "no_variants" };
+  return { ok: true, variant };
+}
+
 export { toVariantGid };

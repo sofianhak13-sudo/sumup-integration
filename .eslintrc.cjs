@@ -86,6 +86,8 @@ module.exports = {
         "**/*.server.{js,ts}",
         // React Router route modules: loader/action run on the server (Node).
         "app/routes/**/*.{js,jsx,ts,tsx}",
+        // Test files run under `node --test` (Node), not the browser.
+        "test/**/*.{js,ts}",
       ],
       env: {
         node: true,
