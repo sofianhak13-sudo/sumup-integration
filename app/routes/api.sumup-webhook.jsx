@@ -1,5 +1,12 @@
 import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
+import {
+  checkoutMatchesMerchant,
+  getSumUpCredentials,
+  sumupFetch,
+} from "../sumup.server";
+import { buildSumUpOrderInput } from "../order-payload.server";
+
 export const action = async ({ request }) => {
   try {
     const event = await request.json();
@@ -12,23 +19,24 @@ export const action = async ({ request }) => {
       return new Response(null, { status: 204 });
     }
 
-    const apiKey = process.env.SUMUP_API_KEY;
+    const { apiKey, merchantCode } = getSumUpCredentials();
 
     if (!apiKey) {
       console.error("SUMUP_API_KEY manquante");
       return new Response(null, { status: 500 });
     }
 
-    // Vérification directe auprès de SumUp
-    const checkoutResponse = await fetch(
-      `https://api.sumup.com/v0.1/checkouts/${encodeURIComponent(event.id)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: "application/json",
-        },
-      }
-    );
+    // Vérification directe auprès de SumUp (avec timeout : voir sumup.server.js)
+    let checkoutResponse;
+
+    try {
+      checkoutResponse = await sumupFetch(
+        `/checkouts/${encodeURIComponent(event.id)}`,
+      );
+    } catch (fetchError) {
+      console.error("Impossible de contacter SumUp :", fetchError);
+      return new Response(null, { status: 500 });
+    }
 
     if (!checkoutResponse.ok) {
       console.error(
@@ -79,7 +87,8 @@ if (payment.orderId) {
 if (
   checkout.checkout_reference !== payment.checkoutReference ||
   Math.abs(Number(checkout.amount) - Number(payment.amount)) > 0.001 ||
-  checkout.currency !== payment.currency
+  checkout.currency !== payment.currency ||
+  !checkoutMatchesMerchant(checkout, merchantCode)
 ) {
   console.error("DONNEES PAIEMENT SUMUP INCOHERENTES");
   return new Response(null, { status: 204 });
@@ -121,34 +130,17 @@ const orderResponse = await admin.graphql(
     }
   }`,
   {
-    variables: {
-      order: {
-        email: payment.customerEmail,
-  currency: payment.currency,
-  lineItems: [
-    {
-      variantId: payment.variantId,
-      quantity: 1,
-    },
-  ],
-  transactions: [
-    {
-      kind: "SALE",
-      status: "SUCCESS",
-      gateway: "SumUp",
-      amountSet: {
-        shopMoney: {
-          amount: Number(payment.amount),
-          currencyCode: payment.currency,
+    variables: buildSumUpOrderInput({
+      email: payment.customerEmail,
+      currency: payment.currency,
+      amount: payment.amount,
+      lineItems: [
+        {
+          variantId: payment.variantId,
+          quantity: 1,
         },
-      },
-    },
-  ],
-},
-options: {
-      sendReceipt: true,
-    },
-    },
+      ],
+    }),
   },
 );
 const orderData = await orderResponse.json();

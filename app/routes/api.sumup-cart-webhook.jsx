@@ -1,5 +1,11 @@
 import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
+import {
+  checkoutMatchesMerchant,
+  getSumUpCredentials,
+  sumupFetch,
+} from "../sumup.server";
+import { buildSumUpOrderInput } from "../order-payload.server";
 
 export const action = async ({ request }) => {
   try {
@@ -13,23 +19,24 @@ export const action = async ({ request }) => {
       return new Response(null, { status: 204 });
     }
 
-    const apiKey = process.env.SUMUP_API_KEY;
+    const { apiKey, merchantCode } = getSumUpCredentials();
 
     if (!apiKey) {
       console.error("SUMUP_API_KEY manquante");
       return new Response(null, { status: 500 });
     }
 
-    // Vérifier directement le paiement auprès de SumUp
-    const checkoutResponse = await fetch(
-      `https://api.sumup.com/v0.1/checkouts/${encodeURIComponent(event.id)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: "application/json",
-        },
-      },
-    );
+    // Vérifier directement le paiement auprès de SumUp (avec timeout : voir sumup.server.js)
+    let checkoutResponse;
+
+    try {
+      checkoutResponse = await sumupFetch(
+        `/checkouts/${encodeURIComponent(event.id)}`,
+      );
+    } catch (fetchError) {
+      console.error("Impossible de contacter SumUp :", fetchError);
+      return new Response(null, { status: 500 });
+    }
 
     if (!checkoutResponse.ok) {
       console.error(
@@ -91,11 +98,12 @@ export const action = async ({ request }) => {
       return new Response(null, { status: 204 });
     }
 
-    // Vérifier référence + montant + devise
+    // Vérifier référence + montant + devise + marchand
     if (
       checkout.checkout_reference !== payment.checkoutReference ||
       Math.abs(Number(checkout.amount) - Number(payment.amount)) > 0.001 ||
-      checkout.currency !== payment.currency
+      checkout.currency !== payment.currency ||
+      !checkoutMatchesMerchant(checkout, merchantCode)
     ) {
       console.error("DONNEES PAIEMENT PANIER SUMUP INCOHERENTES");
       return new Response(null, { status: 204 });
@@ -171,29 +179,12 @@ export const action = async ({ request }) => {
         }
       }`,
       {
-        variables: {
-          order: {
-            email: customerEmail,
-            currency: payment.currency,
-            lineItems,
-            transactions: [
-              {
-                kind: "SALE",
-                status: "SUCCESS",
-                gateway: "SumUp",
-                amountSet: {
-                  shopMoney: {
-                    amount: Number(payment.amount),
-                    currencyCode: payment.currency,
-                  },
-                },
-              },
-            ],
-          },
-          options: {
-            sendReceipt: true,
-          },
-        },
+        variables: buildSumUpOrderInput({
+          email: customerEmail,
+          currency: payment.currency,
+          amount: payment.amount,
+          lineItems,
+        }),
       },
     );
 

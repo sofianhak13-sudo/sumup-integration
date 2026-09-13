@@ -27,6 +27,14 @@ API version: `ApiVersion.July26` (`"2026-07"`, set in
 `app/shopify.server.js` and `shopify.app.toml`'s `[webhooks] api_version`).
 No separate/older API version is pinned specifically for this mutation.
 
+Since Phase 2C, the `variables` object (the `order`/`options` shape below)
+is built by a single shared, pure function —
+`buildSumUpOrderInput({ email, currency, amount, lineItems })` in
+`app/order-payload.server.js` — used by both webhook routes instead of two
+separately hand-written object literals. This is what the cross-repo
+contract test (`app/order-payload.server.test.js`) exercises directly,
+with no Prisma/Shopify/SumUp mocking needed.
+
 ## Payload — single product (`api.sumup-webhook.jsx`)
 
 ```json
@@ -124,3 +132,13 @@ repository's current code or history. Treat it as unconfirmed until
 someone can point to where it actually occurred (possibly a different
 repo, a reverted/squashed commit not in this history, or a
 misremembering).
+
+**Phase 2C update:** the product/tier-mapping fix in that phase
+(`apps.sumup-pay.jsx` accepting an optional `variantId`, see
+`checkout-flow.md`) deliberately did **not** introduce a `tags`/`note`/
+`customAttributes` field to carry tier information — it only ensures the
+correct Shopify `variantId` reaches the order via `lineItems`, which was
+already the tag-free mechanism in place. `buildSumUpOrderInput()` is
+covered by a test asserting `order` never gains a `tags`, `note`, or
+`customAttributes` property, so a future change reintroducing one would
+fail that test first.

@@ -38,9 +38,17 @@ re-reading the actual file. Do not repeat historical claims as fact.
   `app/routes/api.sumup-cart-webhook.jsx` must preserve the
   `processing` / `orderId` compare-and-swap described in
   `references/idempotency.md`. Read that file first.
-- There is no automated test suite in this repo (verified: no `*test*`
-  files, no `.github/` CI). If you change behavior, say explicitly that
-  it was validated by manual code tracing, not by tests.
+- **Never invent a webhook signature scheme.** SumUp's Checkout product
+  webhooks are unsigned by design (confirmed against SumUp's own developer
+  docs in Phase 2C — see `references/security.md`); the only legitimate
+  hardening is deepening the re-fetch-and-compare checks already in
+  `app/sumup.server.js`, not adding an HMAC that doesn't exist.
+- A Vitest suite exists since Phase 2C (`npm test`) covering the webhook
+  routes, the checkout-creation routes' variant selection, and the shared
+  `app/sumup.server.js`/`app/order-payload.server.js` helpers — there is
+  still no `.github/` CI wiring it in automatically. Run `npm test`,
+  `npm run lint`, `npm run typecheck`, and `npm run build` after any
+  change in this area; see `references/testing.md`.
 
 ## Map of references
 
@@ -50,17 +58,29 @@ re-reading the actual file. Do not repeat historical claims as fact.
 - `references/shopify-order.md` — the `orderCreate` mutation and its payload.
 - `references/idempotency.md` — the anti-duplicate-order mechanism and its proof.
 - `references/security.md` — signature/HMAC posture, secrets, logging.
-- `references/testing.md` — actual test coverage (currently none) and the scenario matrix.
+- `references/testing.md` — the Vitest suite added in Phase 2C and the scenario matrix.
 - `references/cross-repo-contract.md` — the data contract with the LE BON PLAN monorepo, and what this repo does NOT own.
 
 ## What this repo does NOT own
 
 - Purchase / OTP / claim / Entitlement / accessLevel / UI unlock — all of
   that is LE BON PLAN monorepo territory, not verified or documented here.
-- Product mapping for "Classique" vs "Premium" tiers is **not implemented
-  in this repo**: the checkout routes accept whatever `productId` /
-  `variant_id` the caller (Shopify theme / storefront) sends, with no
-  tier-specific branching found in `app/routes/`. If a Classique/Premium
-  distinction exists, it lives in the Shopify theme (this repo's
-  `extensions/` directory is empty — only a `.gitkeep`) or in the monorepo.
-  Treat any claim otherwise as HISTORICAL CLAIM — NEEDS CONFIRMATION.
+- **Semantic** product mapping for "Classique" vs "Premium" tiers is
+  **not implemented in this repo** and Phase 2C did not add one: no real
+  Shopify product/variant IDs for either tier are known here, and
+  inventing them would violate the "don't invent values" rule. What
+  Phase 2C did fix is narrower and mechanical — the single-product
+  checkout route used to always take the product's *first* variant no
+  matter what was requested; it now honors an explicit `variantId` when
+  one is given (see `references/checkout-flow.md`). This guarantees
+  whichever variant a caller actually asks for is the one that reaches
+  the Shopify order — it does not mean this repo knows or decides which
+  variant "is" CLASSIQUE or PREMIUM. If a Classique/Premium distinction
+  exists, it lives in the Shopify theme (this repo's `extensions/`
+  directory is empty — only a `.gitkeep`) or in the monorepo — attempted
+  read-only access to `le-bon-plan-telegram-mini-app` and
+  `le-bon-plan-member-backend` in Phase 2C was not possible in that
+  session (see `references/cross-repo-contract.md`), so this is still
+  **NOT VERIFIED HERE**, not HISTORICAL CLAIM — NEEDS CONFIRMATION (that
+  tag applies to claims sourced from outside this session; this one is
+  simply unconfirmed due to a tooling limit).

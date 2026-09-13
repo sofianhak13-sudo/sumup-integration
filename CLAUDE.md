@@ -16,6 +16,11 @@ other half (Purchase / OTP / claim / Entitlement / access) lives in the
 - **Idempotency is load-bearing** (`processing`/`orderId` compare-and-swap
   in `prisma/schema.prisma`). Don't change the webhook routes without
   reading `.claude/skills/le-bon-plan-sumup-integration/references/idempotency.md` first.
-- **No automated tests exist in this repo.** Validate changes by manual
-  code tracing and say so explicitly.
+- **Never invent a webhook signature scheme.** SumUp's Checkout webhooks
+  are unsigned by design (confirmed against SumUp's own docs) — the
+  correct hardening is deepening the re-fetch-and-compare checks already
+  in `app/sumup.server.js`, not adding a fake HMAC.
+- A Vitest suite exists (`npm test`, plus `npm run lint`/`typecheck`/
+  `build`) covering the webhook and checkout-creation routes. Run all four
+  after any change here; there is still no CI wiring them in automatically.
 - Full architecture map: `.claude/skills/le-bon-plan-sumup-integration/SKILL.md`.

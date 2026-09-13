@@ -16,6 +16,8 @@ Routes are file-based (`@react-router/fs-routes`, wired in `app/routes.js`).
 | `app/shopify.server.js` | Shopify app instance: API key/secret, scopes, session storage (Prisma), `authenticate`/`unauthenticated` helpers used by every route below. |
 | `app/db.server.js` | Shared Prisma client singleton. |
 | `app/routes.js` | Registers flat file-based routing. |
+| `app/sumup.server.js` | **Added in Phase 2C.** `sumupFetch()` (Bearer auth + 10s timeout wrapper around the SumUp REST API), `getSumUpCredentials()`, `checkoutMatchesMerchant()`. Used by both checkout-creation routes and both webhook routes. |
+| `app/order-payload.server.js` | **Added in Phase 2C.** `buildSumUpOrderInput()` — the pure function building the `orderCreate` GraphQL variables, shared by both webhook routes; the cross-repo contract test targets this directly. |
 | `prisma/schema.prisma` | Data models: `Session` (Shopify OAuth sessions), `SumUpPayment` (single-product flow), `SumUpCartPayment` (cart flow). |
 
 ## Payment-chain routes (the actual subject of this Skill)
@@ -68,6 +70,10 @@ present in this repository.
 
 ## Tests / CI
 
-**VERIFIED IN CODE:** no test files exist anywhere in the repo (no
-`*.test.*`, `*.spec.*`, `__tests__/`), and there is no `.github/` directory
-or other CI configuration. See `testing.md`.
+Phase 2B found no test files anywhere in the repo. **Phase 2C added a
+Vitest suite** (`vitest.config.js`, `npm test`): `app/sumup.server.test.js`,
+`app/order-payload.server.test.js`, and route-level tests under
+`app/test/routes/` (kept out of `app/routes/` itself — see `testing.md`
+for why). There is still no `.github/` directory or other CI
+configuration to run this suite automatically. See `testing.md` for the
+full scenario matrix.
