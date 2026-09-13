@@ -1,6 +1,8 @@
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 import { getMerchantSettings } from "../lib/merchant-settings.server";
+import { createSumUpCheckout, sumupConfigured } from "../lib/sumup.server";
+import { selectRequestedVariant } from "../lib/variants.server";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -106,25 +108,37 @@ export const action = async ({ request }) => {
   const product = productData.data?.product;
   const variantNodes = product?.variants?.nodes ?? [];
 
-  // The browser only *suggests* a variant. The server stays the source of
-  // truth: we look the id up in the product's own variant list and fall back
-  // to the first available one, so a tampered/stale id can never set a price.
-  const requestedGid =
-    typeof requestedVariantId === "string" && requestedVariantId
-      ? requestedVariantId.startsWith("gid://")
-        ? requestedVariantId
-        : `gid://shopify/ProductVariant/${requestedVariantId}`
-      : null;
+  if (!product) {
+    return new Response(
+      "Impossible de récupérer le prix du produit Shopify.",
+      {
+        status: 400,
+        headers: noStoreHeaders,
+      },
+    );
+  }
 
-  const variant =
-    (requestedGid && variantNodes.find((node) => node.id === requestedGid)) ||
-    variantNodes.find((node) => node.availableForSale) ||
-    variantNodes[0] ||
-    null;
+  // The browser only *suggests* a variant. The server stays the source of
+  // truth: an explicit request for a variant that isn't one of this
+  // product's own variants is rejected outright — it must never silently
+  // fall back to a different variant, which could charge the wrong price
+  // for the wrong offer.
+  const selection = selectRequestedVariant(variantNodes, requestedVariantId);
+  if (!selection.ok) {
+    const message =
+      selection.reason === "unknown_variant"
+        ? "Variante Shopify invalide pour ce produit."
+        : "Impossible de récupérer le prix du produit Shopify.";
+    return new Response(message, {
+      status: 400,
+      headers: noStoreHeaders,
+    });
+  }
+  const variant = selection.variant;
 
   const unitPrice = Number(variant?.price);
 
-  if (!product || !variant || !Number.isFinite(unitPrice) || unitPrice <= 0) {
+  if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
     return new Response(
       "Impossible de récupérer le prix du produit Shopify.",
       {
@@ -137,10 +151,7 @@ export const action = async ({ request }) => {
   const currency = productData.data?.shop?.currencyCode || "EUR";
   const amount = Math.round(unitPrice * 100 * quantity) / 100;
 
-  const apiKey = process.env.SUMUP_API_KEY;
-  const merchantCode = process.env.SUMUP_MERCHANT_CODE;
-
-  if (!apiKey || !merchantCode) {
+  if (!sumupConfigured()) {
     return new Response("Configuration SumUp manquante.", {
       status: 500,
       headers: noStoreHeaders,
@@ -149,39 +160,21 @@ export const action = async ({ request }) => {
 
   const checkoutReference = `shopify-${productId}-${Date.now()}`;
 
-  const sumupResponse = await fetch(
-    "https://api.sumup.com/v0.1/checkouts",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        checkout_reference: checkoutReference,
-        amount,
-        currency,
-        merchant_code: merchantCode,
-        description:
-          quantity > 1 ? `${product.title} × ${quantity}` : product.title,
-        return_url:
-          "https://sumup-integration-dwm1.onrender.com/api/sumup-webhook",
-        redirect_url: `https://lebonplan-ebook.com/apps/sumup-pay/return?reference=${encodeURIComponent(
-          checkoutReference,
-        )}`,
-        hosted_checkout: {
-          enabled: true,
-        },
-      }),
-    },
-  );
+  const sumup = await createSumUpCheckout({
+    amountCents: Math.round(amount * 100),
+    currency,
+    reference: checkoutReference,
+    description:
+      quantity > 1 ? `${product.title} × ${quantity}` : product.title,
+    returnUrl: "https://sumup-integration-dwm1.onrender.com/api/sumup-webhook",
+    redirectUrl: `https://lebonplan-ebook.com/apps/sumup-pay/return?reference=${encodeURIComponent(
+      checkoutReference,
+    )}`,
+  });
 
-  const sumupData = await sumupResponse.json();
-
-  if (!sumupResponse.ok) {
+  if (!sumup.ok) {
     return new Response(
-      `Erreur SumUp ${sumupResponse.status}: ${JSON.stringify(sumupData)}`,
+      `Erreur SumUp ${sumup.status}: ${JSON.stringify(sumup.data)}`,
       {
         status: 500,
         headers: noStoreHeaders,
@@ -189,7 +182,7 @@ export const action = async ({ request }) => {
     );
   }
 
-  if (!sumupData.hosted_checkout_url) {
+  if (!sumup.data.hosted_checkout_url) {
     return new Response(
       "SumUp n'a pas renvoyé d'URL de paiement.",
       {
@@ -201,7 +194,7 @@ export const action = async ({ request }) => {
 
   await prisma.sumUpPayment.create({
     data: {
-      checkoutId: sumupData.id,
+      checkoutId: sumup.data.id,
       checkoutReference: checkoutReference,
       shop: session.shop,
       productId: product.id,
@@ -209,13 +202,13 @@ export const action = async ({ request }) => {
       quantity,
       amount,
       currency,
-      status: sumupData.status || "PENDING",
+      status: sumup.data.status || "PENDING",
       customerEmail: email,
     },
   });
 
   console.log("[SUMUP_CHECKOUT_CREATED]", {
-    checkoutId: sumupData.id,
+    checkoutId: sumup.data.id,
     reference: checkoutReference,
     amount,
     currency,
@@ -225,7 +218,7 @@ export const action = async ({ request }) => {
     status: 303,
     headers: {
       ...noStoreHeaders,
-      Location: sumupData.hosted_checkout_url,
+      Location: sumup.data.hosted_checkout_url,
     },
   });
 };

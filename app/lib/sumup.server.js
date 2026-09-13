@@ -1,13 +1,29 @@
 import {
   apiKeyLast4,
   buildCheckoutBody,
+  checkoutMatchesMerchant,
   maskApiKey,
   parseMerchantProfile,
 } from "./sumup.js";
 
-export { maskApiKey, apiKeyLast4 };
+export { maskApiKey, apiKeyLast4, checkoutMatchesMerchant };
 
 const SUMUP_BASE = "https://api.sumup.com/v0.1";
+
+// Bound every real SumUp call so a slow/hanging response fails safely
+// instead of holding a checkout-creation request or a webhook open
+// indefinitely (Phase 2C hardening, ported here rather than duplicated).
+const SUMUP_TIMEOUT_MS = 10_000;
+
+async function fetchSumUp(path, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SUMUP_TIMEOUT_MS);
+  try {
+    return await fetch(`${SUMUP_BASE}${path}`, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 /** Read SumUp credentials from the environment (server only). */
 export function sumupCredentials() {
@@ -40,25 +56,34 @@ export async function createSumUpCheckout({
     return { ok: false, status: 0, data: { error: "sumup_not_configured" } };
   }
 
-  const res = await fetch(`${SUMUP_BASE}/checkouts`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(
-      buildCheckoutBody({
-        amountCents,
-        currency,
-        reference,
-        merchantCode,
-        description,
-        returnUrl,
-        redirectUrl,
-      }),
-    ),
-  });
+  let res;
+  try {
+    res = await fetchSumUp("/checkouts", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(
+        buildCheckoutBody({
+          amountCents,
+          currency,
+          reference,
+          merchantCode,
+          description,
+          returnUrl,
+          redirectUrl,
+        }),
+      ),
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      status: 0,
+      data: { error: err?.name === "AbortError" ? "timeout" : "network_error" },
+    };
+  }
 
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok && Boolean(data.id), status: res.status, data };
@@ -68,9 +93,20 @@ export async function createSumUpCheckout({
 export async function getSumUpCheckout(id) {
   const { apiKey } = sumupCredentials();
   if (!apiKey) return { ok: false, status: 0, data: {} };
-  const res = await fetch(`${SUMUP_BASE}/checkouts/${encodeURIComponent(id)}`, {
-    headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
-  });
+
+  let res;
+  try {
+    res = await fetchSumUp(`/checkouts/${encodeURIComponent(id)}`, {
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+    });
+  } catch (err) {
+    return {
+      ok: false,
+      status: 0,
+      data: { error: err?.name === "AbortError" ? "timeout" : "network_error" },
+    };
+  }
+
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, status: res.status, data };
 }

@@ -2,6 +2,7 @@ import prisma from "../db.server";
 import { unauthenticated } from "../shopify.server";
 import { buildOrderInput } from "../lib/order-input.js";
 import { createShopifyOrder, findOrderByReference, formatUserErrors } from "../lib/sumup-order.server";
+import { checkoutMatchesMerchant, getSumUpCheckout, sumupCredentials } from "../lib/sumup.server";
 
 const LP = "[SUMUP_WEBHOOK]";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,21 +22,18 @@ export const action = async ({ request }) => {
       return new Response(null, { status: 204, headers: noStore });
     }
 
-    const apiKey = process.env.SUMUP_API_KEY;
+    const { apiKey, merchantCode } = sumupCredentials();
     if (!apiKey) {
       console.error(`${LP} SUMUP_API_KEY manquante`);
       return new Response(null, { status: 500, headers: noStore });
     }
 
-    const checkoutResponse = await fetch(
-      `https://api.sumup.com/v0.1/checkouts/${encodeURIComponent(event.id)}`,
-      { headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" } },
-    );
+    const checkoutResponse = await getSumUpCheckout(event.id);
     if (!checkoutResponse.ok) {
-      console.error(`${LP} vérification checkout SumUp échouée :`, checkoutResponse.status);
+      console.error(`${LP} vérification checkout SumUp échouée :`, checkoutResponse.status, checkoutResponse.data);
       return new Response(null, { status: 500, headers: noStore });
     }
-    const checkout = await checkoutResponse.json();
+    const checkout = checkoutResponse.data;
 
     const payment = await prisma.sumUpPayment.findUnique({
       where: { checkoutId: checkout.id },
@@ -71,7 +69,8 @@ export const action = async ({ request }) => {
     if (
       checkout.checkout_reference !== payment.checkoutReference ||
       Math.abs(Number(checkout.amount) - Number(payment.amount)) > 0.001 ||
-      checkout.currency !== payment.currency
+      checkout.currency !== payment.currency ||
+      !checkoutMatchesMerchant(checkout, merchantCode)
     ) {
       console.error(`${LP} données paiement SumUp incohérentes`);
       return new Response(null, { status: 204, headers: noStore });

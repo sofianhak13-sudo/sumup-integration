@@ -11,6 +11,7 @@ import {
   parseCartAttributes,
 } from "../lib/cart-pricing.server";
 import { getMerchantSettings } from "../lib/merchant-settings.server";
+import { createSumUpCheckout, sumupConfigured } from "../lib/sumup.server";
 
 const noStoreHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
@@ -293,10 +294,7 @@ export const action = async ({ request }) => {
   // ---------------------------------------------------------------------------
   // 3. Create the SumUp checkout for exactly the Shopify-validated total.
   // ---------------------------------------------------------------------------
-  const apiKey = process.env.SUMUP_API_KEY;
-  const merchantCode = process.env.SUMUP_MERCHANT_CODE;
-
-  if (!apiKey || !merchantCode) {
+  if (!sumupConfigured()) {
     return new Response("Configuration SumUp manquante.", {
       status: 500,
       headers: noStoreHeaders,
@@ -313,35 +311,20 @@ export const action = async ({ request }) => {
       ? `Panier Shopify - ${verifiedItems.length} article(s) (remise incluse)`
       : `Panier Shopify - ${verifiedItems.length} article(s)`;
 
-  const sumupResponse = await fetch(
-    "https://api.sumup.com/v0.1/checkouts",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        checkout_reference: checkoutReference,
-        amount: totalCents / 100,
-        currency,
-        merchant_code: merchantCode,
-        description,
-        return_url:
-          "https://sumup-integration-dwm1.onrender.com/api/sumup-cart-webhook",
-        redirect_url: `https://lebonplan-ebook.com/apps/sumup-pay/cart/return?reference=${encodeURIComponent(
-          checkoutReference,
-        )}`,
-        hosted_checkout: { enabled: true },
-      }),
-    },
-  );
+  const sumup = await createSumUpCheckout({
+    amountCents: totalCents,
+    currency,
+    reference: checkoutReference,
+    description,
+    returnUrl:
+      "https://sumup-integration-dwm1.onrender.com/api/sumup-cart-webhook",
+    redirectUrl: `https://lebonplan-ebook.com/apps/sumup-pay/cart/return?reference=${encodeURIComponent(
+      checkoutReference,
+    )}`,
+  });
 
-  const sumupData = await sumupResponse.json();
-
-  if (!sumupResponse.ok || !sumupData.id) {
-    console.error("ERREUR CREATION CHECKOUT PANIER SUMUP :", sumupData);
+  if (!sumup.ok) {
+    console.error("ERREUR CREATION CHECKOUT PANIER SUMUP :", sumup.data);
     return new Response("Impossible de créer le paiement SumUp.", {
       status: 500,
       headers: noStoreHeaders,
@@ -350,7 +333,7 @@ export const action = async ({ request }) => {
 
   await prisma.sumUpCartPayment.create({
     data: {
-      checkoutId: sumupData.id,
+      checkoutId: sumup.data.id,
       checkoutReference,
       shop: session.shop,
       customerEmail: email,
@@ -378,18 +361,18 @@ export const action = async ({ request }) => {
         items: verifiedItems,
         discountAllocations: calcCart.discountAllocations || [],
       },
-      status: sumupData.status || "PENDING",
+      status: sumup.data.status || "PENDING",
     },
   });
 
   console.log("[SUMUP_CHECKOUT_CREATED]", {
-    checkoutId: sumupData.id,
+    checkoutId: sumup.data.id,
     reference: checkoutReference,
     amount: totalCents / 100,
     currency,
   });
 
-  if (!sumupData.hosted_checkout_url) {
+  if (!sumup.data.hosted_checkout_url) {
     return new Response("SumUp n'a pas renvoyé d'URL de paiement.", {
       status: 500,
       headers: noStoreHeaders,
@@ -400,7 +383,7 @@ export const action = async ({ request }) => {
     status: 303,
     headers: {
       ...noStoreHeaders,
-      Location: sumupData.hosted_checkout_url,
+      Location: sumup.data.hosted_checkout_url,
     },
   });
 };

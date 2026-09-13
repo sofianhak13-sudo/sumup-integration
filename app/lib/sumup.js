@@ -52,3 +52,18 @@ export function parseMerchantProfile(me) {
     country: profile.country || null,
   };
 }
+
+/**
+ * SumUp's Checkout webhook carries no signature (SumUp does not offer one
+ * for this product — confirmed against SumUp's own developer docs). The
+ * webhook always re-fetches the checkout from SumUp's API before acting on
+ * it; this is one more field cross-checked on that authenticated response,
+ * alongside checkout_reference/amount/currency, so a checkout that somehow
+ * doesn't belong to this shop's SumUp merchant can never trigger an order.
+ */
+export function checkoutMatchesMerchant(checkout, expectedMerchantCode) {
+  return (
+    Boolean(expectedMerchantCode) &&
+    checkout?.merchant_code === expectedMerchantCode
+  );
+}
